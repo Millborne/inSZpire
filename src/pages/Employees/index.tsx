@@ -79,40 +79,43 @@ const Employees = () => {
     };
 
     useEffect(() => {
-        // Get the current path
-        const currentPath = location.pathname; // e.g., "/home/employees/documents"
+        const pathSegments = location.pathname.split("/").filter(Boolean);
+        const employeeIdIndex =
+            pathSegments.findIndex((segment) => segment === "employees") + 1;
+        const employeeId = pathSegments[employeeIdIndex];
+        const nextSegment = pathSegments[employeeIdIndex + 1];
 
-        // Check if the path starts with "/home/employees/"
-        if (currentPath.startsWith("/home/employees/")) {
-            // Extract the sub-route after "/home/employees/"
-            const subRoute = currentPath.split("/").pop(); // Get the last segment
+        if (!employeeId) return;
 
-            // Find the selected menu item based on the sub-route
-            const selectedMenu = menuItems.find(
-                (item) => item.url === subRoute
-            );
-            if (selectedMenu) {
-                setSelected(selectedMenu.id); // Set the selected state
-            } else {
-                navigate(""); // Redirect to root if no valid route is found
-            }
+        if (!nextSegment) {
+            // No route after employee ID → redirect to summary
+            navigate(`/home/employees/${employeeId}/summary`, {
+                replace: true,
+            });
+            return;
         }
-    }, [location, menuItems, navigate]);
+
+        const matchedMenu = menuItems.find((item) => item.url === nextSegment);
+        if (matchedMenu) {
+            setSelected(matchedMenu.id);
+        } else {
+            // Not a valid menu route → redirect to summary
+            navigate(`/home/employees/${employeeId}/summary`, {
+                replace: true,
+            });
+        }
+    }, [location.pathname, navigate]);
 
     return (
         <div className="h-full">
-            {currentPath === "employees" ? (
+            <SideMenuWithProfile
+                user={user}
+                menuItems={menuItems}
+                selected={selected}
+                setSelected={handleMenuSelect}
+            >
                 <Outlet />
-            ) : (
-                <SideMenuWithProfile
-                    user={user}
-                    menuItems={menuItems}
-                    selected={selected}
-                    setSelected={handleMenuSelect}
-                >
-                    <Outlet />
-                </SideMenuWithProfile>
-            )}
+            </SideMenuWithProfile>
         </div>
     );
 };

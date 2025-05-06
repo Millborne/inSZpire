@@ -1,10 +1,4 @@
-import {
-    BrowserRouter as Router,
-    Routes,
-    Route,
-    useNavigate,
-    useLocation,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "enterprisze-global-components/dist/index.css";
 import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
@@ -30,8 +24,8 @@ function App() {
             <Routes>
                 <Route path="/home/*" element={<Home />}>
                     <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="employees/*" element={<Employees />}>
-                        <Route index element={<EmployeeList />} />
+                    <Route path="employees" element={<EmployeeList />} />
+                    <Route path="employees/:id/*" element={<Employees />}>
                         <Route path="summary" element={<Summary />} />
                         <Route path="personal" element={<Personal />} />
                         <Route path="documents" element={<Documents />} />
