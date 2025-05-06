@@ -1,10 +1,4 @@
-import {
-    BrowserRouter as Router,
-    Routes,
-    Route,
-    useNavigate,
-    useLocation,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "enterprisze-global-components/dist/index.css";
 import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
@@ -23,6 +17,7 @@ import Compensation from "./pages/Employees/pages/Compensation";
 import Payslip from "./pages/Employees/pages/Payslip";
 import HoofTrails from "./pages/Employees/pages/HoofTrails";
 import EmployeeList from "./pages/Employees/pages/EmployeeList";
+import NotFound from "./pages/NotFound";
 
 function App() {
     return (
@@ -30,8 +25,8 @@ function App() {
             <Routes>
                 <Route path="/home/*" element={<Home />}>
                     <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="employees/*" element={<Employees />}>
-                        <Route index element={<EmployeeList />} />
+                    <Route path="employees" element={<EmployeeList />} />
+                    <Route path="employees/:id/*" element={<Employees />}>
                         <Route path="summary" element={<Summary />} />
                         <Route path="personal" element={<Personal />} />
                         <Route path="documents" element={<Documents />} />
@@ -40,6 +35,7 @@ function App() {
                         <Route path="compensation" element={<Compensation />} />
                         <Route path="payslip" element={<Payslip />} />
                         <Route path="hoof-trails" element={<HoofTrails />} />
+                        <Route path="*" element={<NotFound />} />
                     </Route>
                     <Route path="teams" element={<Teams />} />
                     <Route path="notifications" element={<Notifications />} />
@@ -52,7 +48,10 @@ function App() {
                         element={<EmployeeTransition />}
                     />
                     <Route path="settings" element={<Settings />} />
+                    <Route path="*" element={<NotFound />} />
+                    {/* Catch-all route for 404 */}
                 </Route>
+                <Route path="*" element={<>Go to .../home/dashboard</>} />
             </Routes>
         </Router>
     );

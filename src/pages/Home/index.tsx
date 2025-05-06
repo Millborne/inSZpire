@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { SideMenu } from "enterprisze-global-components";
+import { Header, SideMenu } from "enterprisze-global-components";
 import { Outlet } from "react-router-dom";
 import {
     Diagram,
@@ -153,21 +153,23 @@ const Home = () => {
     }, [location, menu, navigate]);
 
     return (
-        <div className="flex flex-col h-screen bg-[#F0F1F4]">
-            <div className="bg-red-200 flex justify-center p-[13px]">
-                Topbar
+        <div className="flex flex-col h-screen bg-[#F0F1F4] gap-8">
+            <div>
+                <Header />
             </div>
-            <div className="flex flex-1 py-8 px-7 gap-5">
-                <div>
-                    <SideMenu
-                        menuItems={menu}
-                        selected={selected}
-                        setSelected={handleMenuSelect}
-                    />
-                </div>
-                <div className="w-full">
-                    <Outlet />
-                </div>
+            <div className="w-full h-full px-7 ">
+                <SideMenu
+                    menuItems={menu}
+                    selected={selected}
+                    setSelected={handleMenuSelect}
+                >
+                    <div className="w-full  h-full flex">
+                        <div className="w-5"></div>
+                        <div className="w-full h-full ">
+                            <Outlet />
+                        </div>
+                    </div>
+                </SideMenu>
             </div>
         </div>
     );
