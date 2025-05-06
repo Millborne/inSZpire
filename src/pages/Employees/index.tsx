@@ -62,7 +62,6 @@ const Employees = () => {
     ];
 
     const [selected, setSelected] = useState("summary");
-    const currentPath = location.pathname.split("/").pop();
 
     const user = {
         name: "John Smith B. Fernandez",
@@ -98,12 +97,14 @@ const Employees = () => {
         const matchedMenu = menuItems.find((item) => item.url === nextSegment);
         if (matchedMenu) {
             setSelected(matchedMenu.id);
-        } else {
-            // Not a valid menu route → redirect to summary
-            navigate(`/home/employees/${employeeId}/summary`, {
-                replace: true,
-            });
-        }
+        } 
+        
+        // else {
+        //     // Not a valid menu route → redirect to summary
+        //     navigate(`/home/employees/${employeeId}/summary`, {
+        //         replace: true,
+        //     });
+        // }
     }, [location.pathname, navigate]);
 
     return (

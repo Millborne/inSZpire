@@ -154,17 +154,20 @@ const Home = () => {
 
     return (
         <div className="flex flex-col h-screen bg-[#F0F1F4] gap-8">
-            <div className="bg-red-200 flex justify-center">
+            <div>
                 <Header />
             </div>
-            <div className="w-full px-7">
+            <div className="w-full h-full px-7 ">
                 <SideMenu
                     menuItems={menu}
                     selected={selected}
                     setSelected={handleMenuSelect}
                 >
-                    <div className="w-full">
-                        <Outlet />
+                    <div className="w-full  h-full flex">
+                        <div className="w-5"></div>
+                        <div className="w-full h-full ">
+                            <Outlet />
+                        </div>
                     </div>
                 </SideMenu>
             </div>

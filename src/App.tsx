@@ -17,6 +17,7 @@ import Compensation from "./pages/Employees/pages/Compensation";
 import Payslip from "./pages/Employees/pages/Payslip";
 import HoofTrails from "./pages/Employees/pages/HoofTrails";
 import EmployeeList from "./pages/Employees/pages/EmployeeList";
+import NotFound from "./pages/NotFound";
 
 function App() {
     return (
@@ -34,6 +35,7 @@ function App() {
                         <Route path="compensation" element={<Compensation />} />
                         <Route path="payslip" element={<Payslip />} />
                         <Route path="hoof-trails" element={<HoofTrails />} />
+                        <Route path="*" element={<NotFound />} />
                     </Route>
                     <Route path="teams" element={<Teams />} />
                     <Route path="notifications" element={<Notifications />} />
@@ -46,7 +48,10 @@ function App() {
                         element={<EmployeeTransition />}
                     />
                     <Route path="settings" element={<Settings />} />
+                    <Route path="*" element={<NotFound />} />
+                    {/* Catch-all route for 404 */}
                 </Route>
+                <Route path="*" element={<>Go to .../home/dashboard</>} />
             </Routes>
         </Router>
     );
