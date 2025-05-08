@@ -3,6 +3,7 @@ import {
   Button,
   CustomDatePicker,
   HeaderType,
+  ItemLimitDropdown,
   Pagination,
   Table,
 } from "enterprisze-global-components";
@@ -53,6 +54,7 @@ const AuditTrails = () => {
   const [value, setValue] = useState<Date>(new Date());
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState({ label: "10", value: "10" });
 
   const handlePageChange = (page: number, meta?: { source?: string }) => {
     setCurrentPage(page);
@@ -79,7 +81,7 @@ const AuditTrails = () => {
         </div>
       </div>
 
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col w-full gap-[16px]">
         <Table headers={headers} data={data} />
         <div className="flex justify-between items-center">
           <Pagination
@@ -88,7 +90,20 @@ const AuditTrails = () => {
             visiblePages={3}
             onChange={handlePageChange}
           />
-          <p>Display Row Count here </p>
+          <ItemLimitDropdown
+            value={limit}
+            options={[
+              { label: "5", value: "5" },
+              { label: "10", value: "10" },
+              { label: "25", value: "25" },
+              { label: "50", value: "50" },
+              { label: "100", value: "100" },
+            ]}
+            onChange={(value) => {
+              setLimit(value);
+            }}
+            page={1}
+          />{" "}
         </div>
       </div>
 

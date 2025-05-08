@@ -330,7 +330,7 @@ const CalendarLogs = () => {
   const [valueShifts, setValueShifts] = useState(shiftDataMay);
 
   return (
-    <div>
+    <div className="pb-[24px]">
       <Calendar
         // value={new Date(2025, 3, 1)}
         shiftData={valueShifts}

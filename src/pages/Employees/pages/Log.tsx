@@ -18,27 +18,31 @@ const Log = () => {
   const [activeTab, setActiveTab] = useState(TABS[0]);
 
   return (
-    <div className="flex flex-col gap-[24px] p-4">
-      <div className="flex w-full">
-        {TABS.map((label, index) => (
-          <Tab
-            key={label}
-            label={label}
-            isFirst={index === 0}
-            type={
-              index === 0
-                ? "left"
-                : index === TABS.length - 1
-                ? "right"
-                : "middle"
-            }
-            active={activeTab === label}
-            onClick={() => setActiveTab(label)}
-          />
-        ))}
-      </div>
-      <CardContainer content={tabContentMap[activeTab]} />
-    </div>
+    <CardContainer
+      content={
+        <div className="flex flex-col gap-[24px] p-4">
+          <div className="flex w-full">
+            {TABS.map((label, index) => (
+              <Tab
+                key={label}
+                label={label}
+                isFirst={index === 0}
+                type={
+                  index === 0
+                    ? "left"
+                    : index === TABS.length - 1
+                    ? "right"
+                    : "middle"
+                }
+                active={activeTab === label}
+                onClick={() => setActiveTab(label)}
+              />
+            ))}
+          </div>
+          {tabContentMap[activeTab]}
+        </div>
+      }
+    />
   );
 };
 
