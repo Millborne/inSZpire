@@ -1,10 +1,9 @@
-import { TextContent } from "enterprisze-global-components";
+import { TextContent, Divider } from "enterprisze-global-components";
 
 //icons
 import { Edit2 } from "iconsax-react";
 
 //components
-import Divider from "../../../components/Divider";
 
 const BasicInfo = () => {
   return (

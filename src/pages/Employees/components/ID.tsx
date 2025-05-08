@@ -1,6 +1,6 @@
+import React from "react";
 import { Table, HeaderType, Avatar } from "enterprisze-global-components";
 import { Edit2 } from "iconsax-react";
-import React from "react";
 
 const employeeIDheaders: HeaderType[] = [
   { type: "string", header: "Employee ID", accessor: "employeeId" },

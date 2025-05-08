@@ -40,7 +40,10 @@ const Personal = () => {
       {activeTab === "IDs" ? (
         tabContentMap[activeTab]
       ) : (
-        <CardContainer content={tabContentMap[activeTab]} />
+        <CardContainer
+          backgroundColor="bg-white"
+          content={tabContentMap[activeTab]}
+        />
       )}
     </div>
   );

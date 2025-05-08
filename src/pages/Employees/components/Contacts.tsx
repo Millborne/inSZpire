@@ -1,10 +1,13 @@
-import { PurpleTaggedCard, TextContent } from "enterprisze-global-components";
+import {
+  PurpleTaggedCard,
+  TextContent,
+  Divider,
+} from "enterprisze-global-components";
 
 //icons
 import { Edit2 } from "iconsax-react";
 
 //components
-import Divider from "../../../components/Divider";
 
 const Contacts = () => {
   return (
