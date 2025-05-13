@@ -77,11 +77,101 @@ const EmployeeList = () => {
             jobCode: "1234567890",
             directHead: "John Doe",
         },
+        {
+            title: "A Back to the Future",
+            owner: (
+                <div className=" flex items-center gap-1">
+                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
+                    <span className="text-body-base-reg">
+                        Germanotta, Stephanie Luke A.
+                    </span>
+                </div>
+            ),
+            team: "BSI",
+            jobTitle: "Junior Web Developer",
+            jobCode: "1234567890",
+            directHead: "John Doe",
+        },
+        {
+            title: "A Back to the Future",
+            owner: (
+                <div className=" flex items-center gap-1">
+                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
+                    <span className="text-body-base-reg">
+                        Germanotta, Stephanie Luke A.
+                    </span>
+                </div>
+            ),
+            team: "BSI",
+            jobTitle: "Junior Web Developer",
+            jobCode: "1234567890",
+            directHead: "John Doe",
+        },
+        {
+            title: "A Back to the Future",
+            owner: (
+                <div className=" flex items-center gap-1">
+                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
+                    <span className="text-body-base-reg">
+                        Germanotta, Stephanie Luke A.
+                    </span>
+                </div>
+            ),
+            team: "BSI",
+            jobTitle: "Junior Web Developer",
+            jobCode: "1234567890",
+            directHead: "John Doe",
+        },
+        {
+            title: "A Back to the Future",
+            owner: (
+                <div className=" flex items-center gap-1">
+                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
+                    <span className="text-body-base-reg">
+                        Germanotta, Stephanie Luke A.
+                    </span>
+                </div>
+            ),
+            team: "BSI",
+            jobTitle: "Junior Web Developer",
+            jobCode: "1234567890",
+            directHead: "John Doe",
+        },
+        {
+            title: "A Back to the Future",
+            owner: (
+                <div className=" flex items-center gap-1">
+                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
+                    <span className="text-body-base-reg">
+                        Germanotta, Stephanie Luke A.
+                    </span>
+                </div>
+            ),
+            team: "BSI",
+            jobTitle: "Junior Web Developer",
+            jobCode: "1234567890",
+            directHead: "John Doe",
+        },
+        {
+            title: "A Back to the Future",
+            owner: (
+                <div className=" flex items-center gap-1">
+                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
+                    <span className="text-body-base-reg">
+                        Germanotta, Stephanie Luke A.
+                    </span>
+                </div>
+            ),
+            team: "BSI",
+            jobTitle: "Junior Web Developer",
+            jobCode: "1234567890",
+            directHead: "John Doe",
+        },
     ];
 
     const moreOptions = [
         {
-            label: "Edit",
+            label: "View",
             onClick: (index: number) => console.log("Edit row:", index),
         },
         {
@@ -91,45 +181,50 @@ const EmployeeList = () => {
     ];
 
     return (
-        <div className="h-full p-4 bg-szWhite100 rounded-md shadow-boxShadow flex flex-col gap-5">
+        <div className="h-full p-4 bg-szWhite100 rounded-md shadow-boxShadow flex flex-col gap-5  overflow-auto">
             <span className="text-h3">Employees</span>
             <div className="h-full w-full flex flex-col gap-4 ">
                 <div className="w-full flex flex-col gap-1">
                     {/* Search bar & Filter btn */}
-                    <div className="w-full flex items-center justify-between">
-                        <div className="md:w-[355px]">
-                            <Inputs
-                                type={"text"}
-                                placeholder="Search by Name, ID, Job Title, or Team"
-                                // value={textIcon}
-                                icon={SearchNormal}
-                                onChange={() => {}}
-                                iconClick={() => {}}
-                            />
+                    <div className="grid md:grid-cols-2 gap-5">
+                        <div className="md:w-[355px] flex items-center">
+                            <div className="w-full">
+                                <Inputs
+                                    type={"text"}
+                                    placeholder="Search by Name, ID, Job Title, or Team"
+                                    // value={textIcon}
+                                    icon={SearchNormal}
+                                    onChange={() => {}}
+                                    iconClick={() => {}}
+                                />
+                            </div>
                         </div>
 
-                        <Button
-                            leftIcon={
-                                openFilter ? (
-                                    <ArrowUp2 />
-                                ) : (
-                                    <ArrowDown2 variant="Linear" />
-                                )
-                            }
-                            label="Ghost"
-                            variant="ghost"
-                            size="large"
-                            onClick={() => setOpenFilter(!openFilter)}
-                        />
+                        <div className="flex justify-end">
+                            <Button
+                                leftIcon={
+                                    openFilter ? (
+                                        <ArrowUp2 />
+                                    ) : (
+                                        <ArrowDown2 variant="Linear" />
+                                    )
+                                }
+                                label="Filters"
+                                variant="ghost"
+                                size="large"
+                                onClick={() => setOpenFilter(!openFilter)}
+                            />
+                        </div>
                     </div>
                     {/* Filters */}
                     {openFilter && (
-                        <div className="p-[10px]">
+                        <div className="p-[10px] w-full overflow-x-auto flex flex-col gap-5">
                             <span className="text-caption-all-caps uppercase">
                                 Filter by
                             </span>
                             <div className="flex flex-col gap-[10px]">
-                                <div className="flex items-center gap-5">
+                                {/* full screen */}
+                                <div className="md:flex flex-row items-center gap-5">
                                     <span className="text-caption-all-caps uppercase text-szPrimary500 w-20">
                                         Class
                                     </span>
@@ -138,12 +233,12 @@ const EmployeeList = () => {
                                             <Checkbox
                                                 label="All"
                                                 checked={selectedFilter.includes(
-                                                    "All"
+                                                    "AllClass"
                                                 )}
                                                 onChange={() => {
                                                     if (
                                                         selectedFilter.includes(
-                                                            "All"
+                                                            "AllClass"
                                                         )
                                                     ) {
                                                         // Remove "All" if already selected
@@ -151,14 +246,14 @@ const EmployeeList = () => {
                                                             selectedFilter.filter(
                                                                 (item) =>
                                                                     item !==
-                                                                    "All"
+                                                                    "AllClass"
                                                             )
                                                         );
                                                     } else {
                                                         // Add "All" if not selected
                                                         setSelectedFilter([
                                                             ...selectedFilter,
-                                                            "All",
+                                                            "AllClass",
                                                         ]);
                                                     }
                                                 }}
@@ -222,7 +317,7 @@ const EmployeeList = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-5">
+                                <div className="md:flex flex-row items-center gap-5">
                                     <span className="text-caption-all-caps uppercase text-szPrimary500 w-20">
                                         type
                                     </span>
@@ -231,12 +326,12 @@ const EmployeeList = () => {
                                             <Checkbox
                                                 label="All"
                                                 checked={selectedFilter.includes(
-                                                    "All"
+                                                    "AllType"
                                                 )}
                                                 onChange={() => {
                                                     if (
                                                         selectedFilter.includes(
-                                                            "All"
+                                                            "AllType"
                                                         )
                                                     ) {
                                                         // Remove "All" if already selected
@@ -244,14 +339,14 @@ const EmployeeList = () => {
                                                             selectedFilter.filter(
                                                                 (item) =>
                                                                     item !==
-                                                                    "All"
+                                                                    "AllType"
                                                             )
                                                         );
                                                     } else {
                                                         // Add "All" if not selected
                                                         setSelectedFilter([
                                                             ...selectedFilter,
-                                                            "All",
+                                                            "AllType",
                                                         ]);
                                                     }
                                                 }}
@@ -402,8 +497,7 @@ const EmployeeList = () => {
                                         </div>
                                     </div>
                                 </div>
-
-                                <div className="flex items-center gap-5">
+                                <div className="md:flex flex-row items-center gap-5">
                                     <span className="text-caption-all-caps uppercase text-szPrimary500 w-20">
                                         status
                                     </span>
@@ -412,12 +506,12 @@ const EmployeeList = () => {
                                             <Checkbox
                                                 label="All"
                                                 checked={selectedFilter.includes(
-                                                    "All"
+                                                    "AllStatus"
                                                 )}
                                                 onChange={() => {
                                                     if (
                                                         selectedFilter.includes(
-                                                            "All"
+                                                            "AllStatus"
                                                         )
                                                     ) {
                                                         // Remove "All" if already selected
@@ -425,14 +519,14 @@ const EmployeeList = () => {
                                                             selectedFilter.filter(
                                                                 (item) =>
                                                                     item !==
-                                                                    "All"
+                                                                    "AllStatus"
                                                             )
                                                         );
                                                     } else {
                                                         // Add "All" if not selected
                                                         setSelectedFilter([
                                                             ...selectedFilter,
-                                                            "All",
+                                                            "AllStatus",
                                                         ]);
                                                     }
                                                 }}
@@ -554,17 +648,22 @@ const EmployeeList = () => {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* small screen */}
                             </div>
                         </div>
                     )}
                 </div>
                 {/* Table */}
-                <div className="h-full overflow-auto flex flex-col justify-between ">
-                    <Table
-                        headers={headers}
-                        data={data}
-                        moreOptions={moreOptions}
-                    />
+                <div className="h-full flex flex-col justify-between">
+                    <div className="h-[400px] overflow-x-auto">
+                        <Table
+                            headers={headers}
+                            data={data}
+                            moreOptions={moreOptions}
+                        />
+                    </div>
+
                     <div className="flex justify-end">
                         <Pagination
                             currentPage={1}
