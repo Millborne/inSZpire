@@ -1,10 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
-    Avatar,
     Button,
     Checkbox,
-    Chip,
     Inputs,
     Pagination,
     Table,
@@ -12,6 +11,8 @@ import {
 import { ArrowDown2, ArrowUp2, SearchNormal } from "iconsax-reactjs";
 
 const EmployeeList = () => {
+    const navigate = useNavigate();
+
     const [openFilter, setOpenFilter] = useState(false);
 
     const [selectedFilter, setSelectedFilter] = useState<string[]>([]);
@@ -33,6 +34,7 @@ const EmployeeList = () => {
 
     const data = [
         {
+            id: "1234567890",
             title: "A Back to the Future",
             owner: (
                 <div className=" flex items-center gap-1">
@@ -48,6 +50,7 @@ const EmployeeList = () => {
             directHead: "John Doe",
         },
         {
+            id: "1234567890",
             title: "A Back to the Future",
             owner: (
                 <div className=" flex items-center gap-1">
@@ -63,6 +66,7 @@ const EmployeeList = () => {
             directHead: "John Doe",
         },
         {
+            id: "1234567890",
             title: "A Back to the Future",
             owner: (
                 <div className=" flex items-center gap-1">
@@ -78,6 +82,7 @@ const EmployeeList = () => {
             directHead: "John Doe",
         },
         {
+            id: "1234567890",
             title: "A Back to the Future",
             owner: (
                 <div className=" flex items-center gap-1">
@@ -93,6 +98,7 @@ const EmployeeList = () => {
             directHead: "John Doe",
         },
         {
+            id: "1234567890",
             title: "A Back to the Future",
             owner: (
                 <div className=" flex items-center gap-1">
@@ -108,6 +114,7 @@ const EmployeeList = () => {
             directHead: "John Doe",
         },
         {
+            id: "1234567890",
             title: "A Back to the Future",
             owner: (
                 <div className=" flex items-center gap-1">
@@ -123,6 +130,7 @@ const EmployeeList = () => {
             directHead: "John Doe",
         },
         {
+            id: "1234567890",
             title: "A Back to the Future",
             owner: (
                 <div className=" flex items-center gap-1">
@@ -138,6 +146,7 @@ const EmployeeList = () => {
             directHead: "John Doe",
         },
         {
+            id: "1234567890",
             title: "A Back to the Future",
             owner: (
                 <div className=" flex items-center gap-1">
@@ -153,6 +162,7 @@ const EmployeeList = () => {
             directHead: "John Doe",
         },
         {
+            id: "1234567890",
             title: "A Back to the Future",
             owner: (
                 <div className=" flex items-center gap-1">
@@ -172,7 +182,9 @@ const EmployeeList = () => {
     const moreOptions = [
         {
             label: "View",
-            onClick: (index: number) => console.log("Edit row:", index),
+            onClick: (index: number) => {
+                navigate(`${data[index].id}/summary`);
+            },
         },
         {
             label: "Delete",
@@ -648,15 +660,13 @@ const EmployeeList = () => {
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* small screen */}
                             </div>
                         </div>
                     )}
                 </div>
                 {/* Table */}
                 <div className="h-full flex flex-col justify-between">
-                    <div className="h-[400px] overflow-x-auto">
+                    <div className="h-[400px] overflow-auto">
                         <Table
                             headers={headers}
                             data={data}
