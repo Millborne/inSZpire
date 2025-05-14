@@ -97,8 +97,8 @@ const Employees = () => {
         const matchedMenu = menuItems.find((item) => item.url === nextSegment);
         if (matchedMenu) {
             setSelected(matchedMenu.id);
-        } 
-        
+        }
+
         // else {
         //     // Not a valid menu route → redirect to summary
         //     navigate(`/home/employees/${employeeId}/summary`, {
@@ -115,7 +115,9 @@ const Employees = () => {
                 selected={selected}
                 setSelected={handleMenuSelect}
             >
-                <Outlet />
+                <div className="overflow-auto h-full">
+                    <Outlet />
+                </div>
             </SideMenuWithProfile>
         </div>
     );
