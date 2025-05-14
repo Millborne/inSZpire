@@ -116,12 +116,7 @@ const Employees = () => {
                 setSelected={handleMenuSelect}
             >
                 <div className="overflow-auto h-full">
-                    {/* <Outlet /> */}
-                    <div className="bg-red-50 w-full h-[500px]"></div>
-                    <div className="bg-red-50 w-full h-[500px]"></div>
-                    <div className="bg-red-50 w-full h-[500px]"></div>
-                    <div className="bg-red-50 w-full h-[500px]"></div>
-                    <div className="bg-red-50 w-full h-[500px]"></div>
+                    <Outlet />
                 </div>
             </SideMenuWithProfile>
         </div>
