@@ -153,19 +153,17 @@ const Home = () => {
     }, [location, menu, navigate]);
 
     return (
-        <div className="flex flex-col h-screen bg-[#F0F1F4] gap-8">
-            <div>
-                <Header />
-            </div>
-            <div className="w-full h-full px-7 ">
+        <div className="flex flex-col h-screen bg-[#F0F1F4]">
+            <Header />
+            <div className="flex-1 px-7 py-8 overflow-hidden">
                 <SideMenu
                     menuItems={menu}
                     selected={selected}
                     setSelected={handleMenuSelect}
                 >
-                    <div className="w-full  h-full flex">
+                    <div className="flex h-full">
                         <div className="w-5"></div>
-                        <div className="w-full h-full ">
+                        <div className="flex-1 overflow-auto">
                             <Outlet />
                         </div>
                     </div>
