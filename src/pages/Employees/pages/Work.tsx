@@ -1,5 +1,7 @@
-import { Tab } from "enterprisze-global-components";
 import { useState } from "react";
+import { Tab } from "enterprisze-global-components";
+import EmployeeDetails from "../components/EmployeeDetails";
+import TeamMember from "../components/TeamMember";
 
 const tabs = ["Employee Details", "Team Members", "Employment History"];
 
@@ -7,7 +9,7 @@ const Work = () => {
     const [activeTab, setActiveTab] = useState(tabs[0]);
 
     return (
-        <div className="flex flex-col gap-[24px] p-4">
+        <div className="flex flex-col gap-6 p-6 h-full">
             <div className="flex">
                 <Tab
                     label="Employee Details"
@@ -29,6 +31,14 @@ const Work = () => {
                     onClick={() => setActiveTab("Employment History")}
                 />
             </div>
+
+            {activeTab === "Employee Details" ? (
+                <EmployeeDetails />
+            ) : activeTab === "Team Members" ? (
+                <TeamMember />
+            ) : (
+                <div>Employment History</div>
+            )}
         </div>
     );
 };
