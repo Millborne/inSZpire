@@ -68,22 +68,22 @@ const DTRLogs = () => {
   };
 
   return (
-    <div className="flex flex-col gap-[24px] bg-white">
-      <div className="flex gap-[20px]">
+    <div className="flex flex-col gap-[24px]">
+      <div className="flex flex-wrap gap-[20px]">
         <div className="flex gap-2 items-center">
           <CustomDatePicker
             value={value}
             label="START"
             onChange={(value) => setValue(value)}
           />
-          {"-"}
+          <span>-</span>
           <CustomDatePicker
             value={value}
             label="END"
             onChange={(value) => setValue(value)}
           />
         </div>
-        <div className="flex gap-[12px] justify-between w-full">
+        <div className="flex gap-[12px] justify-between flex-grow ">
           <Button label="Show" variant="secondary" size="large" />
           <div className="p-[10px]">
             <ImportCurve className="icon-md text-szPrimary900" />

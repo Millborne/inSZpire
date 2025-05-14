@@ -62,7 +62,7 @@ const AuditTrails = () => {
 
   return (
     <div className="flex flex-col gap-[24px] bg-white">
-      <div className="flex gap-[20px]">
+      <div className="flex flex-wrap gap-[20px]">
         <div className="flex gap-2 items-center">
           <CustomDatePicker
             value={value}
@@ -76,7 +76,7 @@ const AuditTrails = () => {
             onChange={(value) => setValue(value)}
           />
         </div>
-        <div className="flex gap-[12px] justify-between w-full">
+        <div className="flex gap-[12px] justify-between flex-grow">
           <Button label="Show" variant="secondary" size="large" />
         </div>
       </div>

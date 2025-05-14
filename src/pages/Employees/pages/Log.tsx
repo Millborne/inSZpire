@@ -20,7 +20,7 @@ const Log = () => {
   return (
     <CardContainer
       content={
-        <div className="flex flex-col gap-[24px] p-4">
+        <div className="flex flex-col gap-[24px]">
           <div className="flex w-full">
             {TABS.map((label, index) => (
               <Tab
