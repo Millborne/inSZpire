@@ -18,7 +18,7 @@ const Contacts = () => {
           <Edit2 className="icon-sm text-szPrimary900" />
         </div>
 
-        <div className="grid grid-cols-2 pb-4 gap-4 items-start">
+        <div className="grid grid-cols-2 pb-4 gap-4 items-start max-w-2xl flex-grow">
           <TextContent header="contact number" text="0919 -207-5631" />
           <TextContent header="personal emails" text="freddyhill@mail.net" />
         </div>
