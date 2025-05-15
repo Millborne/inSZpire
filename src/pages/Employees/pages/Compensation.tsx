@@ -3,7 +3,7 @@ import { Edit2 } from "iconsax-reactjs";
 
 const Compensation = () => {
     return (
-        <div className="p-4">
+        <div>
             <CardContainer
                 backgroundColor="bg-white"
                 content={
