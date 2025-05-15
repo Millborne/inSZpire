@@ -10,7 +10,7 @@ const Work = () => {
     const [activeTab, setActiveTab] = useState(tabs[0]);
 
     return (
-        <div className="flex flex-col gap-6 p-6 h-full">
+        <div className="flex flex-col gap-6 h-full">
             <div className="flex">
                 <Tab
                     label="Employee Details"
