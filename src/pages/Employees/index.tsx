@@ -108,18 +108,16 @@ const Employees = () => {
     }, [location.pathname, navigate]);
 
     return (
-        <div className="h-full">
             <SideMenuWithProfile
                 user={user}
                 menuItems={menuItems}
                 selected={selected}
                 setSelected={handleMenuSelect}
             >
-                <div className="overflow-auto h-full">
+                <div className=" h-full">
                     <Outlet />
                 </div>
             </SideMenuWithProfile>
-        </div>
     );
 };
 

@@ -161,9 +161,9 @@ const Home = () => {
                     selected={selected}
                     setSelected={handleMenuSelect}
                 >
-                    <div className="flex h-full">
-                        <div className="w-5"></div>
-                        <div className="flex-1 overflow-auto">
+                    <div className="h-full overflow-auto">
+                        <div className="inline-block w-5"></div>
+                        <div className="inline-block w-[calc(100%-1.25rem)]">
                             <Outlet />
                         </div>
                     </div>
