@@ -61,22 +61,22 @@ const AuditTrails = () => {
   };
 
   return (
-    <div className="flex flex-col gap-[24px] bg-white">
+    <div className="grid grid-cols-1 gap-[24px] bg-white">
       <div className="flex flex-wrap gap-[20px]">
-        <div className="flex gap-2 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-[auto_auto_auto] gap-2 items-center justify-center">
           <CustomDatePicker
             value={value}
             label="START"
             onChange={(value) => setValue(value)}
           />
-          {"-"}
+          <span className="justify-self-center">-</span>
           <CustomDatePicker
             value={value}
             label="END"
             onChange={(value) => setValue(value)}
           />
         </div>
-        <div className="flex gap-[12px] justify-between flex-grow">
+        <div className="flex gap-[12px] justify-between flex-grow h-fit">
           <Button label="Show" variant="secondary" size="large" />
         </div>
       </div>
