@@ -17,14 +17,15 @@ const EmployeeList = () => {
 
     const [selectedFilter, setSelectedFilter] = useState<string[]>([]);
 
+    // For larger screen
     const headers: Array<
         | { type: "string"; header: string; accessor: string }
         | { type: "more"; header: React.ReactNode; accessor: "more" }
         | { type: "checkbox"; header: React.ReactNode; accessor: "checkbox" }
     > = [
         { type: "checkbox", header: <></>, accessor: "checkbox" },
-        { type: "string", header: "Name", accessor: "title" },
-        { type: "string", header: "ID", accessor: "owner" },
+        { type: "string", header: "Name", accessor: "name" },
+        { type: "string", header: "ID", accessor: "id" },
         { type: "string", header: "Team", accessor: "team" },
         { type: "string", header: "Job Title", accessor: "jobTitle" },
         { type: "string", header: "Job Code", accessor: "jobCode" },
@@ -36,154 +37,47 @@ const EmployeeList = () => {
         {
             id: "1234567890",
             title: "A Back to the Future",
-            owner: (
+            name: (
                 <div className=" flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg">
+                    <div className="hidden lg:!block w-[14px] h-[14px] rounded-full bg-success700"></div>
+                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
                         Germanotta, Stephanie Luke A.
                     </span>
                 </div>
             ),
-            team: "BSI",
-            jobTitle: "Junior Web Developer",
-            jobCode: "1234567890",
-            directHead: "John Doe",
-        },
-        {
-            id: "1234567890",
-            title: "A Back to the Future",
-            owner: (
-                <div className=" flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg">
-                        Germanotta, Stephanie Luke A.
-                    </span>
-                </div>
+            team: (
+                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
+                    BSI
+                </span>
             ),
-            team: "BSI",
-            jobTitle: "Junior Web Developer",
-            jobCode: "1234567890",
-            directHead: "John Doe",
-        },
-        {
-            id: "1234567890",
-            title: "A Back to the Future",
-            owner: (
-                <div className=" flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg">
-                        Germanotta, Stephanie Luke A.
-                    </span>
-                </div>
+            jobTitle: (
+                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
+                    Junior Web Developer
+                </span>
             ),
-            team: "BSI",
-            jobTitle: "Junior Web Developer",
-            jobCode: "1234567890",
-            directHead: "John Doe",
-        },
-        {
-            id: "1234567890",
-            title: "A Back to the Future",
-            owner: (
-                <div className=" flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg">
-                        Germanotta, Stephanie Luke A.
-                    </span>
-                </div>
-            ),
-            team: "BSI",
-            jobTitle: "Junior Web Developer",
-            jobCode: "1234567890",
-            directHead: "John Doe",
-        },
-        {
-            id: "1234567890",
-            title: "A Back to the Future",
-            owner: (
-                <div className=" flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg">
-                        Germanotta, Stephanie Luke A.
-                    </span>
-                </div>
-            ),
-            team: "BSI",
-            jobTitle: "Junior Web Developer",
-            jobCode: "1234567890",
-            directHead: "John Doe",
-        },
-        {
-            id: "1234567890",
-            title: "A Back to the Future",
-            owner: (
-                <div className=" flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg">
-                        Germanotta, Stephanie Luke A.
-                    </span>
-                </div>
-            ),
-            team: "BSI",
-            jobTitle: "Junior Web Developer",
-            jobCode: "1234567890",
-            directHead: "John Doe",
-        },
-        {
-            id: "1234567890",
-            title: "A Back to the Future",
-            owner: (
-                <div className=" flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg">
-                        Germanotta, Stephanie Luke A.
-                    </span>
-                </div>
-            ),
-            team: "BSI",
-            jobTitle: "Junior Web Developer",
-            jobCode: "1234567890",
-            directHead: "John Doe",
-        },
-        {
-            id: "1234567890",
-            title: "A Back to the Future",
-            owner: (
-                <div className=" flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg">
-                        Germanotta, Stephanie Luke A.
-                    </span>
-                </div>
-            ),
-            team: "BSI",
-            jobTitle: "Junior Web Developer",
-            jobCode: "1234567890",
-            directHead: "John Doe",
-        },
-        {
-            id: "1234567890",
-            title: "A Back to the Future",
-            owner: (
-                <div className=" flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg">
-                        Germanotta, Stephanie Luke A.
-                    </span>
-                </div>
-            ),
-            team: "BSI",
-            jobTitle: "Junior Web Developer",
             jobCode: "1234567890",
             directHead: "John Doe",
         },
     ];
 
+    // For smaller screen
+    const headersSmall: Array<
+        | { type: "string"; header: string; accessor: string }
+        | { type: "more"; header: React.ReactNode; accessor: "more" }
+        | { type: "checkbox"; header: React.ReactNode; accessor: "checkbox" }
+    > = [
+        { type: "string", header: "Name", accessor: "name" },
+        { type: "string", header: "Team", accessor: "team" },
+        { type: "string", header: "Job Title", accessor: "jobTitle" },
+        { type: "more", header: <></>, accessor: "more" },
+    ];
+
+
     const moreOptions = [
         {
             label: "View",
             onClick: (index: number) => {
-                navigate(`${data[index].id}/summary`);
+                navigate(`${data[index]?.id}/summary`);
             },
         },
         {
@@ -193,7 +87,7 @@ const EmployeeList = () => {
     ];
 
     return (
-        <div className="h-full p-4 bg-szWhite100 rounded-md shadow-boxShadow flex flex-col gap-5  overflow-auto">
+        <div className="h-full p-4 bg-szWhite100 rounded-md shadow-boxShadow flex flex-col gap-5 overflow-auto">
             <span className="text-h3">Employees</span>
             <div className="h-full w-full flex flex-col gap-4 ">
                 <div className="w-full flex flex-col gap-1">
@@ -665,13 +559,22 @@ const EmployeeList = () => {
                     )}
                 </div>
                 {/* Table */}
-                <div className="h-full flex flex-col justify-between">
-                    <div className="h-[400px] overflow-auto">
-                        <Table
-                            headers={headers}
-                            data={data}
-                            moreOptions={moreOptions}
-                        />
+                <div className="h-full justify-between">
+                    <div className="h-[400px] overflow-auto overflow-x-auto">
+                        <div className="hidden lg:!block">
+                            <Table
+                                    headers={headers}
+                                    data={data?.map((item) => item ?? {}) ?? []}
+                                    moreOptions={moreOptions}
+                            />
+                        </div>
+                        <div className="block lg:!hidden">
+                            <Table
+                                headers={headersSmall}
+                                data={data?.map((item) => item ?? {}) ?? []}
+                                moreOptions={moreOptions}
+                            />
+                        </div>
                     </div>
 
                     <div className="flex justify-end">
