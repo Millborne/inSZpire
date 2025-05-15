@@ -59,7 +59,7 @@ const data = [
 
 const ID = () => {
   return (
-    <div className="flex flex-col w-full gap-[28px]">
+    <div className="grid grid-cols-1 gap-[28px]">
       <Table headers={employeeIDheaders} data={employeeID} />
       <div className="flex flex-col w-full gap-[8px]">
         <div className="flex justify-between">
