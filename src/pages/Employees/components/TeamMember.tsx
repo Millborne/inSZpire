@@ -173,7 +173,7 @@ const TeamMember = () => {
         <CardContainer
             backgroundColor="bg-white"
             content={
-                <div className="flex flex-col h-full gap-4">
+                <div className="flex flex-col h-full gap-4 w-full">
                     <div className="flex justify-between">
                         <h6 className="text-h6 text-szPrimary700">
                             Team Members
@@ -181,20 +181,22 @@ const TeamMember = () => {
                         <Edit2 className="icon-sm text-szPrimary900" />
                     </div>
                     <div
-                        className={`flex  ${
+                        className={`${
                             showData
-                                ? ""
-                                : "justify-center items-center h-[400px]"
+                                ? "overflow-x-auto"
+                                : "flex justify-center items-center h-[400px]"
                         } `}
                     >
                         {showData ? (
-                            <div className="w-full h-[400px] overflow-auto">
-                                <Table
-                                    headers={headers}
-                                    data={data}
-                                    moreOptions={moreOptions}
-                                />
-                            </div>
+                            <>
+                                <div className=" h-[400px] overflow-y-auto">
+                                    <Table
+                                        headers={headers}
+                                        data={data}
+                                        moreOptions={moreOptions}
+                                    />
+                                </div>
+                            </>
                         ) : (
                             <div className="md:flex justify-center items-center gap-[10px]">
                                 <div className="flex justify-center items-center">

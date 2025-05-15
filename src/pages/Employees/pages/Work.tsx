@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Tab } from "enterprisze-global-components";
 import EmployeeDetails from "../components/EmployeeDetails";
 import TeamMember from "../components/TeamMember";
+import EmploymentHistory from "../components/EmploymentHistory";
 
 const tabs = ["Employee Details", "Team Members", "Employment History"];
 
@@ -37,7 +38,7 @@ const Work = () => {
             ) : activeTab === "Team Members" ? (
                 <TeamMember />
             ) : (
-                <div>Employment History</div>
+                <EmploymentHistory />
             )}
         </div>
     );
