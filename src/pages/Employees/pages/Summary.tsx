@@ -21,8 +21,9 @@ const Summary = () => {
           <div className="flex flex-wrap flex-row md:flex-row gap-[24px]">
             <img
               src="/src/assets/qrcode.png"
-              className="w-[100px] h-[100px] sm:w-[150px] sm:h-[150px]"
+              className="w-full max-w-[250px] md:max-w-[150px]"
             />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-auto">
               <TextContent
                 icon={<Hashtag />}
