@@ -99,7 +99,7 @@ const Employees = () => {
     }, [location.pathname, navigate]);
 
     return (
-        <SideMenuWithProfile user={user} menuItems={menuItems} selected={selected} setSelected={handleMenuSelect}>
+        <SideMenuWithProfile user={user} menuItems={menuItems} selected={selected} setSelected={handleMenuSelect} backgroundColor="bg-[#FFFFFF]">
             <div className=" h-full">
                 <Outlet />
             </div>
