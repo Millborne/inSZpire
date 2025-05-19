@@ -72,7 +72,6 @@ const EmployeeList = () => {
         { type: "more", header: <></>, accessor: "more" },
     ];
 
-
     const moreOptions = [
         {
             label: "View",
@@ -563,9 +562,10 @@ const EmployeeList = () => {
                     <div className="h-[400px] overflow-auto overflow-x-auto">
                         <div className="hidden lg:!block">
                             <Table
-                                    headers={headers}
-                                    data={data?.map((item) => item ?? {}) ?? []}
-                                    moreOptions={moreOptions}
+                                headers={headers}
+                                data={data?.map((item) => item ?? {}) ?? []}
+                                moreOptions={moreOptions}
+                                tableHeight="h-[400px]"
                             />
                         </div>
                         <div className="block lg:!hidden">
@@ -573,6 +573,7 @@ const EmployeeList = () => {
                                 headers={headersSmall}
                                 data={data?.map((item) => item ?? {}) ?? []}
                                 moreOptions={moreOptions}
+                                tableHeight="h-[400px]"
                             />
                         </div>
                     </div>
