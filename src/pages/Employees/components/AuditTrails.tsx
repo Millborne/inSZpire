@@ -83,27 +83,32 @@ const AuditTrails = () => {
 
       <div className="flex flex-col w-full gap-[16px]">
         <Table headers={headers} data={data} />
-        <div className="flex justify-between items-center">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={3}
-            visiblePages={3}
-            onChange={handlePageChange}
-          />
-          <ItemLimitDropdown
-            value={limit}
-            options={[
-              { label: "5", value: "5" },
-              { label: "10", value: "10" },
-              { label: "25", value: "25" },
-              { label: "50", value: "50" },
-              { label: "100", value: "100" },
-            ]}
-            onChange={(value) => {
-              setLimit(value);
-            }}
-            page={1}
-          />{" "}
+        <div className="flex flex-wrap m justify-between items-center w-full gap-y-2 ">
+          <div className="w-[100%] md:w-fit order-2 md:order-1">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={3}
+              visiblePages={3}
+              onChange={handlePageChange}
+            />
+          </div>
+
+          <div className="w-[150px] w-[100%] md:w-fit order-1 md:order-2">
+            <ItemLimitDropdown
+              value={limit}
+              options={[
+                { label: "5", value: "5" },
+                { label: "10", value: "10" },
+                { label: "25", value: "25" },
+                { label: "50", value: "50" },
+                { label: "100", value: "100" },
+              ]}
+              onChange={(value) => {
+                setLimit(value);
+              }}
+              page={1}
+            />
+          </div>
         </div>
       </div>
 
