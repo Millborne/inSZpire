@@ -1,13 +1,5 @@
 import { SideMenuWithProfile } from "enterprisze-global-components";
-import {
-    Briefcase,
-    Calendar,
-    Clipboard,
-    DocumentCopy,
-    Personalcard,
-    ReceiptText,
-    Wallet1,
-} from "iconsax-reactjs";
+import { Briefcase, Calendar, Clipboard, DocumentCopy, Personalcard, ReceiptText, Wallet1 } from "iconsax-reactjs";
 import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 
@@ -79,8 +71,7 @@ const Employees = () => {
 
     useEffect(() => {
         const pathSegments = location.pathname.split("/").filter(Boolean);
-        const employeeIdIndex =
-            pathSegments.findIndex((segment) => segment === "employees") + 1;
+        const employeeIdIndex = pathSegments.findIndex((segment) => segment === "employees") + 1;
         const employeeId = pathSegments[employeeIdIndex];
         const nextSegment = pathSegments[employeeIdIndex + 1];
 
@@ -108,16 +99,11 @@ const Employees = () => {
     }, [location.pathname, navigate]);
 
     return (
-            <SideMenuWithProfile
-                user={user}
-                menuItems={menuItems}
-                selected={selected}
-                setSelected={handleMenuSelect}
-            >
-                <div className=" h-full">
-                    <Outlet />
-                </div>
-            </SideMenuWithProfile>
+        <SideMenuWithProfile user={user} menuItems={menuItems} selected={selected} setSelected={handleMenuSelect}>
+            <div className=" h-full">
+                <Outlet />
+            </div>
+        </SideMenuWithProfile>
     );
 };
 

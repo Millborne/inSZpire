@@ -1,11 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-    content: [
-        "./index.html",
-        "./src/**/*.{js,ts,jsx,tsx}",
-        "./app/**/*.{js,ts,jsx,tsx}",
-        "./components/**/*.{js,ts,jsx,tsx}",
-    ],
+    content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}", "./app/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
     theme: {
         extend: {
             colors: {
@@ -59,41 +54,17 @@ export default {
                 h4: ["20px", { lineHeight: "28px", fontWeight: "600" }],
                 h5: ["18px", { lineHeight: "26px", fontWeight: "600" }],
                 h6: ["16px", { lineHeight: "24px", fontWeight: "600" }],
-                "body-big-reg": [
-                    "18px",
-                    { lineHeight: "26px", fontWeight: "400" },
-                ],
-                "body-big-strong": [
-                    "18px",
-                    { lineHeight: "26px", fontWeight: "500" },
-                ],
+                "body-big-reg": ["18px", { lineHeight: "26px", fontWeight: "400" }],
+                "body-big-strong": ["18px", { lineHeight: "26px", fontWeight: "500" }],
 
-                "body-base-reg": [
-                    "16px",
-                    { lineHeight: "24px", fontWeight: "400" },
-                ],
-                "body-base-strong": [
-                    "16px",
-                    { lineHeight: "24px", fontWeight: "500" },
-                ],
+                "body-base-reg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                "body-base-strong": ["16px", { lineHeight: "24px", fontWeight: "500" }],
 
-                "body-small-reg": [
-                    "14px",
-                    { lineHeight: "20px", fontWeight: "400" },
-                ],
-                "body-small-strong": [
-                    "14px",
-                    { lineHeight: "20px", fontWeight: "500" },
-                ],
+                "body-small-reg": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                "body-small-strong": ["14px", { lineHeight: "20px", fontWeight: "500" }],
 
-                "caption-reg": [
-                    "12px",
-                    { lineHeight: "auto", fontWeight: "500" },
-                ],
-                "caption-strong": [
-                    "12px",
-                    { lineHeight: "auto", fontWeight: "700" },
-                ],
+                "caption-reg": ["12px", { lineHeight: "auto", fontWeight: "500" }],
+                "caption-strong": ["12px", { lineHeight: "auto", fontWeight: "700" }],
                 "caption-all-caps": [
                     "9px",
                     {
