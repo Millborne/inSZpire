@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { ArrowDown2, ArrowUp2, Airplane, Calendar, ArrowUp, ArrowSwapHorizontal, Add, ProfileAdd } from "iconsax-react";
+import { ArrowDown2, ArrowUp2, Airplane, ArrowUp, ArrowSwapHorizontal, Add, ProfileAdd } from "iconsax-react";
 
 // img
-import profile from "../../assets/profile.jpg";
+import noAvatar from "../../assets/noAvatar.png";
 import Staff from "../../assets/Staff.svg";
 import Vector from "../../assets/Vector.svg";
 import Layer_1 from "../../assets/Layer_1.svg";
@@ -43,11 +43,11 @@ const Dashboard = () => {
 
     // my team
     const teamMembers = [
-        { id: 1, profile: profile, name: "James David", score: "89,911" },
-        { id: 2, profile: profile, name: "Donald Duckies", score: "85,911" },
-        { id: 3, profile: profile, name: "James David", score: "89,911" },
-        { id: 4, profile: profile, name: "Donald Duckies", score: "85,911" },
-        { id: 5, profile: profile, name: "Bob Marley", score: "77,300" },
+        { id: 1, profile: noAvatar, name: "James David", score: "89,911" },
+        { id: 2, profile: noAvatar, name: "Donald Duckies", score: "85,911" },
+        { id: 3, profile: noAvatar, name: "James David", score: "89,911" },
+        { id: 4, profile: noAvatar, name: "Donald Duckies", score: "85,911" },
+        { id: 5, profile: noAvatar, name: "Bob Marley", score: "77,300" },
     ];
 
     const displayedMembers = showAll ? teamMembers : teamMembers.slice(0, 4);
