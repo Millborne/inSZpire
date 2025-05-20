@@ -1,4 +1,8 @@
-import { CardContainer, TextContent } from "enterprisze-global-components";
+import {
+    CardContainer,
+    Divider,
+    TextContent,
+} from "enterprisze-global-components";
 import { Edit2 } from "iconsax-reactjs";
 
 const Compensation = () => {
@@ -7,7 +11,7 @@ const Compensation = () => {
             <CardContainer
                 backgroundColor="bg-white"
                 content={
-                    <div className="flex flex-col gap-7">
+                    <div className="flex flex-col">
                         {/* Rates */}
                         <div className="flex flex-col gap-4">
                             <div className="flex justify-between">
@@ -45,6 +49,7 @@ const Compensation = () => {
                                 </div>
                             </div>
                         </div>
+                        <Divider />
 
                         {/* Allowances */}
                         <div className="flex flex-col gap-4">
@@ -80,6 +85,7 @@ const Compensation = () => {
                                 </div>
                             </div>
                         </div>
+                        <Divider />
 
                         {/* Bonuses */}
                         <div className="flex flex-col gap-4">
@@ -98,6 +104,7 @@ const Compensation = () => {
                                 </div>
                             </div>
                         </div>
+                        <Divider />
 
                         {/* Payroll */}
                         <div className="flex flex-col gap-4">
@@ -144,6 +151,7 @@ const Compensation = () => {
                                 </div>
                             </div>
                         </div>
+                        <Divider />
 
                         {/* Semi Monthly Government Paymenrs */}
                         <div className="flex flex-col gap-4">
