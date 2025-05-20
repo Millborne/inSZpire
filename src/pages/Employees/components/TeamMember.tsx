@@ -215,15 +215,15 @@ const TeamMember = () => {
                         <Edit2 className="icon-sm text-szPrimary900" />
                     </div>
                     <div
-                        className={`${
+                        className={`h-[500px] ${
                             showData
                                 ? "overflow-x-auto"
-                                : "flex justify-center items-center h-[400px]"
+                                : "flex justify-center items-center "
                         } `}
                     >
                         {showData ? (
                             <>
-                                <div className=" h-[400px] overflow-y-auto">
+                                <div className="h-full overflow-y-auto">
                                     <div className="bg-[#F9F9F9] h-full rounded-[16px] font-montserrat">
                                         <ReactFlow
                                             className="bg-[#F9F9F9] h-full rounded-[16px] font-montserrat"
