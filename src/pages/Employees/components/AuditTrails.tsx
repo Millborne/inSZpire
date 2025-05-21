@@ -19,7 +19,7 @@ const headers: HeaderType[] = [
 
 const data = [
   {
-    remarks: "Login",
+    remarks: "I - Login",
     logs: "Mar 24, 2025 01:34:08 AM",
     ipAddress: "120.28.14.173",
   },
@@ -39,7 +39,7 @@ const data = [
     ipAddress: "120.28.14.173",
   },
   {
-    remarks: "Login",
+    remarks: "I -Login",
     logs: "Mar 24, 2025 05:34:08 AM",
     ipAddress: "120.28.14.173",
   },
@@ -50,13 +50,37 @@ const data = [
   },
 ];
 
+const getColoredRemark = (remark: string) => {
+  let color = "";
+  if (remark.toLowerCase().includes("login")) {
+    color = "text-greenText";
+  } else if (
+    remark.toLowerCase().includes("out for break") ||
+    remark.toLowerCase().includes("back from break")
+  ) {
+    color = "text-szSecondary500";
+  } else if (
+    remark.toLowerCase().includes("logout") ||
+    remark.toLowerCase().includes("dtr")
+  ) {
+    color = "text-error900";
+  }
+  return <span className={color}>{remark}</span>;
+};
+
+// set color for remarks column
+const coloredData = data.map((row) => ({
+  ...row,
+  remarks: getColoredRemark(row.remarks),
+}));
+
 const AuditTrails = () => {
   const [value, setValue] = useState<Date>(new Date());
 
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState({ label: "10", value: "10" });
 
-  const handlePageChange = (page: number, meta?: { source?: string }) => {
+  const handlePageChange = (page: number, _meta?: { source?: string }) => {
     setCurrentPage(page);
   };
 
@@ -82,7 +106,7 @@ const AuditTrails = () => {
       </div>
 
       <div className="flex flex-col w-full gap-[16px]">
-        <Table headers={headers} data={data} />
+        <Table headers={headers} data={coloredData} />
         <div className="flex flex-wrap m justify-between items-center w-full gap-y-2 ">
           <div className="w-[100%] md:w-fit order-2 md:order-1">
             <Pagination

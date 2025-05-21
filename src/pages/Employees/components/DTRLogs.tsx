@@ -6,6 +6,7 @@ import {
   Pagination,
   Table,
   ItemLimitDropdown,
+  Chip,
 } from "enterprisze-global-components";
 
 // icons
@@ -25,15 +26,15 @@ const headers: HeaderType[] = [
 
 const data = [
   {
-    date: "Mar 10, 2025",
-    shift: "8:00:00 AM to 5:00:00 PM",
+    date: "Mar 10, 2025, Monday",
+    shift: "9:00 AM 6:00 PM",
     clockIn: "Mar 10, 2025 07:47 AM",
     clockOut: "Mar 10, 2025 07:47 AM",
     totalBreak: "56 mins",
     workHrs: "8.00 HR",
   },
   {
-    date: "Mar 10, 2025",
+    date: "Mar 10, 2025, Monday",
     shift: "LEAVE - WP",
     clockIn: "NO LOGS",
     clockOut: "NO LOGS",
@@ -41,7 +42,15 @@ const data = [
     workHrs: "0 HR",
   },
   {
-    date: "Mar 10, 2025",
+    date: "Mar 10, 2025, Monday",
+    shift: "ABSENT",
+    clockIn: "NO LOGS",
+    clockOut: "NO LOGS",
+    totalBreak: "0 min",
+    workHrs: "0 HR",
+  },
+  {
+    date: "Mar 10, 2025, Monday",
     shift: "LEAVE - WP",
     clockIn: "NO LOGS",
     clockOut: "NO LOGS",
@@ -49,12 +58,52 @@ const data = [
     workHrs: "0 HR",
   },
   {
-    date: "Mar 10, 2025",
-    shift: "LEAVE - WP",
+    date: "Mar 10, 2025, Monday",
+    shift: "WORK ON LEAVE",
     clockIn: "NO LOGS",
     clockOut: "NO LOGS",
     totalBreak: "0 min",
     workHrs: "0 HR",
+  },
+  {
+    date: "Mar 10, 2025, Monday",
+    shift: "REST DAY",
+    clockIn: "NO LOGS",
+    clockOut: "NO LOGS",
+    totalBreak: "0 min",
+    workHrs: "0 HR",
+  },
+  {
+    date: "Mar 10, 2025, Monday",
+    shift: "SUSPENDED",
+    clockIn: "NO LOGS",
+    clockOut: "NO LOGS",
+    totalBreak: "0 min",
+    workHrs: "0 HR",
+  },
+  {
+    date: "Mar 10, 2025, Monday",
+    shift: "OFFICIAL BUS.",
+    clockIn: "NO LOGS",
+    clockOut: "NO LOGS",
+    totalBreak: "0 min",
+    workHrs: "0 HR",
+  },
+  {
+    date: "Mar 10, 2025, Monday",
+    shift: "HLDY OVT WP",
+    clockIn: "NO LOGS",
+    clockOut: "NO LOGS",
+    totalBreak: "0 min",
+    workHrs: "0 HR",
+  },
+  {
+    date: "Mar 10, 2025, Monday",
+    shift: "9:00 AM 6:00 PM",
+    clockIn: "Mar 10, 2025 07:47 AM",
+    clockOut: "Mar 10, 2025 07:47 AM",
+    totalBreak: "56 mins",
+    workHrs: "8.00 HR",
   },
 ];
 
@@ -63,14 +112,53 @@ const DTRLogs = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState({ label: "10", value: "10" });
 
-  const handlePageChange = (page: number, meta?: { source?: string }) => {
+  const handlePageChange = (page: number, _meta?: { source?: string }) => {
     setCurrentPage(page);
   };
+
+  // For clock in and out utility function for dynamic coloring
+  const renderNoLogs = (value: string) =>
+    value === "NO LOGS" ? (
+      <span className="text-szLightGrey400">{value}</span>
+    ) : (
+      value
+    );
+
+  // For shift chip and clock in and out
+  const coloredData = data.map((row) => ({
+    ...row,
+    shift: (
+      <Chip
+        type="schedule"
+        scheduleType={
+          /^\d{1,2}:\d{2}.*\d{1,2}:\d{2}/i.test(row.shift)
+            ? "shift"
+            : row.shift === "LEAVE - WP"
+            ? "leave"
+            : row.shift === "WORK ON LEAVE"
+            ? "workOnLeave"
+            : row.shift === "REST DAY"
+            ? "rest"
+            : row.shift === "SUSPENDED"
+            ? "suspended"
+            : row.shift === "ABSENT"
+            ? "absent"
+            : row.shift === "OFFICIAL BUS."
+            ? "business"
+            : row.shift === "HLDY OVT WP"
+            ? "holiday"
+            : undefined
+        }
+        label={row.shift}
+      />
+    ),
+    clockIn: renderNoLogs(row.clockIn),
+    clockOut: renderNoLogs(row.clockOut),
+  }));
 
   return (
     <div className="grid grid-cols-1 gap-[24px]">
       <div className="flex flex-wrap gap-[20px]">
-        {/* <div className="flex flex-wrap gap-2 items-center flex-col md:flex-row "> */}
         <div className="grid grid-cols-1 md:grid-cols-[auto_auto_auto] gap-2 items-center justify-center">
           <CustomDatePicker
             value={value}
@@ -93,7 +181,7 @@ const DTRLogs = () => {
       </div>
 
       <div className="flex flex-col w-full gap-[16px]">
-        <Table headers={headers} data={data} />
+        <Table headers={headers} data={coloredData} />
         <div className="flex flex-wrap m justify-between items-center w-full gap-y-2 ">
           <div className="w-[100%] md:w-fit order-2 md:order-1">
             <Pagination
