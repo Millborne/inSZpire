@@ -5,12 +5,14 @@ import { Tab, CardContainer } from "enterprisze-global-components";
 import CalendarLogs from "../components/CalendarLogs";
 import DTRLogs from "../components/DTRLogs";
 import AuditTrails from "../components/AuditTrails";
+import QRLogs from "../components/QRLogs";
 
-const TABS = ["Calendar", "DTR Logs", "Audit Trails"];
+const TABS = ["Calendar", "DTR Logs", "QR Logs", "Audit Trails"];
 
 const tabContentMap: Record<string, JSX.Element> = {
   Calendar: <CalendarLogs />,
   "DTR Logs": <DTRLogs />,
+  "QR Logs": <QRLogs />,
   "Audit Trails": <AuditTrails />,
 };
 
