@@ -10,6 +10,7 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@rollup/rollup-darwin-x64": "^4.41.0",
         "@xyflow/react": "^12.6.4",
         "enterprisze-global-components": "^1.4.3",
         "iconsax-reactjs": "^0.0.8",

@@ -92,6 +92,18 @@ const Dashboard = () => {
             title: "Daily Scrum",
             organizer: "BSI",
         },
+        {
+            id: 4,
+            date: "FEB 17 - 18",
+            title: "Daily Scrum",
+            organizer: "BSI",
+        },
+        {
+            id: 5,
+            date: "FEB 17 - 18",
+            title: "Daily Scrum",
+            organizer: "BSI",
+        },
     ];
 
     // timely suggestion
@@ -174,7 +186,7 @@ const Dashboard = () => {
                         title="Awaiting your action"
                         content={
                             <div>
-                                {awaitingAction.map((awaiting, index) => (
+                                {awaitingAction.slice(0, 3).map((awaiting, index) => (
                                     <div key={awaiting.id}>
                                         <div className="flex flex-row gap-3 py-3 ">
                                             <div className="rounded-full bg-szPrimary100 w-12 h-12 flex justify-center items-center">
@@ -190,9 +202,11 @@ const Dashboard = () => {
                                                 </p>
                                             </div>
                                         </div>
-                                        {index < awaitingAction.length - 1 && <hr className="border-szGrey150" />}
+                                        {index < 2 && <hr className="border-szGrey150" />}
                                     </div>
                                 ))}
+                                <hr className="border-szGrey150" />
+                                <div className="text-body-base-strong text-szPrimary700 py-3 px-6">View More</div>
                             </div>
                         }
                     />
@@ -279,7 +293,7 @@ const Dashboard = () => {
                         title="Important Dates"
                         content={
                             <div>
-                                {importantDates.map((importantdates, index) => (
+                                {importantDates.slice(0, 3).map((importantdates, index) => (
                                     <div key={importantdates.id}>
                                         <div className="flex flex-wrap py-3 gap-3 items-center">
                                             <div className="rounded-md border border-szBlack900 w-20 h-12 items-center justify-center flex">
@@ -299,7 +313,7 @@ const Dashboard = () => {
                                                 <p>{importantdates.organizer}</p>
                                             </div>
                                         </div>
-                                        {index < importantDates.length - 1 && <hr className="border-szGrey150" />}
+                                        {index < 2 && <hr className="border-szGrey150" />}
                                     </div>
                                 ))}
                                 <hr className="border-szGrey150" />
@@ -313,7 +327,7 @@ const Dashboard = () => {
                         title="Timely Suggestion"
                         content={
                             <div>
-                                {leaveRequests.map((leave, index) => (
+                                {leaveRequests.slice(0, 3).map((leave, index) => (
                                     <div key={leave.id}>
                                         <div className="flex flex-row gap-3 py-3">
                                             <div className="rounded-full bg-szGrey150 w-12 h-12 flex justify-center items-center">
@@ -325,9 +339,11 @@ const Dashboard = () => {
                                                 <p className="flex justify-end text-body-base-strong text-szPrimary700">{leave.link}</p>
                                             </div>
                                         </div>
-                                        {index < leaveRequests.length - 1 && <hr className="border-szGrey150" />}
+                                        {index < 2 && <hr className="border-szGrey150" />}
                                     </div>
                                 ))}
+                                <hr className="border-szGrey150" />
+                                <div className="text-body-base-strong text-szPrimary700 py-3 px-6">View More</div>
                             </div>
                         }
                     />
