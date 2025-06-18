@@ -3,6 +3,7 @@ import {
   TextContent,
   ButtonsIcon,
   PurpleTaggedCard,
+  SnackbarAlert,
 } from "enterprisze-global-components";
 
 //icons
@@ -13,6 +14,7 @@ import EducationalModal from "./modals/EducationalModal";
 
 const educationalData = [
   {
+    id: "1",
     level: "College",
     "school name": "USTP",
     degree: "-",
@@ -22,6 +24,7 @@ const educationalData = [
     "honors received": "First Honor",
   },
   {
+    id: "2",
     level: "Senior High School",
     "school name": "USTP",
     degree: "-",
@@ -34,6 +37,11 @@ const educationalData = [
 
 const Education = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+
+  const handleSubmitSuccess = () => {
+    setIsSnackbarOpen(true);
+  };
 
   return (
     <div className="flex flex-col w-full">
@@ -50,6 +58,7 @@ const Education = () => {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             educationalData={educationalData}
+            onSubmitSuccess={handleSubmitSuccess}
           />
         </div>
         <div className="flex flex-col gap-[24px]">
@@ -83,6 +92,15 @@ const Education = () => {
           ))}
         </div>
       </div>
+
+      <SnackbarAlert
+        isOpen={isSnackbarOpen}
+        onClose={() => setIsSnackbarOpen(false)}
+        showCloseButton={true}
+        type="success"
+        title="Successfully updated Educational Background"
+        animation="slide-up"
+      />
     </div>
   );
 };

@@ -6,44 +6,63 @@ import {
 } from "enterprisze-global-components";
 
 //icons
-import { Edit2 } from "iconsax-react";
+import { Edit2, Trash } from "iconsax-react";
 
 //components
+import ContactModal from "./modals/ContactModal";
+import { useState } from "react";
 
 const emergencyContacts = [
   {
+    id: "1",
     lastName: "Lee",
     firstName: "Keith Lloyd",
     middleName: "Ridgely",
     extensions: "N/A",
     contactNumber: "0955-021-1889",
     email: "graciathefirst@gmail.com",
-    address:
-      "Blk 5 Lot 3, Villa Luz Subdivision, Brgy. 26, City of Cagayan de Oro, Misamis Oriental, Region X, 9000, Philippines.",
+    region: "Region X",
+    province: "Misamis Oriental",
+    city: "City of Cagayan de Oro",
+    barangay: "Brgy. 26",
+    street: "Blk 5 Lot 3, Villa Luz Subdivision",
+    postalCode: "9000",
   },
   {
+    id: "2",
     lastName: "Germannotta",
     firstName: "Stephanie",
     middleName: "Ridgely",
     extensions: "N/A",
     contactNumber: "0955-021-1888",
     email: "freddyhill@gmail.com",
-    address:
-      "Blk 5 Lot 3, Villa Luz Subdivision, Brgy. 26, City of Cagayan de Oro, Misamis Oriental, Region X, 9000, Philippines.",
+    region: "Region X",
+    province: "Misamis Oriental",
+    city: "City of Cagayan de Oro",
+    barangay: "Brgy. 26",
+    street: "Blk 5 Lot 3, Villa Luz Subdivision",
+    postalCode: "9000",
   },
   {
+    id: "3",
     lastName: "Lee",
     firstName: "Stephanie",
     middleName: "Ridgely",
     extensions: "N/A",
     contactNumber: "0955-021-1887",
     email: "sibling@gmail.com",
-    address:
-      "Blk 5 Lot 3, Villa Luz Subdivision, Brgy. 26, City of Cagayan de Oro, Misamis Oriental, Region X, 9000, Philippines.",
+    region: "Region X",
+    province: "Misamis Oriental",
+    city: "City of Cagayan de Oro",
+    barangay: "Brgy. 26",
+    street: "Blk 5 Lot 3, Villa Luz Subdivision",
+    postalCode: "9000",
   },
 ];
 
 const Contacts = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="flex flex-col w-full">
       <div className="flex flex-col w-full gap-[8px]">
@@ -53,6 +72,12 @@ const Contacts = () => {
             variant="secondary"
             size="small"
             label="Edit Contact Information"
+            onClick={() => setIsModalOpen(true)}
+          />
+          <ContactModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            emergencyContacts={emergencyContacts}
           />
         </div>
 
@@ -100,8 +125,11 @@ const Contacts = () => {
                   <div className="break-all">
                     <TextContent header="email" text={contact.email} />
                   </div>
-                  <div className="sm:col-span-3 col-span-1 break-all">
-                    <TextContent header="address" text={contact.address} />
+                  <div className="sm:col-span-3 col-span-1 break-all flex justify-between items-end">
+                    <TextContent
+                      header="address"
+                      text={`${contact.street}, ${contact.barangay}, ${contact.city}, ${contact.province}, ${contact.postalCode}, Philippines`}
+                    />
                   </div>
                 </div>
               }

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Button,
   Inputs,
@@ -8,12 +9,13 @@ import {
 
 // icons
 import { ArrowDown2, TickCircle, Trash, Edit2 } from "iconsax-reactjs";
-import { useState } from "react";
 
 // Components
 import EducationConfirmationModal from "./EducationConfirmationModal";
+import DeleteConfirmation from "../../../../components/DeleteConfirmation";
 
-interface EducationalData {
+export interface EducationalDataType {
+  id: string;
   level: string;
   "school name": string;
   degree: string;
@@ -26,20 +28,36 @@ interface EducationalData {
 interface EducationalModalProps {
   isOpen: boolean;
   onClose: () => void;
-  educationalData: EducationalData[];
+  educationalData: EducationalDataType[];
+  onSubmitSuccess?: () => void;
 }
+
+const educationalLevelOptions = [
+  "High School",
+  "Senior High School",
+  "Vocational",
+  "College Level",
+  "College Graduate",
+  "Masters",
+  "Doctorate",
+];
 
 const EducationalModal: React.FC<EducationalModalProps> = ({
   isOpen,
   onClose,
   educationalData,
+  onSubmitSuccess,
 }) => {
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [showInputContainer, setShowInputContainer] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [showEducationalLevelDropdown, setShowEducationalLevelDropdown] =
+    useState(false);
+  const [educationalLevel, setEducationalLevel] = useState("Educational Level");
   const [currentEducationData, setCurrentEducationData] =
-    useState<EducationalData | null>(null);
+    useState<EducationalDataType | null>(null);
 
   // For Adding Education
   const handleAddEducationClick = () => {
@@ -50,9 +68,8 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
 
   //For adding education once finished
   const handleAddClick = () => {
-    // Here you would typically collect the form data
-    // For now, we'll use dummy data
-    const newEducationData: EducationalData = {
+    const newEducationData: EducationalDataType = {
+      id: "1",
       level: "College",
       "school name": "Sample School",
       degree: "Bachelor's Degree",
@@ -63,6 +80,8 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
     };
     setCurrentEducationData(newEducationData);
     setShowInputContainer(false);
+    setEducationalLevel("Educational Level");
+    setShowEducationalLevelDropdown(false);
   };
 
   // For Editing Education
@@ -77,6 +96,8 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
     if (editingIndex !== null) {
       setCurrentEducationData(educationalData[editingIndex]);
       setShowInputContainer(false);
+      setEducationalLevel("Educational Level");
+      setShowEducationalLevelDropdown(false);
     }
   };
 
@@ -95,6 +116,10 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
     }
   };
 
+  const handleDeleteClick = (index: number) => {
+    setIsDeleteModalOpen(true);
+  };
+
   // Reusable Input Container Component
   const InputContainer = ({
     isEditMode,
@@ -105,11 +130,35 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
   }) => (
     <div className="flex flex-col gap-[8px] border rounded-[12px] border-szPrimary200 pt-[4px] pr-[12px] pb-[8px] pl-[12px]">
       <div className="flex gap-[16px] items-center min-h-[32px] justify-between">
-        <div className="flex gap-[16px] items-center">
-          <h6 className="text-h6 text-szPrimary700 max-w-[160px] sm:max-w-fit">
-            Choose Educational Level
-          </h6>
-          <ArrowDown2 className="icon-sm" />
+        <div className="relative">
+          <div
+            className="flex gap-[16px] items-center cursor-pointer"
+            onClick={() => setShowEducationalLevelDropdown((prev) => !prev)}
+          >
+            <h6 className="text-h6 text-szPrimary700 min-w-[130px] sm:max-w-fit">
+              {educationalLevel}
+            </h6>
+            <ArrowDown2 className="icon-sm" />
+          </div>
+          {showEducationalLevelDropdown && (
+            <div
+              className="absolute z-20 mt-2 bg-white border rounded-lg shadow-lg w-full"
+              style={{ maxHeight: "150px", overflowY: "auto" }}
+            >
+              {educationalLevelOptions.map((option) => (
+                <p
+                  key={option}
+                  className="px-[12px] py-[8px] hover:bg-szPrimary100 cursor-pointer text-body-small-reg"
+                  onClick={() => {
+                    setEducationalLevel(option);
+                    setShowEducationalLevelDropdown(false);
+                  }}
+                >
+                  {option}
+                </p>
+              ))}
+            </div>
+          )}
         </div>
         <p className="text-caption-all-caps text-szGrey500 uppercase">
           [x] - You can leave blank
@@ -194,59 +243,65 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
             {showInputContainer && !isEditMode && (
               <InputContainer isEditMode={false} index={null} />
             )}
-
             <section className="mt-[12px]">
               <div className="flex flex-col gap-[24px] ">
                 {educationalData.map((educationalData, index) => (
-                  <PurpleTaggedCard
-                    key={index}
-                    label={educationalData.level}
-                    children={
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
-                        <TextContent
-                          header="school name"
-                          text={educationalData["school name"]}
-                        />
-                        <TextContent
-                          header="degree"
-                          text={educationalData.degree}
-                        />
-                        <TextContent
-                          header="course"
-                          text={educationalData.course}
-                        />
-                        <TextContent
-                          header="year started"
-                          text={educationalData["year started"]}
-                        />
-                        <TextContent
-                          header="year left"
-                          text={educationalData["year left"]}
-                        />
-                        <div className="flex justify-between items-end">
+                  <div key={index} className="flex flex-col gap-[24px]">
+                    <PurpleTaggedCard
+                      label={educationalData.level}
+                      children={
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
                           <TextContent
-                            header="honors received"
-                            text={educationalData["honors received"]}
+                            header="school name"
+                            text={educationalData["school name"]}
                           />
-                          <div className="flex gap-[16px]">
-                            <Edit2
-                              className="icon-sm text-szPrimary900 cursor-pointer"
-                              onClick={() => handleEditClick(index)}
+                          <TextContent
+                            header="degree"
+                            text={educationalData.degree}
+                          />
+                          <TextContent
+                            header="course"
+                            text={educationalData.course}
+                          />
+                          <TextContent
+                            header="year started"
+                            text={educationalData["year started"]}
+                          />
+                          <TextContent
+                            header="year left"
+                            text={educationalData["year left"]}
+                          />
+                          <div className="flex justify-between items-end">
+                            <TextContent
+                              header="honors received"
+                              text={educationalData["honors received"]}
                             />
-                            <Trash className="icon-sm text-szPrimary900 cursor-pointer" />
+                            <div className="flex gap-[16px]">
+                              <Edit2
+                                className="icon-sm text-szPrimary900 cursor-pointer"
+                                onClick={() => handleEditClick(index)}
+                              />
+                              <Trash
+                                className="icon-sm text-szPrimary900 cursor-pointer"
+                                onClick={() => handleDeleteClick(index)}
+                              />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    }
-                  />
+                      }
+                    />
+                    {showInputContainer &&
+                      isEditMode &&
+                      editingIndex === index && (
+                        <InputContainer
+                          isEditMode={true}
+                          index={editingIndex}
+                        />
+                      )}
+                  </div>
                 ))}
               </div>
             </section>
-
-            {/* Edit mode input container */}
-            {showInputContainer && isEditMode && editingIndex !== null && (
-              <InputContainer isEditMode={true} index={editingIndex} />
-            )}
           </div>
         }
       />
@@ -255,10 +310,18 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
         <EducationConfirmationModal
           isOpen={showConfirmationModal}
           onClose={handleConfirmationClose}
-          isEditMode={isEditMode}
-          educationalData={currentEducationData}
+          educationalData={currentEducationData ? [currentEducationData] : []}
+          onSubmitSuccess={onSubmitSuccess}
         />
       )}
+
+      {/* Delete Confirmation Modal --------------------------- */}
+      <DeleteConfirmation
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onClick={() => {}}
+        description="Are you sure you want to delete this educational background?"
+      />
     </>
   );
 };
