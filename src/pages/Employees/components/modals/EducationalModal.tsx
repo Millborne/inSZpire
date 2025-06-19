@@ -165,38 +165,18 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
         </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px]">
-        <Inputs
-          label="SCHOOL NAME"
-          placeholder="Name of College to Edit"
-          value={index !== null ? educationalData[index]?.["school name"] : ""}
-        />
+        <Inputs label="SCHOOL NAME" placeholder="Name of College to Edit" />
         <Inputs
           label="DEGREE (EX. BACHELOR OF SCIENCE IN ARCHITECTURE)"
           placeholder="Bachelor of Science in Information Technology"
-          value={index !== null ? educationalData[index]?.degree : ""}
         />
         <Inputs
           label="COURSE / SPECIALIZATION (EX. NETWORKING. [X])"
           placeholder=""
-          value={index !== null ? educationalData[index]?.course : ""}
         />
-        <Inputs
-          label="YEAR STARTED"
-          placeholder="2022"
-          value={index !== null ? educationalData[index]?.["year started"] : ""}
-        />
-        <Inputs
-          label="YEAR ENDED"
-          placeholder="2024"
-          value={index !== null ? educationalData[index]?.["year left"] : ""}
-        />
-        <Inputs
-          label="HONORS RECEIVED [X]"
-          placeholder=""
-          value={
-            index !== null ? educationalData[index]?.["honors received"] : ""
-          }
-        />
+        <Inputs label="YEAR STARTED" placeholder="2022" />
+        <Inputs label="YEAR ENDED" placeholder="2024" />
+        <Inputs label="HONORS RECEIVED [X]" placeholder="" />
       </div>
       <div className="flex justify-end">
         <Button
@@ -235,6 +215,7 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
             variant: "primary",
             onClick: handleProceed,
             size: "medium",
+            disabled: !currentEducationData,
           },
         ]}
         content={

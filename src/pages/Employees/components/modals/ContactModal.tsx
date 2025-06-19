@@ -258,6 +258,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
             variant: "primary",
             onClick: handleProceed,
             size: "medium",
+            disabled: !currentContactData,
           },
         ]}
         content={
