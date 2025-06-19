@@ -11,7 +11,7 @@
     },
     "dependencies": {
         "@xyflow/react": "^12.6.4",
-        "enterprisze-global-components": "^1.3.3",
+        "enterprisze-global-components": "^1.4.3",
         "iconsax-reactjs": "^0.0.8",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",

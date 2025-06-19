@@ -1,4 +1,8 @@
-import { TextContent, Divider } from "enterprisze-global-components";
+import {
+  TextContent,
+  Divider,
+  ButtonsIcon,
+} from "enterprisze-global-components";
 
 //icons
 import { Edit2 } from "iconsax-react";
@@ -11,7 +15,7 @@ const BasicInfo = () => {
       <div className="flex flex-col w-full gap-[8px]">
         <div className="flex justify-between">
           <h6 className="text-h6 text-szPrimary700">Full Name</h6>
-          <Edit2 className="icon-sm text-szPrimary900" />
+          <ButtonsIcon icon={<Edit2 />} variant="secondary" size="small" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
           <TextContent header="last name" text="Lee" />
@@ -25,8 +29,7 @@ const BasicInfo = () => {
       <div className="flex flex-col w-full gap-[8px]">
         <div className="flex justify-between">
           <h6 className="text-h6 text-szPrimary700">Birthday</h6>
-          <Edit2 className="icon-sm text-szPrimary900" />
-        </div>{" "}
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
           <TextContent header="date of birth" text="September 8, 2002" />
           <TextContent header="age" text="22" />
@@ -39,35 +42,8 @@ const BasicInfo = () => {
       <Divider />
       <div className="flex flex-col w-full gap-[8px]">
         <div className="flex justify-between">
-          <h6 className="text-h6 text-szPrimary700">Educational Details</h6>
-          <Edit2 className="icon-sm text-szPrimary900" />
-        </div>{" "}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
-          <TextContent
-            header="highschool attended"
-            text="Amundsen High School"
-          />
-          <TextContent header="educational attainment" text="College" />
-          <TextContent
-            header="last attended school"
-            text="Illinois Institute of Technology"
-          />
-          <TextContent
-            header="years attended (date range)"
-            text="2015 - 2019"
-          />
-          <TextContent
-            header="college course taken (if applicable)"
-            text="Bachelor of Science in Information Technology"
-          />
-        </div>
-      </div>
-      <Divider />
-      <div className="flex flex-col w-full gap-[8px]">
-        <div className="flex justify-between">
           <h6 className="text-h6 text-szPrimary700">Others</h6>
-          <Edit2 className="icon-sm text-szPrimary900" />
-        </div>{" "}
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
           <TextContent header="religion" text="Roman Catholic" />
           <TextContent header="sex" text="Male" />
@@ -81,8 +57,7 @@ const BasicInfo = () => {
       <div className="flex flex-col w-full gap-[8px]">
         <div className="flex justify-between">
           <h6 className="text-h6 text-szPrimary700">Addresses</h6>
-          <Edit2 className="icon-sm text-szPrimary900" />
-        </div>{" "}
+        </div>
         <div className="grid gap-4 items-start">
           <TextContent
             header="present addresses"

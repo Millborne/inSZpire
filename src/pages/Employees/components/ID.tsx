@@ -1,6 +1,11 @@
 import React from "react";
-import { Table, HeaderType, Avatar } from "enterprisze-global-components";
-import { Edit2 } from "iconsax-react";
+import {
+  Table,
+  HeaderType,
+  Avatar,
+  ButtonsIcon,
+} from "enterprisze-global-components";
+import { Add, Edit2 } from "iconsax-react";
 
 const employeeIDheaders: HeaderType[] = [
   { type: "string", header: "Employee ID", accessor: "employeeId" },
@@ -64,7 +69,7 @@ const ID = () => {
       <div className="flex flex-col w-full gap-[8px]">
         <div className="flex justify-between">
           <h6 className="text-h6 text-szBlack900 ">Government IDs & Numbers</h6>
-          <Edit2 className="icon-sm text-szPrimary900" />
+          <ButtonsIcon icon={<Add />} variant="secondary" size="small" />
         </div>{" "}
         <Table headers={headers} data={data} />
       </div>

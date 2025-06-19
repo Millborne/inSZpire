@@ -4,13 +4,15 @@ import BasicInfo from "../components/BasicInfo";
 import Contacts from "../components/Contacts";
 import Family from "../components/Family";
 import ID from "../components/ID";
+import Education from "../components/Education";
 
-const TABS = ["Basic Info", "Contacts", "Family", "IDs"];
+const TABS = ["Basic Info", "Education", "Family", "Contacts", "IDs"];
 
 const tabContentMap: Record<string, JSX.Element> = {
   "Basic Info": <BasicInfo />,
-  Contacts: <Contacts />,
+  Education: <Education />,
   Family: <Family />,
+  Contacts: <Contacts />,
   IDs: <ID />,
 };
 
