@@ -1,87 +1,106 @@
-import { Button, ButtonsIcon, PurpleTaggedCard, TextContent } from "enterprisze-global-components";
+import { useState } from "react";
+import { ButtonsIcon, PurpleTaggedCard, SnackbarAlert, TextContent } from "enterprisze-global-components";
+import { Edit2 } from "iconsax-react";
+import FamilyModal from "./modals/FamilyModal";
 
-//icons
-import { Add, Edit2 } from "iconsax-react";
-
-const childrenData = [
+const familyMembersData = [
     {
-        "last name": "Lee",
-        "first name": "Lauren",
-        "middle name": "McMullen",
-        extensions: "N/A",
-        "contact number": "0925-939-6926",
+        id: 1,
+        relationship: "Mother",
+        lastName: "Abrams",
+        firstName: "Gracia",
+        middleName: "Ridgley",
+        extension: "I",
+        contactNumber: "0955-021-1889",
+        email: "graciathefirst@gmail.com",
+        address: {
+            country: "Philippines",
+            region: "Region X",
+            province: "Misamis Oriental",
+            cityMunicipality: "City of Cagayan de Oro",
+            barangay: "Brgy. 26",
+            streetHouseNoLot: "Blk 5 Lot 3, Villa Luz Subdivision",
+            postalCode: "9000",
+        },
     },
-
     {
-        "last name": "N/A",
-        "first name": "N/A",
-        "middle name": "N/A",
-        extensions: "N/A",
-        "contact number": "N/A",
+        id: 2,
+        relationship: "Father",
+        lastName: "dfdfdfdfdf",
+        firstName: "dfdfdfdfdfdf",
+        middleName: "Ridgley",
+        extension: "I",
+        contactNumber: "0955-021-1889",
+        email: "graciathefirst@gmail.com",
+        address: {
+            country: "Philippines",
+            region: "Region X",
+            province: "Misamis Oriental",
+            cityMunicipality: "City of Cagayan de Oro",
+            barangay: "Brgy. 26",
+            streetHouseNoLot: "Blk 5 Lot 3, Villa Luz Subdivision",
+            postalCode: "9000",
+        },
     },
 ];
 
 const Family = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+
+    const handleSubmitSuccess = () => {
+        setIsSnackbarOpen(true);
+    };
+
     return (
         <div className="flex flex-col w-full">
             <div className="flex flex-col w-full gap-[16px]">
-                <div className="flex justify-end ">
-                    <ButtonsIcon icon={<Edit2 variant="Linear" />} variant="secondary" size="small" />
-                    {/* <Button
-            leftIcon={<Add variant="Linear" />}
-            label="Add Family"
-            variant="secondary"
-            size="small"
-          /> */}
+                <div className="flex justify-between ">
+                    <h6 className="text-h6 text-szPrimary700">Family</h6>
+                    <ButtonsIcon icon={<Edit2 variant="Linear" />} variant="secondary" size="small" onClick={() => setIsModalOpen(true)} />
                 </div>
                 <div className="flex flex-col gap-[24px]">
-                    <PurpleTaggedCard
-                        label="Father"
-                        children={
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
-                                <TextContent header="last name" text="Lee" />
-                                <TextContent header="first name" text="Keith Lloyd" />
-                                <TextContent header="middle name" text="Ridgely" />
-                                <TextContent header="extensions" text="N/A" />
-                                <TextContent header="contact number" text="0955-021-1889" />
-                            </div>
-                        }
-                    />
-                    <PurpleTaggedCard
-                        label="Mother"
-                        children={
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
-                                <TextContent header="last name" text="Hill" />
-                                <TextContent header="first name" text="Martha Lloyd" />
-                                <TextContent header="middle name" text="Morrison" />
-                                <TextContent header="extensions" text="N/A" />
-                                <TextContent header="contact number" text="0956-294-7801" />
-                            </div>
-                        }
-                    />
-                    <PurpleTaggedCard
-                        label="Spouse"
-                        children={
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
-                                <TextContent header="last name" text="McMullen" />
-                                <TextContent header="first name" text="Donna" />
-                                <TextContent header="middle name" text="Copley" />
-                                <TextContent header="extensions" text="N/A" />
-                                <TextContent header="contact number" text="0956-536-2471" />
-                            </div>
-                        }
-                    />
-                    <PurpleTaggedCard label="Child / Children">
-                        {childrenData.map((child, childIndex) => (
-                            <div key={childIndex} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start mb-4">
-                                {Object.entries(child).map(([header, text], index) => (
-                                    <TextContent key={index} header={header} text={text} />
-                                ))}
-                            </div>
-                        ))}
-                    </PurpleTaggedCard>
+                    {familyMembersData.map((member, index) => {
+                        const address = `${member.address.streetHouseNoLot}, ${member.address.barangay}, ${member.address.cityMunicipality}, ${member.address.province}, ${member.address.region}, ${member.address.postalCode}, ${member.address.country}`;
+                        return (
+                            <PurpleTaggedCard key={index} label={member.relationship}>
+                                <div className="flex flex-col gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-3">
+                                        <TextContent header="last name" text={member.lastName} />
+                                        <TextContent header="first name" text={member.firstName} />
+                                        <TextContent header="middle name" text={member.middleName} />
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-3">
+                                        <TextContent header="extension" text={member.extension} />
+                                        <TextContent header="contact number" text={member.contactNumber} />
+                                        <TextContent header="email" text={member.email} />
+                                    </div>
+                                    <div className="flex flex-col lg:flex-row justify-between items-end gap-4">
+                                        <TextContent header="address" text={address} />
+                                    </div>
+                                </div>
+                            </PurpleTaggedCard>
+                        );
+                    })}
                 </div>
             </div>
+
+            {/* Modal component */}
+            <FamilyModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                familyMembersData={familyMembersData}
+                onSubmitSuccess={handleSubmitSuccess}
+            />
+
+            <SnackbarAlert
+                isOpen={isSnackbarOpen}
+                onClose={() => setIsSnackbarOpen(false)}
+                showCloseButton={true}
+                type="success"
+                title="Successfully updated Family Members"
+                animation="slide-up"
+            />
         </div>
     );
 };

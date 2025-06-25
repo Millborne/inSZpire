@@ -1,26 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import {
-    Button,
-    Checkbox,
-    Inputs,
-    Pagination,
-    Table,
-} from "enterprisze-global-components";
-import {
-    ArrowDown2,
-    ArrowUp2,
-    InfoCircle,
-    SearchNormal,
-} from "iconsax-reactjs";
+import { Button, Pagination, Table } from "enterprisze-global-components";
+import { Filter, InfoCircle } from "iconsax-reactjs";
+import EmployeeFilterModal from "../components/modals/EmployeeFilterModal";
 
 const EmployeeList = () => {
     const navigate = useNavigate();
-
     const [openFilter, setOpenFilter] = useState(false);
 
-    const [selectedFilter, setSelectedFilter] = useState<string[]>([]);
+    // const [selectedFilter, setSelectedFilter] = useState<string[]>([]);
 
     // For larger screen
     const headers: Array<
@@ -43,32 +32,22 @@ const EmployeeList = () => {
                     <InfoCircle className="w-4 h-4 text-szBlack700 hover:text-szPrimary700 transition-colors duration-200 cursor-help" />
                     <div className="absolute z-10 invisible group-hover:visible bg-white shadow-lg rounded-lg p-2 w-[97px] -left-20 top-6">
                         <div className="flex flex-col gap-2 w-full items-start">
-                            <span className="text-body-small-reg text-szBlack800">
-                                Legends:
-                            </span>
+                            <span className="text-body-small-reg text-szBlack800">Legends:</span>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-success700 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Active
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Active</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-szGrey300 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Inactive
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Inactive</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-info500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Floating
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Floating</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-warning500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Clearance
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Clearance</span>
                             </div>
                         </div>
                     </div>
@@ -89,21 +68,11 @@ const EmployeeList = () => {
             name: (
                 <div className="md:flex items-center gap-1">
                     <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                        Germanotta, Stephanie Luke A.
-                    </span>
+                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Germanotta, Stephanie Luke A.</span>
                 </div>
             ),
-            team: (
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                    BSI
-                </span>
-            ),
-            jobTitle: (
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                    Junior Web Developer
-                </span>
-            ),
+            team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">BSI</span>,
+            jobTitle: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Junior Web Developer</span>,
             jobCode: "1234567890",
             directHead: "John Doe",
         },
@@ -112,20 +81,12 @@ const EmployeeList = () => {
             name: (
                 <div className="md:flex items-center gap-1">
                     <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                        Smith, John William B.
-                    </span>
+                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Smith, John William B.</span>
                 </div>
             ),
-            team: (
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                    Shoopee
-                </span>
-            ),
+            team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Shoopee</span>,
             jobTitle: (
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                    Customer Service Representative
-                </span>
+                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Customer Service Representative</span>
             ),
             jobCode: "2345678901",
             directHead: "Jane Smith",
@@ -135,20 +96,12 @@ const EmployeeList = () => {
             name: (
                 <div className="md:flex items-center gap-1">
                     <div className="w-[14px] h-[14px] rounded-full bg-info500"></div>
-                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                        Johnson, Emily Rose C.
-                    </span>
+                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Johnson, Emily Rose C.</span>
                 </div>
             ),
-            team: (
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                    Shoopee
-                </span>
-            ),
+            team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Shoopee</span>,
             jobTitle: (
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                    Customer Service Representative
-                </span>
+                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Customer Service Representative</span>
             ),
             jobCode: "3456789012",
             directHead: "Michael Brown",
@@ -158,21 +111,11 @@ const EmployeeList = () => {
             name: (
                 <div className="md:flex items-center gap-1">
                     <div className="w-[14px] h-[14px] rounded-full bg-warning500"></div>
-                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                        Davis, Robert James D.
-                    </span>
+                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Davis, Robert James D.</span>
                 </div>
             ),
-            team: (
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                    Shoopee
-                </span>
-            ),
-            jobTitle: (
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                    Manager
-                </span>
-            ),
+            team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Shoopee</span>,
+            jobTitle: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Manager</span>,
             jobCode: "4567890123",
             directHead: "Sarah Wilson",
         },
@@ -198,32 +141,22 @@ const EmployeeList = () => {
                     <InfoCircle className="w-4 h-4 text-szBlack700 hover:text-szPrimary700 transition-colors duration-200 cursor-help" />
                     <div className="absolute z-10 invisible group-hover:visible bg-white shadow-lg rounded-lg p-2 w-[97px] -left-20 top-6">
                         <div className="flex flex-col gap-2 w-full items-start">
-                            <span className="text-body-small-reg text-szBlack800">
-                                Legends:
-                            </span>
+                            <span className="text-body-small-reg text-szBlack800">Legends:</span>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-success700 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Active
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Active</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-szGrey300 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Inactive
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Inactive</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-info500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Floating
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Floating</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-warning500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Clearance
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Clearance</span>
                             </div>
                         </div>
                     </div>
@@ -252,9 +185,9 @@ const EmployeeList = () => {
         <div className="h-full p-4 bg-szWhite100 rounded-md shadow-boxShadow flex flex-col gap-5 overflow-auto">
             <span className="text-h3">Employees</span>
             <div className="h-full w-full flex flex-col gap-4 ">
-                <div className="w-full flex flex-col gap-1">
-                    {/* Search bar & Filter btn */}
-                    <div className="grid md:grid-cols-2 gap-5">
+                {/* <div className="w-full flex flex-col gap-1"> */}
+                {/* Search bar & Filter btn */}
+                {/* <div className="grid md:grid-cols-2 gap-5">
                         <div className="md:w-[355px] flex items-center">
                             <div className="w-full">
                                 <Inputs
@@ -283,16 +216,16 @@ const EmployeeList = () => {
                                 onClick={() => setOpenFilter(!openFilter)}
                             />
                         </div>
-                    </div>
-                    {/* Filters */}
-                    {openFilter && (
+                    </div> */}
+                {/* Filters */}
+                {/* {openFilter && (
                         <div className="p-[10px] w-full overflow-x-auto flex flex-col gap-5">
                             <span className="text-caption-all-caps uppercase">
                                 Filter by
                             </span>
                             <div className="flex flex-col gap-[10px]">
                                 {/* full screen */}
-                                <div className="md:flex flex-row items-center gap-5">
+                {/*    <div className="md:flex flex-row items-center gap-5">
                                     <span className="text-caption-all-caps uppercase text-szPrimary500 w-20">
                                         Class
                                     </span>
@@ -718,8 +651,16 @@ const EmployeeList = () => {
                                 </div>
                             </div>
                         </div>
-                    )}
+                    )} */}
+                {/* </div> */}
+
+                {/* Filter */}
+                <div className="flex justify-end">
+                    <Button leftIcon={<Filter />} label="Filters" variant="ghost" size="large" onClick={() => setOpenFilter(!openFilter)} />
                 </div>
+
+                <EmployeeFilterModal isOpen={openFilter} onClose={() => setOpenFilter(false)} />
+
                 {/* Table */}
                 <div className="h-full justify-between">
                     <div className="h-[400px] overflow-auto overflow-x-auto">
@@ -742,12 +683,7 @@ const EmployeeList = () => {
                     </div>
 
                     <div className="flex justify-end">
-                        <Pagination
-                            currentPage={1}
-                            totalPages={10}
-                            visiblePages={5}
-                            onChange={() => {}}
-                        />
+                        <Pagination currentPage={1} totalPages={10} visiblePages={5} onChange={() => {}} />
                     </div>
                 </div>
             </div>
