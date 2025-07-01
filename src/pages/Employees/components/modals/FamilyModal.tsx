@@ -7,6 +7,7 @@ import { useState } from "react";
 // components
 //   import DeleteConfirmation from "../../../../components/DeleteConfirmation";
 import FamilyConfirmationModal from "./FamilyConfirmationModal";
+import DeleteConfirmation from "../../../../components/DeleteConfirmation";
 
 const relationshipOptions = ["Mother", "Father", "Spouse", "Child", "Sibling", "Live In / Partner", "Friend", "Guardian"];
 
@@ -163,7 +164,7 @@ const FamilyModal: React.FC<FamilyModalProps> = ({ isOpen, onClose, familyMember
                     <div className="col-span-1 sm:col-span-2">
                         <p className="text-caption-all-caps uppercase mb-[16px] text-szGrey500">INPUT THEIR ADDRESS</p>
                         {/* Address Row 1: 4 dropdowns */}
-                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-[16px] mb-[16px]">
+                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-[16px] mb-[16px] relative z-50">
                             <Dropdown label="REGION" placeholder="" options={[]} onSelectionChange={() => {}} />
                             <Dropdown label="PROVINCE" placeholder="" options={[]} onSelectionChange={() => {}} />
                             <Dropdown label="CITY / MUNICIPALITY" placeholder="" options={[]} onSelectionChange={() => {}} />
@@ -292,13 +293,13 @@ const FamilyModal: React.FC<FamilyModalProps> = ({ isOpen, onClose, familyMember
             )}
 
             {/* Delete Confirmation Modal --------------------------- */}
-            {/* <DeleteConfirmation
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onClick={() => {}}
-          description="This contact is part of your family. Are you sure you want to delete them?"
-          subDescription="All information from the contact will also be deleted from your family."
-        /> */}
+            <DeleteConfirmation
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onClick={() => {}}
+                description="Are you sure you want to delete this family?"
+                subDescription="This person will also be removed from emergency contacts."
+            />
         </>
     );
 };

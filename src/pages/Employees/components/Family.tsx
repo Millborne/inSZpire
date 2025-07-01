@@ -98,7 +98,7 @@ const Family = () => {
                 onClose={() => setIsSnackbarOpen(false)}
                 showCloseButton={true}
                 type="success"
-                title="Successfully updated Family Members"
+                title="Successfully updated Family"
                 animation="slide-up"
             />
         </div>

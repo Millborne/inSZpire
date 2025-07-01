@@ -128,7 +128,7 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({ isOpen, onClose, onSubm
                             <div className="grid gap-4 items-start">
                                 <p className="text-body-base-strong text-szBlack700">Permanent Address</p>
                                 {/* Address Row 1: 4 dropdowns */}
-                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-[16px]">
+                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-[16px] relative z-50">
                                     <Dropdown label="REGION" placeholder="" options={[]} onSelectionChange={() => {}} />
                                     <Dropdown label="PROVINCE" placeholder="" options={[]} onSelectionChange={() => {}} />
                                     <Dropdown label="CITY / MUNICIPALITY" placeholder="" options={[]} onSelectionChange={() => {}} />
@@ -148,7 +148,7 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({ isOpen, onClose, onSubm
                             <div className="grid gap-4 items-start">
                                 <p className="text-body-base-strong text-szBlack700">Present Address</p>
                                 {/* Address Row 1: 4 dropdowns */}
-                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-[16px]">
+                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-[16px] relative z-50">
                                     <Dropdown label="REGION" placeholder="" options={[]} onSelectionChange={() => {}} />
                                     <Dropdown label="PROVINCE" placeholder="" options={[]} onSelectionChange={() => {}} />
                                     <Dropdown label="CITY / MUNICIPALITY" placeholder="" options={[]} onSelectionChange={() => {}} />

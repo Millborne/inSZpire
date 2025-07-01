@@ -55,8 +55,10 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({ isOpen, onClose, onSubm
                 ]}
                 content={
                     <div className="flex flex-col w-full gap-[16px]">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1 items-start">
-                            <Dropdown label="CARD TYPE" placeholder="Select Type" options={[]} onSelectionChange={() => {}} />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1 items-start relative z-50">
+                            <div className="relative z-50">
+                                <Dropdown label="CARD TYPE" placeholder="Select Type" options={[]} onSelectionChange={() => {}} />
+                            </div>
                             <Inputs label="ISSUED DATE" placeholder="12/01/2022" />
                             <Inputs label="ID NUMBER / ACCOUNT NUMBER" placeholder="123-456-789-000" />
                             <Inputs label="VALIDITY" placeholder="12/01/2022" />
