@@ -1,12 +1,38 @@
 import { useState } from "react";
-import { CardContainer, Tab } from "enterprisze-global-components";
+import { CardContainer, Tabs } from "enterprisze-global-components";
 import BasicInfo from "../components/BasicInfo";
 import Contacts from "../components/Contacts";
 import Family from "../components/Family";
 import ID from "../components/ID";
 import Education from "../components/Education";
 
-const TABS = ["Basic Info", "Education", "Family", "Contacts", "IDs"];
+const tabOptions = [
+  {
+    label: "Basic Info",
+    value: "Basic Info",
+    number: 1,
+  },
+  {
+    label: "Education",
+    value: "Education",
+    number: 2,
+  },
+  {
+    label: "Family",
+    value: "Family",
+    number: 3,
+  },
+  {
+    label: "Contacts",
+    value: "Contacts",
+    number: 4,
+  },
+  {
+    label: "IDs",
+    value: "IDs",
+    number: 5,
+  },
+];
 
 const tabContentMap: Record<string, JSX.Element> = {
   "Basic Info": <BasicInfo />,
@@ -17,32 +43,21 @@ const tabContentMap: Record<string, JSX.Element> = {
 };
 
 const Personal = () => {
-  const [activeTab, setActiveTab] = useState(TABS[0]);
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
 
   return (
     <div className="flex flex-col gap-[24px]">
-      <div className="flex w-full">
-        {TABS.map((label, index) => (
-          <Tab
-            key={label}
-            label={label}
-            isFirst={index === 0}
-            type={
-              index === 0
-                ? "left"
-                : index === TABS.length - 1
-                ? "right"
-                : "middle"
-            }
-            active={activeTab === label}
-            onClick={() => setActiveTab(label)}
-          />
-        ))}
+      <div className="grid w-full">
+        <Tabs
+          options={tabOptions}
+          activeIndex={activeTabIndex}
+          onTabChange={setActiveTabIndex}
+        />
       </div>
 
       <CardContainer
         backgroundColor="bg-white"
-        content={tabContentMap[activeTab]}
+        content={tabContentMap[tabOptions[activeTabIndex].value]}
       />
     </div>
   );
