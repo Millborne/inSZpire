@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Pagination, Table } from "enterprisze-global-components";
-import { Filter, InfoCircle } from "iconsax-reactjs";
+import { Button, Inputs, Pagination, Table } from "enterprisze-global-components";
+import { Filter, InfoCircle, SearchNormal } from "iconsax-reactjs";
 import EmployeeFilterModal from "../components/modals/EmployeeFilterModal";
 
 const EmployeeList = () => {
@@ -183,7 +183,8 @@ const EmployeeList = () => {
 
     return (
         <div className="h-full p-4 bg-szWhite100 rounded-md shadow-boxShadow flex flex-col gap-5 overflow-auto">
-            <span className="text-h3">Employees</span>
+            <span className="text-h3 font-montserrat">Employees</span>
+
             <div className="h-full w-full flex flex-col gap-4 ">
                 {/* <div className="w-full flex flex-col gap-1"> */}
                 {/* Search bar & Filter btn */}
@@ -655,8 +656,11 @@ const EmployeeList = () => {
                 {/* </div> */}
 
                 {/* Filter */}
-                <div className="flex justify-end">
-                    <Button leftIcon={<Filter />} label="Filters" variant="ghost" size="large" onClick={() => setOpenFilter(!openFilter)} />
+                <div className="flex justify-start">
+                    <div className="lg:w-[355px]">
+                        <Inputs placeholder="Search by Name, ID, Job Title, or Team" icon={SearchNormal} className="lg:w-[355px]" />
+                    </div>
+                    <Button leftIcon={<Filter />} variant="ghost" size="large" onClick={() => setOpenFilter(!openFilter)} label={""} />
                 </div>
 
                 <EmployeeFilterModal isOpen={openFilter} onClose={() => setOpenFilter(false)} />
