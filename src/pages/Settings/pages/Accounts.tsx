@@ -9,13 +9,20 @@ import {
 } from "enterprisze-global-components";
 
 //icons
-import { Add, ArchiveBox, ArrowLeft, SearchNormal } from "iconsax-reactjs";
+import {
+  Add,
+  ArchiveBox,
+  ArrowLeft,
+  Edit2,
+  SearchNormal,
+} from "iconsax-reactjs";
 
 // components
 import AccountModal, {
   AccountDataType,
   ModalMode,
 } from "../components/modals/AccountModal";
+import ConfirmationModal from "../../../components/ConfirmationModal";
 
 //! for page mode
 type AccountPageMode = "all-accounts" | "archived";
@@ -119,6 +126,10 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
   const [selectedAccount, setSelectedAccount] =
     useState<AccountDataType | null>(null);
   const [modalMode, setModalMode] = useState<ModalMode>("add");
+  const [isArchiveConfirmationOpen, setIsArchiveConfirmationOpen] =
+    useState(false);
+  const [accountToArchive, setAccountToArchive] =
+    useState<AccountDataType | null>(null);
 
   //! Get headers based on mode
   const headers = getHeaders(mode);
@@ -138,95 +149,143 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
     setSelectedAccount(null);
   };
 
-  const handleSaveAccount = (data: AccountDataType) => {
-    // Handle save logic here based on modalMode
-    if (modalMode === "add") {
-      console.log("Adding new account:", data);
-      // Add your API call here
-    } else if (modalMode === "edit") {
-      console.log("Updating account:", data);
-      // Add your API call here
+  const handleSaveAccount = async (data: AccountDataType) => {
+    try {
+      if (modalMode === "add") {
+        console.log("Adding new account:", data);
+        // TODO: await createAccount(data).unwrap();
+      } else if (modalMode === "edit") {
+        console.log("Updating account:", data);
+        // TODO: await updateAccount({ id: selectedAccount?.id, ...data }).unwrap();
+      }
+    } catch (error) {
+      // TODO: Add error handling
+      console.error("Error saving account:", error);
+    }
+  };
+
+  const handleArchiveAccount = (index: number) => {
+    const account = data[index];
+    setAccountToArchive(account);
+    setIsArchiveConfirmationOpen(true);
+  };
+
+  const handleArchiveConfirm = async () => {
+    try {
+      if (accountToArchive) {
+        console.log("Archiving account:", accountToArchive);
+        // TODO: await archiveAccount(accountToArchive.id).unwrap();
+      }
+    } catch (error) {
+      // TODO: Add error handling
+      console.error("Error archiving account:", error);
+    } finally {
+      setIsArchiveConfirmationOpen(false);
+      setAccountToArchive(null);
     }
   };
 
   const moreOptions = [
     {
+      icon: <Edit2 />,
       label: "Edit Account",
       onClick: (index: number) => handleOpenModal(modalData[index], "edit"),
     },
     {
+      icon: <ArchiveBox />,
       label: "Archive Account",
-      onClick: (index: number) => console.log("Delete row:", index),
+      onClick: (index: number) => handleArchiveAccount(index),
     },
   ];
 
   return (
-    <CardContainer
-      content={
-        <div className="grid grid-cols-1 gap-[20px]">
-          <section className="flex gap-[8px]">
-            <div className="flex flex-row gap-[8px] items-center flex-1">
-              {mode === "archived" && (
-                <ArrowLeft
-                  className="text-szPrimary700 cursor-pointer"
-                  //   onClick={() => navigate("/accounts")}
-                />
-              )}
-              <h6 className="text-h6 text-szPrimary700">
-                {mode === "archived" ? "Archived Accounts" : "Accounts"}
-              </h6>
-
-              {mode === "all-accounts" && (
-                <div className="flex-1">
-                  <PopoverMenu
-                    size="small"
-                    items={[
-                      {
-                        label: "Add Account",
-                        icon: <Add />,
-                        onClick: () =>
-                          handleOpenModal({} as AccountDataType, "add"),
-                      },
-                      {
-                        label: "View Archived Account",
-                        icon: <ArchiveBox />,
-                        onClick: () => {
-                          window.location.href = "/archived-accounts"; // or use navigation
-                        },
-                      },
-                    ]}
+    <>
+      <CardContainer
+        content={
+          <div className="grid grid-cols-1 gap-[20px]">
+            <section className="flex gap-[8px]">
+              <div className="flex flex-row gap-[8px] items-center flex-1">
+                {mode === "archived" && (
+                  <ArrowLeft
+                    className="text-szPrimary700 cursor-pointer"
+                    // TODO: Backend Integration - Add navigation handler
+                    // onClick={() => navigate("/accounts")}
                   />
-                </div>
-              )}
-            </div>
-            <div className="w-full max-w-[260px] min-w-[150px]">
-              <Inputs placeholder="Search" icon={SearchNormal} />
-            </div>
-          </section>
-          <Table
-            headers={headers}
-            data={coloredData}
-            moreOptions={moreOptions}
-          />
-          <section className="flex justify-end">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={3}
-              visiblePages={3}
-              onChange={handlePageChange}
+                )}
+                <h6 className="text-h6 text-szPrimary700">
+                  {mode === "archived" ? "Archived Accounts" : "Accounts"}
+                </h6>
+
+                {mode === "all-accounts" && (
+                  <div className="flex-1">
+                    <PopoverMenu
+                      size="small"
+                      items={[
+                        {
+                          label: "Add Account",
+                          icon: <Add />,
+                          onClick: () =>
+                            handleOpenModal({} as AccountDataType, "add"),
+                        },
+                        {
+                          label: "View Archived Accounts",
+                          icon: <ArchiveBox />,
+                          onClick: () => {
+                            // TODO: Backend Integration - Replace with proper navigation
+                            window.location.href = "/archived-accounts";
+                          },
+                        },
+                      ]}
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="w-full max-w-[260px] min-w-[150px]">
+                <Inputs
+                  placeholder="Search"
+                  icon={SearchNormal}
+                  // TODO: Backend Integration - Add search functionality
+                  // onChange={(value) => handleSearch(value)}
+                />
+              </div>
+            </section>
+            <Table
+              headers={headers}
+              data={coloredData}
+              moreOptions={moreOptions}
             />
-          </section>
-          <AccountModal
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
-            accounts={modalData}
-            mode={modalMode}
-            selectedAccount={selectedAccount}
-            onSave={handleSaveAccount}
-          />
-        </div>
-      }
-    />
+            <section className="flex justify-end">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={3}
+                visiblePages={3}
+                onChange={handlePageChange}
+              />
+            </section>
+            <AccountModal
+              isOpen={isModalOpen}
+              onClose={handleCloseModal}
+              accounts={modalData}
+              mode={modalMode}
+              selectedAccount={selectedAccount}
+              onSave={handleSaveAccount}
+            />
+          </div>
+        }
+      />
+      <ConfirmationModal
+        isOpen={isArchiveConfirmationOpen}
+        onClose={() => {
+          setIsArchiveConfirmationOpen(false);
+          setAccountToArchive(null);
+        }}
+        onClick={handleArchiveConfirm}
+        image="/src/assets/archive_confirmation.png"
+        description="Are you sure you want to archive this account?"
+        buttonLabel="Archive"
+        buttonFooterIcon={<ArchiveBox />}
+      />
+    </>
   );
 };
 
