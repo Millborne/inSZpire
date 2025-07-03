@@ -9,39 +9,37 @@ import {
 import { ArchiveBox, Edit2 } from "iconsax-reactjs";
 import ConfirmationModal from "../../../../components/ConfirmationModal";
 
-export interface AccountDataType {
+export interface TagsDataType {
   id: string;
-  account: string;
-  code: string;
+  name: string;
   description?: string;
-  status: string;
+  type: string;
 }
 
 export type ModalMode = "view" | "edit" | "add";
 
-interface AccountModalProps {
+interface TagsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  accounts: AccountDataType[];
+  tags: TagsDataType[];
   mode: ModalMode;
-  selectedAccount?: AccountDataType | null;
-  onSave?: (data: AccountDataType) => void;
+  selectedTag?: TagsDataType | null;
+  onSave?: (data: TagsDataType) => void;
 }
 
-const AccountModal: React.FC<AccountModalProps> = ({
+const TagsModal: React.FC<TagsModalProps> = ({
   isOpen,
   onClose,
+  tags,
   mode,
-  selectedAccount,
+  selectedTag,
   onSave,
 }) => {
-  // Form state
-  const [formData, setFormData] = useState<AccountDataType>({
+  const [formData, setFormData] = useState<TagsDataType>({
     id: "",
-    account: "",
-    code: "",
+    name: "",
     description: "",
-    status: "",
+    type: "",
   });
   const [toggle, setToggle] = useState(false);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
@@ -52,26 +50,24 @@ const AccountModal: React.FC<AccountModalProps> = ({
   // TODO: Backend Integration - Add loading state for form operations
   // const [isLoading, setIsLoading] = useState(false);
 
-  // Load selected account data when it changes
   useEffect(() => {
-    if (selectedAccount) {
-      setFormData(selectedAccount);
+    if (selectedTag) {
+      setFormData(selectedTag);
       // TODO: Backend Integration - Set archived status from API data
-      // setToggle(selectedAccount.isArchived || false);
+      // setToggle(selectedTag.isArchived || false);
     } else {
       setFormData({
         id: "",
-        account: "",
-        code: "",
+        name: "",
         description: "",
-        status: "",
+        type: "",
       });
       setToggle(false);
     }
-  }, [selectedAccount]);
+  }, [selectedTag]);
 
   // Handle input changes
-  const handleInputChange = (field: keyof AccountDataType, value: string) => {
+  const handleInputChange = (field: keyof TagsDataType, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -90,7 +86,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
       onClose();
     } catch (error) {
       // TODO: Add error handling
-      console.error("Error saving account:", error);
+      console.error("Error saving tag:", error);
     } finally {
       // TODO: Remove loading state
       // setIsLoading(false);
@@ -103,19 +99,19 @@ const AccountModal: React.FC<AccountModalProps> = ({
   };
 
   const getConfirmationProps = () => {
-    const accountName = formData.account || "Account";
+    const tagName = formData.name || "Tag";
 
     switch (confirmationAction) {
       case "add":
         return {
-          image: "/src/assets/account_confirmation.png",
-          description: `Are you sure to add this account?`,
-          buttonLabel: "Add Account",
+          image: "/src/assets/tags_confirmation.png",
+          description: `You are about to add tag: ${tagName}`,
+          buttonLabel: "Add Tag",
         };
       case "archive":
         return {
           image: "/src/assets/archive_confirmation.png",
-          description: `Are you sure you want to archive this account?`,
+          description: `Are you sure you want to archive this tag?`,
           buttonLabel: "Archive",
           buttonFooterIcon: <ArchiveBox />,
         };
@@ -123,8 +119,8 @@ const AccountModal: React.FC<AccountModalProps> = ({
       default:
         return {
           image: "/src/assets/update_confirmation.png",
-          description: `Are you sure you want to update this account?`,
-          buttonLabel: "Update Account",
+          description: `Are you sure you want to update this tag?`,
+          buttonLabel: "Update Tag",
         };
     }
   };
@@ -135,15 +131,14 @@ const AccountModal: React.FC<AccountModalProps> = ({
       case "add":
         return (
           <ConfirmationContent
-            title="ADD ACCOUNT"
+            title="ADD TAG"
             variant="add"
             data={[
               //change this based on integration
-              { label: "ACCOUNT NAME", value: formData.account || "—" },
-              { label: "ACCOUNT CODE", value: formData.code || "—" },
-              { label: "STATUS", value: formData.status || "—" },
+              { label: "TAG NAME", value: formData.name || "—" },
+              { label: "TAG TYPE", value: formData.type || "—" },
               {
-                label: "ACCOUNT DESCRIPTION",
+                label: "TAG DESCRIPTION",
                 value: formData.description || "—",
               },
             ]}
@@ -154,32 +149,14 @@ const AccountModal: React.FC<AccountModalProps> = ({
           <div className="min-h-[100px]">
             <ConfirmationContent
               variant="edit"
-              sectionLabel="ACCOUNT"
+              sectionLabel="TAG"
               data={[
                 //change this based on integration
                 {
-                  label: "Account Name",
+                  label: "Tag Name",
                   value: "",
-                  oldValue: selectedAccount?.account || "—",
-                  newValue: formData.account || "—",
-                },
-                {
-                  label: "Account Code",
-                  value: "",
-                  oldValue: selectedAccount?.code || "—",
-                  newValue: formData.code || "—",
-                },
-                {
-                  label: "Status",
-                  value: "",
-                  oldValue: selectedAccount?.status || "—",
-                  newValue: formData.status || "—",
-                },
-                {
-                  label: "Description",
-                  value: "",
-                  oldValue: selectedAccount?.description || "—",
-                  newValue: formData.description || "—",
+                  oldValue: selectedTag?.name || "—",
+                  newValue: formData.name || "—",
                 },
               ]}
             />
@@ -190,22 +167,20 @@ const AccountModal: React.FC<AccountModalProps> = ({
     }
   };
 
-  // Get modal title based on mode
   const getTitle = () => {
-    if (mode === "add") return "Add Account";
-    if (mode === "edit") return "Edit Account";
-    if (mode === "view") return "View Account";
-    return "Account";
+    if (mode === "add") return "Add Tag";
+    if (mode === "edit") return "Edit Tag";
+    if (mode === "view") return "View Tag";
+    return "Tag";
   };
 
-  // Status options for dropdown
-  const statusOptions = [
-    { label: "Pending", value: "Pending" },
-    { label: "Active", value: "Active" },
-    { label: "Idle", value: "Idle" },
+  // TODO: Backend Integration - Fetch tag types from API
+  const tagTypeOptions = [
+    { label: "Position", value: "Position" },
+    { label: "Team", value: "Team" },
+    // TODO: Add more tag types from backend or change this based on backend
   ];
 
-  // Footer buttons
   const footerButtons: Array<{
     label: string;
     variant: "ghost" | "primary";
@@ -220,10 +195,9 @@ const AccountModal: React.FC<AccountModalProps> = ({
     },
   ];
 
-  // Add save button if not in view mode
   if (mode !== "view") {
     footerButtons.push({
-      label: mode === "add" ? "Add Account" : "Update Account",
+      label: mode === "add" ? "Add Tag" : "Update Tag",
       variant: "primary",
       onClick:
         mode === "edit"
@@ -242,7 +216,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
         onClose={onClose}
         title={getTitle()}
         showButton={mode !== "view" ? false : true}
-        buttonLabel="Edit Account"
+        buttonLabel="Edit Tag"
         modalWidth="w-[900px]"
         contentHeight="h-[400px] min-h-[120px] max-h-[55vh]"
         buttonIcon={<Edit2 />}
@@ -253,38 +227,33 @@ const AccountModal: React.FC<AccountModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] mt-1">
             <div className="flex flex-col gap-[24px]">
               <Inputs
-                label="ACCOUNT NAME"
-                value={formData.account}
-                onChange={(e) => handleInputChange("account", e.target.value)}
+                label="TAG NAME"
+                value={formData.name}
+                onChange={(e) => handleInputChange("name", e.target.value)}
                 // TODO: Backend Integration - Add validation
-                // error={errors.account}
+                // error={errors.name}
                 // disabled={isLoading}
               />
-              <Inputs
-                label="ACCOUNT CODE"
-                value={formData.code}
-                onChange={(e) => handleInputChange("code", e.target.value)}
-                // TODO: Backend Integration - Add validation
-                // error={errors.code}
-                // disabled={isLoading}
-              />
+
               <div className="z-20">
                 <Dropdown
-                  label="STATUS"
+                  label="TAG TYPE"
                   size="small"
-                  options={statusOptions}
-                  placeholder="Select Status"
+                  options={tagTypeOptions}
+                  placeholder="Select type"
                   value={
-                    formData.status
-                      ? { label: formData.status, value: formData.status }
+                    formData.type
+                      ? { label: formData.type, value: formData.type }
                       : undefined
                   }
                   onSelectionChange={(value) => {
-                    const statusValue = Array.isArray(value)
+                    const typeValue = Array.isArray(value)
                       ? value[0]?.value
                       : value?.value;
-                    handleInputChange("status", statusValue || "");
+                    handleInputChange("type", typeValue || "");
                   }}
+                  // TODO: Backend Integration - Add loading state to dropdown
+                  // isLoading={isLoadingTagTypes}
                 />
               </div>
 
@@ -301,13 +270,15 @@ const AccountModal: React.FC<AccountModalProps> = ({
                             setToggle(!toggle);
                           }
                         }}
+                        // TODO: Backend Integration - Add loading state to toggle
+                        // disabled={isLoading}
                       />
                       <p>Archived</p>
                     </div>
                     <p className="text-caption-reg text-szGrey500">
                       {toggle
-                        ? "Switch this off to restore the account."
-                        : "Switching this on will result in archiving the account."}
+                        ? "Switch this off to restore the tag."
+                        : "Switching this on will result in archiving the tag."}
                     </p>
                   </div>
                   <div className="flex flex-col">
@@ -323,9 +294,8 @@ const AccountModal: React.FC<AccountModalProps> = ({
               )}
             </div>
 
-            {/* Right column */}
             <Inputs
-              label="ACCOUNT DESCRIPTION"
+              label="TAG DESCRIPTION"
               className="h-[256px]"
               maxCharacter={200}
               isTextarea
@@ -345,7 +315,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
           try {
             if (confirmationAction === "archive") {
               // TODO: Backend Integration - Call archive API
-              // await archiveAccount(selectedAccount?.id).unwrap();
+              // await archiveTag(selectedTag?.id).unwrap();
               setToggle(true);
               setIsConfirmationModalOpen(false);
             } else {
@@ -367,4 +337,4 @@ const AccountModal: React.FC<AccountModalProps> = ({
   );
 };
 
-export default AccountModal;
+export default TagsModal;
