@@ -21,43 +21,43 @@ import Accounts from "./pages/Settings/pages/Accounts";
 import Tags from "./pages/Settings/pages/Tags";
 import Positions from "./pages/Settings/pages/Positions";
 import JobTitle from "./pages/Settings/pages/JobTitle";
-import Teams from "./pages/Settings";
+import Teams from "./pages/Teams/index";
 
 function App() {
-    return (
-        <Router>
-            <Routes>
-                <Route path="/home/*" element={<Home />}>
-                    <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="employees" element={<EmployeeList />} />
-                    <Route path="employees/:id/*" element={<Employees />}>
-                        <Route path="summary" element={<Summary />} />
-                        <Route path="personal" element={<Personal />} />
-                        <Route path="documents" element={<Documents />} />
-                        <Route path="work" element={<Work />} />
-                        <Route path="log" element={<Log />} />
-                        <Route path="compensation" element={<Compensation />} />
-                        <Route path="payslip" element={<Payslip />} />
-                        <Route path="hoof-trails" element={<HoofTrails />} />
-                        <Route path="*" element={<NotFound />} />
-                    </Route>
-                    <Route path="teams" element={<Teams />} />
-                    <Route path="notifications" element={<Notifications />} />
-                    <Route path="analytics-and-report" element={<AnalyticsAndReport />} />
-                    <Route path="employee-transition" element={<EmployeeTransition />} />
-                    <Route path="settings/*" element={<Settings />}>
-                        <Route path="accounts" element={<Accounts />} />
-                        <Route path="tags" element={<Tags />} />
-                        <Route path="positions" element={<Positions />} />
-                        <Route path="job-title" element={<JobTitle />} />
-                    </Route>
-                    <Route path="*" element={<NotFound />} />
-                    {/* Catch-all route for 404 */}
-                </Route>
-                <Route path="*" element={<>Go to .../home/dashboard</>} />
-            </Routes>
-        </Router>
-    );
+  return (
+    <Router>
+      <Routes>
+        <Route path="/home/*" element={<Home />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="employees" element={<EmployeeList />} />
+          <Route path="employees/:id/*" element={<Employees />}>
+            <Route path="summary" element={<Summary />} />
+            <Route path="personal" element={<Personal />} />
+            <Route path="documents" element={<Documents />} />
+            <Route path="work" element={<Work />} />
+            <Route path="log" element={<Log />} />
+            <Route path="compensation" element={<Compensation />} />
+            <Route path="payslip" element={<Payslip />} />
+            <Route path="hoof-trails" element={<HoofTrails />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+          <Route path="teams" element={<Teams />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="analytics-and-report" element={<AnalyticsAndReport />} />
+          <Route path="employee-transition" element={<EmployeeTransition />} />
+          <Route path="settings/*" element={<Settings />}>
+            <Route path="accounts" element={<Accounts mode="all-accounts" />} />
+            <Route path="tags" element={<Tags mode="all-tags" />} />
+            <Route path="positions" element={<Positions />} />
+            <Route path="job-title" element={<JobTitle />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+          {/* Catch-all route for 404 */}
+        </Route>
+        <Route path="*" element={<>Go to .../home/dashboard</>} />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;
