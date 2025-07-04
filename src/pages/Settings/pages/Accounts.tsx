@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { CardContainer, Inputs, PopoverMenu, Table, HeaderType, Pagination } from "enterprisze-global-components";
 
 //icons
-import { Add, ArchiveBox, ArrowLeft, Edit2, SearchNormal } from "iconsax-reactjs";
+import { Add, ArchiveBox, ArrowLeft, Edit2, HamburgerMenu, SearchNormal } from "iconsax-reactjs";
 
 // components
 import AccountModal, { AccountDataType, ModalMode } from "../components/modals/AccountModal";
 import ConfirmationModal from "../../../components/ConfirmationModal";
 
+import { SidebarContext } from "../index";
 //! for page mode
 type AccountPageMode = "all-accounts" | "archived";
 
@@ -102,6 +103,8 @@ const modalData = data.map((row) => ({
 }));
 
 const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
+    const { toggleSidebar } = useContext(SidebarContext);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedAccount, setSelectedAccount] = useState<AccountDataType | null>(null);
@@ -191,7 +194,7 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                                     />
                                 )}
                                 <h6 className="text-h6 text-szPrimary700">{mode === "archived" ? "Archived Accounts" : "Accounts"}</h6>
-
+                                <HamburgerMenu className="text-szPrimary700 cursor-pointer blcok md:hidden" onClick={toggleSidebar} />
                                 {mode === "all-accounts" && (
                                     <div className="flex-1">
                                         <PopoverMenu
