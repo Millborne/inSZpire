@@ -1,12 +1,7 @@
 import React from "react";
 import TeamCard from "../components/TeamCard";
 import TeamsTable from "../components/TeamsTable";
-
-interface Employee {
-  name: string;
-  position: string;
-  avatar: string;
-}
+import { Employee } from "..";
 
 interface Team {
   id: number;
@@ -30,7 +25,13 @@ const TeamsList = ({ teams, viewType = "card" }: TeamsListProps) => {
               employees={team.employees}
             />
           ))
-        : teams.map((team) => <TeamsTable key={team.id} />)}
+        : teams.map((team) => (
+            <TeamsTable
+              key={team.id}
+              teamName={team.name}
+              employees={team.employees}
+            />
+          ))}
     </div>
   );
 };
