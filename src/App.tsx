@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "enterprisze-global-components/dist/index.css";
 import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
-import Teams from "./pages/Teams";
 import Notifications from "./pages/Notifications";
 import AnalyticsAndReport from "./pages/AnalyticsAndReport";
 import EmployeeTransition from "./pages/EmployeeTransition";
@@ -18,6 +17,11 @@ import Payslip from "./pages/Employees/pages/Payslip";
 import HoofTrails from "./pages/Employees/pages/HoofTrails";
 import EmployeeList from "./pages/Employees/pages/EmployeeList";
 import NotFound from "./pages/NotFound";
+import Accounts from "./pages/Settings/pages/Accounts";
+import Tags from "./pages/Settings/pages/Tags";
+import Positions from "./pages/Settings/pages/Positions";
+import JobTitle from "./pages/Settings/pages/JobTitle";
+import Teams from "./pages/Settings";
 
 function App() {
     return (
@@ -39,15 +43,14 @@ function App() {
                     </Route>
                     <Route path="teams" element={<Teams />} />
                     <Route path="notifications" element={<Notifications />} />
-                    <Route
-                        path="analytics-and-report"
-                        element={<AnalyticsAndReport />}
-                    />
-                    <Route
-                        path="employee-transition"
-                        element={<EmployeeTransition />}
-                    />
-                    <Route path="settings" element={<Settings />} />
+                    <Route path="analytics-and-report" element={<AnalyticsAndReport />} />
+                    <Route path="employee-transition" element={<EmployeeTransition />} />
+                    <Route path="settings/*" element={<Settings />}>
+                        <Route path="accounts" element={<Accounts />} />
+                        <Route path="tags" element={<Tags />} />
+                        <Route path="positions" element={<Positions />} />
+                        <Route path="job-title" element={<JobTitle />} />
+                    </Route>
                     <Route path="*" element={<NotFound />} />
                     {/* Catch-all route for 404 */}
                 </Route>

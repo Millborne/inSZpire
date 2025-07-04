@@ -83,7 +83,7 @@ const Home = () => {
 
     return (
         <div className="flex flex-col w-full h-screen bg-[#F0F1F4] overflow-auto overflow-x-hidden">
-            <Header />
+            <Header text={"HRMSZ"} />
             <div className="flex-1 px-7 py-8">
                 <SideMenu menuItems={menu} selected={selected} setSelected={handleMenuSelect}>
                     <div className="flex h-full ">
