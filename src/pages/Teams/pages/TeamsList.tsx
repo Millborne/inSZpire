@@ -16,7 +16,7 @@ interface TeamsListProps {
 
 const TeamsList = ({ teams, viewType = "card" }: TeamsListProps) => {
   return (
-    <div className="flex flex-col gap-[20px]">
+    <div className="grid grid-cols-1 gap-[20px] w-full">
       {viewType === "card"
         ? teams.map((team) => (
             <TeamCard

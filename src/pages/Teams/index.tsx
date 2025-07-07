@@ -6,6 +6,7 @@ import {
   ButtonsIcon,
   Tab,
   Pagination,
+  Tabs,
 } from "enterprisze-global-components";
 import {
   Add,
@@ -18,6 +19,10 @@ import {
 
 // components
 import TeamsList from "./pages/TeamsList";
+import TeamModal, {
+  ModalMode,
+  TeamDataType,
+} from "./components/modals/TeamModal";
 
 export interface Employee {
   name: string;
@@ -280,6 +285,9 @@ const teamsData = [
 ];
 
 const Teams = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<ModalMode>("add");
+  const [selectedTeam, setSelectedTeam] = useState<TeamDataType | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewType, setViewType] = useState<"card" | "table">("card");
   const teamsPerPage = 3;
@@ -298,6 +306,17 @@ const Teams = () => {
     setCurrentPage(page);
   };
 
+  const handleOpenModal = (team: TeamDataType, mode: ModalMode) => {
+    setSelectedTeam(team);
+    setModalMode(mode);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedTeam(null);
+  };
+
   return (
     <div className="flex flex-col h-full">
       <CardContainer
@@ -312,7 +331,7 @@ const Teams = () => {
                     {
                       label: "Add Team",
                       icon: <Add />,
-                      onClick: () => {},
+                      onClick: () => handleOpenModal({} as TeamDataType, "add"),
                     },
                     {
                       label: "Export",
@@ -320,6 +339,20 @@ const Teams = () => {
                       onClick: () => {},
                     },
                   ]}
+                />
+              </div>
+              <div className="flex w-fit">
+                {/* static for now since there's no organizational chart yet*/}
+                <Tabs
+                  options={[
+                    { label: "SZ Teams", value: "sz-teams" },
+                    {
+                      label: "Organizational Chart",
+                      value: "organizational-chart",
+                    },
+                  ]}
+                  activeIndex={0}
+                  onTabChange={() => {}}
                 />
               </div>
             </section>
@@ -333,28 +366,28 @@ const Teams = () => {
                     // onChange={(value) => handleSearch(value)}
                   />
                 </div>
-                <ButtonsIcon
-                  icon={<Filter />}
-                  size="medium"
-                  variant="ghost"
-                  onClick={() => {}}
-                />
+                <div className="flex w-fit">
+                  <Tab
+                    type="left"
+                    active={viewType === "card"}
+                    icon={<Grid2 />}
+                    isFirst
+                    onClick={() => setViewType("card")}
+                  />
+                  <Tab
+                    type="right"
+                    active={viewType === "table"}
+                    icon={<Firstline />}
+                    onClick={() => setViewType("table")}
+                  />
+                </div>
               </div>
-              <div className="flex w-fit">
-                <Tab
-                  type="left"
-                  active={viewType === "card"}
-                  icon={<Grid2 />}
-                  isFirst
-                  onClick={() => setViewType("card")}
-                />
-                <Tab
-                  type="right"
-                  active={viewType === "table"}
-                  icon={<Firstline />}
-                  onClick={() => setViewType("table")}
-                />
-              </div>
+              <ButtonsIcon
+                icon={<Filter />}
+                size="medium"
+                variant="ghost"
+                onClick={() => {}}
+              />
             </section>
             <TeamsList teams={paginatedTeams} viewType={viewType} />
             {totalPages > 1 && (
@@ -368,6 +401,13 @@ const Teams = () => {
             )}
           </div>
         }
+      />
+      <TeamModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        mode={modalMode}
+        selectedTeam={selectedTeam}
+        onSave={() => {}}
       />
     </div>
   );
