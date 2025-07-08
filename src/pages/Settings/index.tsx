@@ -106,11 +106,11 @@ const Settings = () => {
     return (
         <>
             <SidebarContext.Provider value={{ isSidebarOpen: sidebarVisible, toggleSidebar }}>
-                <section className="relative flex w-full">
+                <section className="relative flex h-full w-full">
                     {/* Sidebar for lg and up */}
 
                     {isLargeScreen && (
-                        <div className="h-screen">
+                        <div className="relative flex h-full">
                             <SidebarMenu
                                 sidebarMenuItems={sidebarMenuItems}
                                 selected={selected}
