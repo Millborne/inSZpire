@@ -14,7 +14,7 @@ import { useState } from "react";
 
 // components
 import DeleteConfirmation from "../../../../components/DeleteConfirmation";
-import ContactConfirmationModal from "./ContactConfirmationModal";
+// import ContactConfirmationModal from "./ContactConfirmationModal";
 
 export interface ContactDataType {
   id: string;
@@ -36,6 +36,7 @@ interface ContactModalProps {
   isOpen: boolean;
   onClose: () => void;
   emergencyContacts: ContactDataType[];
+  onSubmitSuccess?: () => void;
 }
 
 const relationshipOptions = [
@@ -53,19 +54,17 @@ const ContactModal: React.FC<ContactModalProps> = ({
   isOpen,
   onClose,
   emergencyContacts,
+  onSubmitSuccess,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [showInputContainer, setShowInputContainer] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [showRelationshipDropdown, setShowRelationshipDropdown] =
     useState(false);
   const [relationship, setRelationship] = useState(
     "Relationship to the Contact"
   );
-  const [currentContactData, setCurrentContactData] =
-    useState<ContactDataType | null>(null);
 
   // For Adding Education
   const handleAddContactClick = () => {
@@ -74,58 +73,35 @@ const ContactModal: React.FC<ContactModalProps> = ({
     setEditingIndex(null);
   };
 
-  //For adding education once finished
+  //For adding contact once finished
   const handleAddClick = () => {
-    const newContactData: ContactDataType = {
-      id: "1",
-      lastName: "Lee",
-      firstName: "Keith Lloyd",
-      middleName: "Ridgely",
-      extensions: "N/A",
-      contactNumber: "0955-021-1889",
-      email: "graciathefirst@gmail.com",
-      region: "Region X",
-      province: "Misamis Oriental",
-      city: "City of Cagayan de Oro",
-      barangay: "Brgy. 26",
-      street: "Blk 5 Lot 3, Villa Luz Subdivision",
-      postalCode: "9000",
-    };
-    setCurrentContactData(newContactData);
     setShowInputContainer(false);
     setRelationship("Relationship to the Contact");
     setShowRelationshipDropdown(false);
   };
 
-  // For Editing Education
+  // For Editing Contact
   const handleEditClick = (index: number) => {
     setShowInputContainer(true);
     setIsEditMode(true);
     setEditingIndex(index);
   };
 
-  // For Editing Educaton once finished
+  // For Editing Contact once finished
   const handleDoneClick = () => {
     if (editingIndex !== null) {
-      setCurrentContactData(emergencyContacts[editingIndex]);
       setShowInputContainer(false);
       setRelationship("Relationship to the Contact");
       setShowRelationshipDropdown(false);
     }
   };
 
-  const handleConfirmationClose = () => {
-    setShowConfirmationModal(false);
-    setShowInputContainer(false);
-    setIsEditMode(false);
-    setEditingIndex(null);
-    setCurrentContactData(null);
-  };
+  const handleSubmit = () => {
+    onClose();
 
-  const handleProceed = () => {
-    if (currentContactData) {
-      setShowConfirmationModal(true);
-      onClose();
+    // Call success callback if provided
+    if (onSubmitSuccess) {
+      onSubmitSuccess();
     }
   };
 
@@ -142,7 +118,10 @@ const ContactModal: React.FC<ContactModalProps> = ({
     index: number | null;
   }) => {
     return (
-      <div className="flex flex-col gap-[8px] w-full border rounded-[12px] border-szPrimary200 pt-[4px] pr-[12px] pb-[8px] pl-[12px]">
+      <div
+        key={index}
+        className="flex flex-col gap-[8px] w-full border rounded-[12px] border-szPrimary200 pt-[4px] pr-[12px] pb-[8px] pl-[12px]"
+      >
         <div className="flex gap-[16px] items-center min-h-[32px] justify-between ">
           <div className="flex gap-[16px] items-center">
             <div className="relative">
@@ -254,11 +233,10 @@ const ContactModal: React.FC<ContactModalProps> = ({
             size: "medium",
           },
           {
-            label: "Proceed",
+            label: "Submit",
             variant: "primary",
-            onClick: handleProceed,
+            onClick: handleSubmit,
             size: "medium",
-            disabled: !currentContactData,
           },
         ]}
         content={
@@ -358,14 +336,6 @@ const ContactModal: React.FC<ContactModalProps> = ({
           </div>
         }
       />
-
-      {currentContactData && (
-        <ContactConfirmationModal
-          isOpen={showConfirmationModal}
-          onClose={handleConfirmationClose}
-          // educationalData={currentContactData ? [currentContactData] : []}
-        />
-      )}
 
       {/* Delete Confirmation Modal --------------------------- */}
       <DeleteConfirmation
