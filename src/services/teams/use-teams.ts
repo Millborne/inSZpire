@@ -3,18 +3,23 @@ import { useFetchTeamsQuery, useActionTeamsMutation } from "./teamsAPI";
 export const useTeams = ({
     queryParameters,
     method,
+    disableFetch = false,
 }: // body,
 {
     queryParameters?: string;
     method?: string;
-    body?: any;
+    disableFetch?: boolean;
+    // body?: any;
 }) => {
     // fetch
     const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
-        useFetchTeamsQuery({
-            queryParameters: queryParameters ?? "",
-            method: method,
-        });
+        useFetchTeamsQuery(
+            {
+                queryParameters: queryParameters ?? "",
+                method: method,
+            },
+            { skip: disableFetch }
+        );
 
     // action
     const [
@@ -25,6 +30,7 @@ export const useTeams = ({
             isLoading: actionIsLoading,
             isSuccess: actionIsSuccess,
             error: actionError,
+            reset: actionReset,
         },
     ] = useActionTeamsMutation();
     return {
@@ -44,5 +50,6 @@ export const useTeams = ({
         actionIsLoading,
         actionIsSuccess,
         actionError,
+        actionReset,
     };
 };
