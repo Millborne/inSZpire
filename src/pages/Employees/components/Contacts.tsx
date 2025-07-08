@@ -3,6 +3,7 @@ import {
   TextContent,
   Divider,
   Button,
+  SnackbarAlert,
 } from "enterprisze-global-components";
 
 //icons
@@ -62,6 +63,11 @@ const emergencyContacts = [
 
 const Contacts = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+
+  const handleSubmitSuccess = () => {
+    setIsSnackbarOpen(true);
+  };
 
   return (
     <div className="flex flex-col w-full">
@@ -78,6 +84,7 @@ const Contacts = () => {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             emergencyContacts={emergencyContacts}
+            onSubmitSuccess={handleSubmitSuccess}
           />
         </div>
 
@@ -137,6 +144,15 @@ const Contacts = () => {
           ))}
         </div>
       </div>
+
+      <SnackbarAlert
+        isOpen={isSnackbarOpen}
+        onClose={() => setIsSnackbarOpen(false)}
+        showCloseButton={true}
+        type="success"
+        title="Successfully updated Contact Information"
+        animation="slide-up"
+      />
     </div>
   );
 };

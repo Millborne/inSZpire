@@ -11,7 +11,7 @@ import {
 import { ArrowDown2, TickCircle, Trash, Edit2 } from "iconsax-reactjs";
 
 // Components
-import EducationConfirmationModal from "./EducationConfirmationModal";
+// import EducationConfirmationModal from "./EducationConfirmationModal";
 import DeleteConfirmation from "../../../../components/DeleteConfirmation";
 
 export interface EducationalDataType {
@@ -52,12 +52,9 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
   const [showInputContainer, setShowInputContainer] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [showEducationalLevelDropdown, setShowEducationalLevelDropdown] =
     useState(false);
   const [educationalLevel, setEducationalLevel] = useState("Educational Level");
-  const [currentEducationData, setCurrentEducationData] =
-    useState<EducationalDataType | null>(null);
 
   // For Adding Education
   const handleAddEducationClick = () => {
@@ -68,17 +65,6 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
 
   //For adding education once finished
   const handleAddClick = () => {
-    const newEducationData: EducationalDataType = {
-      id: "1",
-      level: "College",
-      "school name": "Sample School",
-      degree: "Bachelor's Degree",
-      course: "Computer Science",
-      "year started": "2020",
-      "year left": "2024",
-      "honors received": "Dean's List",
-    };
-    setCurrentEducationData(newEducationData);
     setShowInputContainer(false);
     setEducationalLevel("Educational Level");
     setShowEducationalLevelDropdown(false);
@@ -94,25 +80,18 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
   // For Editing Educaton once finished
   const handleDoneClick = () => {
     if (editingIndex !== null) {
-      setCurrentEducationData(educationalData[editingIndex]);
       setShowInputContainer(false);
       setEducationalLevel("Educational Level");
       setShowEducationalLevelDropdown(false);
     }
   };
 
-  const handleConfirmationClose = () => {
-    setShowConfirmationModal(false);
-    setShowInputContainer(false);
-    setIsEditMode(false);
-    setEditingIndex(null);
-    setCurrentEducationData(null);
-  };
+  const handleSubmit = () => {
+    onClose();
 
-  const handleProceed = () => {
-    if (currentEducationData) {
-      setShowConfirmationModal(true);
-      onClose();
+    // Call success callback if provided
+    if (onSubmitSuccess) {
+      onSubmitSuccess();
     }
   };
 
@@ -128,7 +107,10 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
     isEditMode: boolean;
     index: number | null;
   }) => (
-    <div className="flex flex-col gap-[8px] border rounded-[12px] border-szPrimary200 pt-[4px] pr-[12px] pb-[8px] pl-[12px]">
+    <div
+      key={index}
+      className="flex flex-col gap-[8px] border rounded-[12px] border-szPrimary200 pt-[4px] pr-[12px] pb-[8px] pl-[12px]"
+    >
       <div className="flex gap-[16px] items-center min-h-[32px] justify-between">
         <div className="relative">
           <div
@@ -193,7 +175,7 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
   return (
     <>
       <Modal
-        isOpen={isOpen && !showConfirmationModal}
+        isOpen={isOpen}
         onClose={onClose}
         showHeaderDivider={false}
         title="Edit Educational Background"
@@ -211,11 +193,10 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
             size: "medium",
           },
           {
-            label: "Proceed",
+            label: "Submit",
             variant: "primary",
-            onClick: handleProceed,
+            onClick: handleSubmit,
             size: "medium",
-            disabled: !currentEducationData,
           },
         ]}
         content={
@@ -287,20 +268,11 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
         }
       />
 
-      {currentEducationData && (
-        <EducationConfirmationModal
-          isOpen={showConfirmationModal}
-          onClose={handleConfirmationClose}
-          educationalData={currentEducationData ? [currentEducationData] : []}
-          onSubmitSuccess={onSubmitSuccess}
-        />
-      )}
-
       {/* Delete Confirmation Modal --------------------------- */}
       <DeleteConfirmation
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        onClick={() => {}}
+        onClick={() => {}} //add function here
         description="Are you sure you want to delete this educational background?"
       />
     </>
