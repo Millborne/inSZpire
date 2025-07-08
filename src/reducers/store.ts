@@ -3,8 +3,22 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 // import storage from 'redux-persist/lib/storage';
 
 // API
-import { teamsAPI } from "../services/teams/teamsAPI";
-import { accountsAPI } from "../services/accounts/accountsAPI";
+import { teamsAPI } from "../services/teams/list/teamsAPI";
+import { accountsAPI } from "../services/settings/accounts/list/accountsAPI";
+import { tagsAPI } from "../services/settings/tags/list/tagsAPI";
+import { positionsAPI } from "../services/settings/positions/list/positionsAPI";
+import { jobTitleAPI } from "../services/settings/job-title/list/jobTitleAPI";
+import { employeeAPI } from "../services/employee/list/employeeAPI";
+import { summaryAPI } from "../services/employee-profile/summary/summaryAPI";
+import { basicInfoAPI } from "../services/employee-profile/personal/basic-info/basicInfoAPI";
+import { educationAPI } from "../services/employee-profile/personal/education/educationAPI";
+import { familyAPI } from "../services/employee-profile/personal/family/familyAPI";
+import { contactAPI } from "../services/employee-profile/personal/contact/contactAPI";
+import { idsAPI } from "../services/employee-profile/personal/ids/idsAPI";
+import { employeeDetailsAPI } from "../services/employee-profile/work/employee-details/employeeDetailsAPI";
+import { teamMemberAPI } from "../services/employee-profile/work/team-member/teamMemberAPI";
+import { employeeHistoryAPI } from "../services/employee-profile/work/employee-history/employeeHistoryAPI";
+import { personalDocumentsAPI } from "../services/employee-profile/work/documents/personal/personalDocumentsAPI";
 
 // Slices
 // here
@@ -12,6 +26,20 @@ import { accountsAPI } from "../services/accounts/accountsAPI";
 const rootReducer = combineReducers({
     [teamsAPI.reducerPath]: teamsAPI.reducer,
     [accountsAPI.reducerPath]: accountsAPI.reducer,
+    [tagsAPI.reducerPath]: tagsAPI.reducer,
+    [positionsAPI.reducerPath]: positionsAPI.reducer,
+    [jobTitleAPI.reducerPath]: jobTitleAPI.reducer,
+    [employeeAPI.reducerPath]: employeeAPI.reducer,
+    [summaryAPI.reducerPath]: summaryAPI.reducer,
+    [basicInfoAPI.reducerPath]: basicInfoAPI.reducer,
+    [educationAPI.reducerPath]: educationAPI.reducer,
+    [familyAPI.reducerPath]: familyAPI.reducer,
+    [contactAPI.reducerPath]: contactAPI.reducer,
+    [idsAPI.reducerPath]: idsAPI.reducer,
+    [employeeDetailsAPI.reducerPath]: employeeDetailsAPI.reducer,
+    [teamMemberAPI.reducerPath]: teamMemberAPI.reducer,
+    [employeeHistoryAPI.reducerPath]: employeeHistoryAPI.reducer,
+    [personalDocumentsAPI.reducerPath]: personalDocumentsAPI.reducer,
 });
 
 const configStore = configureStore({
@@ -19,7 +47,21 @@ const configStore = configureStore({
     middleware: (getDefaultMiddleware: any) =>
         getDefaultMiddleware({ serializableCheck: false }).concat(
             teamsAPI.middleware,
-            accountsAPI.middleware
+            accountsAPI.middleware,
+            tagsAPI.middleware,
+            positionsAPI.middleware,
+            jobTitleAPI.middleware,
+            employeeAPI.middleware,
+            summaryAPI.middleware,
+            basicInfoAPI.middleware,
+            educationAPI.middleware,
+            familyAPI.middleware,
+            contactAPI.middleware,
+            idsAPI.middleware,
+            employeeDetailsAPI.middleware,
+            teamMemberAPI.middleware,
+            employeeHistoryAPI.middleware,
+            personalDocumentsAPI.middleware
         ),
 });
 
