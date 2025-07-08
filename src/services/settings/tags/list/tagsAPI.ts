@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Cookies from "js-cookie";
 
-const { VITE_APP_CLIENT_ENDPOINT } = import.meta.env;
+const { VITE_TEAM_AND_POSITION_SERVICE } = import.meta.env;
 
 interface generalProps {
     queryParameters: string;
@@ -12,7 +12,7 @@ interface generalProps {
 export const tagsAPI = createApi({
     reducerPath: "tags",
     baseQuery: fetchBaseQuery({
-        baseUrl: VITE_APP_CLIENT_ENDPOINT,
+        baseUrl: VITE_TEAM_AND_POSITION_SERVICE,
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 
