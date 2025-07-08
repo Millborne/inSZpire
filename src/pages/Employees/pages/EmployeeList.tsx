@@ -1,18 +1,29 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Inputs, Pagination, Table } from "enterprisze-global-components";
-import { Add, ExportCurve, Filter, InfoCircle, More, SearchNormal } from "iconsax-reactjs";
+import { Button, Inputs, Pagination, SnackbarAlert, Table } from "enterprisze-global-components";
+import { Add, Briefcase, Edit2, ExportCurve, Filter, InfoCircle, More, SearchNormal } from "iconsax-reactjs";
 import EmployeeFilterModal from "../components/modals/EmployeeFilterModal";
-import React from "react";
+import EmployeeModal from "../components/modals/EmployeeModal";
+import EmployeePositionModal from "../components/modals/EmployeePositionModal";
 
 const EmployeeList = () => {
     const navigate = useNavigate();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] = useState(false);
+    const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
     const [openFilter, setOpenFilter] = useState(false);
-
     const [openDropdown, setOpenDropdown] = useState(false);
 
-    // const [selectedFilter, setSelectedFilter] = useState<string[]>([]);
+    const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+
+    const [snackbarAction, setSnackbarAction] = useState<"add" | "edit" | "update" | null>(null);
+
+    const handleSubmitSuccess = (action: "add" | "edit" | "update") => {
+        setSnackbarAction(action);
+        setIsSnackbarOpen(true);
+    };
 
     // For larger screen
     const headers: Array<
@@ -179,8 +190,20 @@ const EmployeeList = () => {
             },
         },
         {
-            label: "Delete",
-            onClick: (index: number) => console.log("Delete row:", index),
+            label: "Edit Employee",
+            icon: <Edit2 />,
+            onClick: (index: number) => {
+                setIsEditModalOpen(true);
+                setSelectedEmployee(data[index]);
+            },
+        },
+        {
+            label: "Update Position",
+            icon: <Briefcase />,
+            onClick: (index: number) => {
+                setIsUpdatePositionModalOpen(true);
+                setSelectedEmployee(data[index]);
+            },
         },
     ];
 
@@ -188,7 +211,7 @@ const EmployeeList = () => {
         {
             label: "Add Employee",
             icon: <Add />,
-            onClick: () => console.log("Edit clicked"),
+            onClick: () => setIsModalOpen(true),
         },
         {
             label: "Export",
@@ -208,7 +231,7 @@ const EmployeeList = () => {
                         {employeeMoreOptions.map((option, index) => (
                             <button
                                 key={index}
-                                // onClick={option.onClick}
+                                onClick={option.onClick}
                                 className="flex flex-row items-center px-3 py-2 gap-1 text-body-small-reg text-szBlack800 font-dmSans hover:bg-szGrey150 whitespace-nowrap"
                             >
                                 {option.icon && React.cloneElement(option.icon, { size: 16 })}
@@ -256,6 +279,41 @@ const EmployeeList = () => {
                     </div>
                 </div>
             </div>
+
+            <EmployeeModal
+                isOpen={isModalOpen || isEditModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setIsEditModalOpen(false);
+                }}
+                mode={isEditModalOpen ? "edit" : "add"}
+                addEmployeeData={isEditModalOpen ? selectedEmployee : undefined}
+                onSubmitSuccess={() => handleSubmitSuccess(isEditModalOpen ? "add" : "edit")}
+            />
+
+            <EmployeePositionModal
+                isOpen={isUpdatePositionModalOpen}
+                onClose={() => setIsUpdatePositionModalOpen(false)}
+                employeePositionData={selectedEmployee}
+                onSubmitSuccess={() => handleSubmitSuccess("update")}
+            />
+
+            <SnackbarAlert
+                isOpen={isSnackbarOpen}
+                onClose={() => setIsSnackbarOpen(false)}
+                showCloseButton={true}
+                type="success"
+                title={
+                    snackbarAction === "edit"
+                        ? "Successfully edited employee"
+                        : snackbarAction === "update"
+                        ? "Successfully updated position"
+                        : snackbarAction === "add"
+                        ? "Successfully added employee"
+                        : "Success"
+                }
+                animation="slide-up"
+            />
         </div>
     );
 };
