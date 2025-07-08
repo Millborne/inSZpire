@@ -9,8 +9,8 @@ interface generalProps {
     body?: any;
 }
 
-export const teamsAPI = createApi({
-    reducerPath: "teams",
+export const accountsAPI = createApi({
+    reducerPath: "accounts",
     baseQuery: fetchBaseQuery({
         baseUrl: VITE_APP_CLIENT_ENDPOINT,
         prepareHeaders: (headers) => {
@@ -23,14 +23,15 @@ export const teamsAPI = createApi({
             return headers;
         },
     }),
-    tagTypes: ["teams"],
+    tagTypes: ["accounts"],
     endpoints: (builder) => ({
-        fetchTeams: builder.query({
-            query: (data: generalProps) => `api/teams${data.queryParameters}`,
+        fetchAccounts: builder.query({
+            query: (data: generalProps) =>
+                `api/accounts${data.queryParameters}`,
         }),
-        actionTeams: builder.mutation({
+        actionAccounts: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/api/teams${data.queryParameters}`,
+                url: `/api/accounts${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),
@@ -38,4 +39,4 @@ export const teamsAPI = createApi({
     }),
 });
 
-export const { useFetchTeamsQuery, useActionTeamsMutation } = teamsAPI;
+export const { useFetchAccountsQuery, useActionAccountsMutation } = accountsAPI;

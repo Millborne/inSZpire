@@ -4,19 +4,22 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 
 // API
 import { teamsAPI } from "../services/teams/teamsAPI";
+import { accountsAPI } from "../services/accounts/accountsAPI";
 
 // Slices
 // here
 
 const rootReducer = combineReducers({
     [teamsAPI.reducerPath]: teamsAPI.reducer,
+    [accountsAPI.reducerPath]: accountsAPI.reducer,
 });
 
 const configStore = configureStore({
     reducer: rootReducer,
     middleware: (getDefaultMiddleware: any) =>
         getDefaultMiddleware({ serializableCheck: false }).concat(
-            teamsAPI.middleware
+            teamsAPI.middleware,
+            accountsAPI.middleware
         ),
 });
 
