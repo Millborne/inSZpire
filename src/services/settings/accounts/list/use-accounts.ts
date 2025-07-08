@@ -1,6 +1,9 @@
-import { useFetchTeamsQuery, useActionTeamsMutation } from "./teamsAPI";
+import {
+    useFetchAccountsQuery,
+    useActionAccountsMutation,
+} from "./accountsAPI";
 
-export const useTeams = ({
+export const useAccounts = ({
     queryParameters,
     method,
     disableFetch = false,
@@ -11,7 +14,7 @@ export const useTeams = ({
 }) => {
     // fetch
     const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
-        useFetchTeamsQuery(
+        useFetchAccountsQuery(
             {
                 queryParameters: queryParameters ?? "",
                 method: method,
@@ -30,7 +33,7 @@ export const useTeams = ({
             error: actionError,
             reset: actionReset,
         },
-    ] = useActionTeamsMutation();
+    ] = useActionAccountsMutation();
 
     return {
         // fetching
@@ -53,47 +56,50 @@ export const useTeams = ({
     };
 };
 
-// Team-specific interfaces based on API documentation
-export interface TeamData {
-    team_ID?: string;
-    team_name: string;
-    team_description?: string;
-    team_status: "active" | "inactive";
+// Account-specific interfaces based on API documentation
+export interface AccountData {
+    acc_ID?: string;
+    acc_code: string;
+    acc_name: string;
+    acc_description?: string;
+    acc_status: "active" | "pending" | "inactive" | "suspended";
     is_archived?: number;
     created_at?: string;
     updated_at?: string;
 }
 
-export interface CreateTeamRequest {
-    team_name: string;
-    team_description?: string;
-    team_status: "active" | "inactive";
+export interface CreateAccountRequest {
+    acc_code: string;
+    acc_name: string;
+    acc_description?: string;
+    acc_status: "active" | "pending" | "inactive" | "suspended";
     is_archived?: number;
 }
 
-export interface UpdateTeamRequest {
-    team_ID: string;
-    team_name?: string;
-    team_description?: string;
-    team_status?: "active" | "inactive";
+export interface UpdateAccountRequest {
+    acc_ID: string;
+    acc_code?: string;
+    acc_name?: string;
+    acc_description?: string;
+    acc_status?: "active" | "pending" | "inactive" | "suspended";
     is_archived?: number;
 }
 
-export interface ViewTeamsRequest {
+export interface ViewAccountsRequest {
     search?: string;
     is_archived?: number;
-    team_status?: "active" | "inactive";
+    acc_status?: "active" | "pending" | "inactive" | "suspended";
     offset?: number;
     limit?: number;
 }
 
 export interface BatchUpdateStatusRequest {
     req_IDs: string[];
-    team_status: "active" | "inactive";
+    acc_status: "active" | "pending" | "inactive" | "suspended";
 }
 
-// Specific team service methods
-export const useTeamService = () => {
+// Specific account service methods
+export const useAccountService = () => {
     const [
         generalAction,
         {
@@ -104,37 +110,36 @@ export const useTeamService = () => {
             error: actionError,
             reset: actionReset,
         },
-    ] = useActionTeamsMutation();
+    ] = useActionAccountsMutation();
 
-    const createTeam = async (teamData: CreateTeamRequest) => {
+    const viewList = async () => {
+        return generalAction({
+            queryParameters: "/list",
+            method: "GET"
+        });
+    };
+
+    const createAccount = async (accountData: CreateAccountRequest) => {
         return generalAction({
             queryParameters: "/",
             method: "POST",
-            body: teamData,
+            body: accountData,
         });
     };
 
-    const updateTeam = async (teamData: UpdateTeamRequest) => {
+    const updateAccount = async (accountData: UpdateAccountRequest) => {
         return generalAction({
             queryParameters: "/",
             method: "PUT",
-            body: teamData,
+            body: accountData,
         });
     };
 
-    const viewTeams = async (filters: ViewTeamsRequest) => {
+    const viewAccounts = async (filters: ViewAccountsRequest) => {
         return generalAction({
             queryParameters: "/view",
             method: "POST",
             body: filters,
-        });
-    };
-
-    const batchUpdateStatus = async (batchData: BatchUpdateStatusRequest) => {
-        return generalAction({
-            queryParameters: "/batch-update-status",
-            method: "POST",
-            body: batchData,
         });
     };
 
@@ -148,9 +153,9 @@ export const useTeamService = () => {
         actionReset,
 
         // methods
-        createTeam,
-        updateTeam,
-        viewTeams,
-        batchUpdateStatus,
+        viewList,
+        createAccount,
+        updateAccount,
+        viewAccounts,
     };
 };

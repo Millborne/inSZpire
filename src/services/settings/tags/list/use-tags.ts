@@ -1,9 +1,6 @@
-import {
-    useFetchAccountsQuery,
-    useActionAccountsMutation,
-} from "./accountsAPI";
+import { useFetchTagsQuery, useActionTagsMutation } from "./tagsAPI";
 
-export const useAccounts = ({
+export const useTags = ({
     queryParameters,
     method,
     disableFetch = false,
@@ -14,7 +11,7 @@ export const useAccounts = ({
 }) => {
     // fetch
     const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
-        useFetchAccountsQuery(
+        useFetchTagsQuery(
             {
                 queryParameters: queryParameters ?? "",
                 method: method,
@@ -33,7 +30,7 @@ export const useAccounts = ({
             error: actionError,
             reset: actionReset,
         },
-    ] = useActionAccountsMutation();
+    ] = useActionTagsMutation();
 
     return {
         // fetching
@@ -56,50 +53,50 @@ export const useAccounts = ({
     };
 };
 
-// Account-specific interfaces based on API documentation
-export interface AccountData {
-    acc_ID?: string;
-    acc_code: string;
-    acc_name: string;
-    acc_description?: string;
-    acc_status: "active" | "pending" | "inactive" | "suspended";
+// Tag-specific interfaces based on API documentation
+export interface TagData {
+    tag_ID?: string;
+    tag_name: string;
+    tag_description?: string;
+    tag_color?: string;
+    tag_status: "active" | "pending" | "inactive" | "suspended";
     is_archived?: number;
     created_at?: string;
     updated_at?: string;
 }
 
-export interface CreateAccountRequest {
-    acc_code: string;
-    acc_name: string;
-    acc_description?: string;
-    acc_status: "active" | "pending" | "inactive" | "suspended";
+export interface CreateTagRequest {
+    tag_name: string;
+    tag_description?: string;
+    tag_color?: string;
+    tag_status: "active" | "pending" | "inactive" | "suspended";
     is_archived?: number;
 }
 
-export interface UpdateAccountRequest {
-    acc_ID: string;
-    acc_code?: string;
-    acc_name?: string;
-    acc_description?: string;
-    acc_status?: "active" | "pending" | "inactive" | "suspended";
+export interface UpdateTagRequest {
+    tag_ID: string;
+    tag_name?: string;
+    tag_description?: string;
+    tag_color?: string;
+    tag_status?: "active" | "pending" | "inactive" | "suspended";
     is_archived?: number;
 }
 
-export interface ViewAccountsRequest {
+export interface ViewTagsRequest {
     search?: string;
     is_archived?: number;
-    acc_status?: "active" | "pending" | "inactive" | "suspended";
+    tag_status?: "active" | "pending" | "inactive" | "suspended";
     offset?: number;
     limit?: number;
 }
 
 export interface BatchUpdateStatusRequest {
     req_IDs: string[];
-    acc_status: "active" | "pending" | "inactive" | "suspended";
+    tag_status: "active" | "pending" | "inactive" | "suspended";
 }
 
-// Specific account service methods
-export const useAccountService = () => {
+// Specific tag service methods
+export const useTagService = () => {
     const [
         generalAction,
         {
@@ -110,25 +107,25 @@ export const useAccountService = () => {
             error: actionError,
             reset: actionReset,
         },
-    ] = useActionAccountsMutation();
+    ] = useActionTagsMutation();
 
-    const createAccount = async (accountData: CreateAccountRequest) => {
+    const createTag = async (tagData: CreateTagRequest) => {
         return generalAction({
             queryParameters: "/",
             method: "POST",
-            body: accountData,
+            body: tagData,
         });
     };
 
-    const updateAccount = async (accountData: UpdateAccountRequest) => {
+    const updateTag = async (tagData: UpdateTagRequest) => {
         return generalAction({
             queryParameters: "/",
             method: "PUT",
-            body: accountData,
+            body: tagData,
         });
     };
 
-    const viewAccounts = async (filters: ViewAccountsRequest) => {
+    const viewTags = async (filters: ViewTagsRequest) => {
         return generalAction({
             queryParameters: "/view",
             method: "POST",
@@ -154,9 +151,9 @@ export const useAccountService = () => {
         actionReset,
 
         // methods
-        createAccount,
-        updateAccount,
-        viewAccounts,
+        createTag,
+        updateTag,
+        viewTags,
         batchUpdateStatus,
     };
 };
