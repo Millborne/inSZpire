@@ -15,6 +15,7 @@ export interface AccountDataType {
     code: string;
     description?: string;
     status: string;
+    is_archived?: number;
 }
 
 export type ModalMode = "view" | "edit" | "add";
@@ -86,7 +87,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
             // setIsLoading(true);
 
             if (onSave) {
-                await onSave(formData);
+                await onSave({ ...formData, is_archived: toggle ? 1 : 0 });
             }
             onClose();
         } catch (error) {

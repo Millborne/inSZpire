@@ -29,9 +29,10 @@ import ConfirmationModal from "../../../components/ConfirmationModal";
 import {
     useAccountService,
     type AccountData,
-} from "../../../services/accounts";
+} from "../../../services/settings/accounts/list";
 
 import { SidebarContext } from "../index";
+import { useNavigate } from "react-router-dom";
 //! for page mode
 type AccountPageMode = "all-accounts" | "archived";
 
@@ -76,7 +77,7 @@ const getColoredStatus = (status: string) => {
 const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
     const { toggleSidebar } = useContext(SidebarContext);
     const accountService = useAccountService();
-
+    const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedAccount, setSelectedAccount] =
@@ -90,6 +91,8 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
     const [accounts, setAccounts] = useState<AccountData[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+
+    console.log(accounts);
 
     //! Get headers based on mode
     const headers = getHeaders(mode);
@@ -171,6 +174,29 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                     is_archived: 0,
                 };
                 await accountService.createAccount(accountData);
+            } else if (
+                modalMode === "edit" &&
+                selectedAccount?.id &&
+                data.is_archived
+            ) {
+                const accountData = {
+                    acc_ID: selectedAccount.id,
+                    is_archived: data.is_archived,
+                };
+                const accountDataEdit = {
+                    acc_ID: selectedAccount.id,
+                    acc_code: data.code,
+                    acc_name: data.account,
+                    acc_description: data.description || "",
+                    acc_status: data.status as
+                        | "active"
+                        | "pending"
+                        | "inactive"
+                        | "suspended",
+                };
+                await accountService.updateAccount(accountDataEdit);
+
+                await accountService.updateAccount(accountData);
             } else if (modalMode === "edit" && selectedAccount?.id) {
                 const accountData = {
                     acc_ID: selectedAccount.id,
@@ -244,8 +270,10 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
         {
             icon: <Edit2 />,
             label: "Edit Account",
-            onClick: (index: number) =>
-                handleOpenModal(modalData[index], "edit"),
+            onClick: (index: number) => {
+                console.log(index);
+                handleOpenModal(modalData[index], "edit");
+            },
         },
         {
             icon: <ArchiveBox />,
@@ -295,9 +323,7 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                                                     label: "View Archived Accounts",
                                                     icon: <ArchiveBox />,
                                                     onClick: () => {
-                                                        // TODO: Backend Integration - Replace with proper navigation
-                                                        window.location.href =
-                                                            "/archived-accounts";
+                                                        navigate("archived");
                                                     },
                                                 },
                                             ]}
