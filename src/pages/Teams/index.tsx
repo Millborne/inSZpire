@@ -7,6 +7,7 @@ import {
   Tab,
   Pagination,
   Tabs,
+  SnackbarAlert,
 } from "enterprisze-global-components";
 import {
   Add,
@@ -291,6 +292,8 @@ const Teams = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewType, setViewType] = useState<"card" | "table">("card");
   const teamsPerPage = 3;
+  const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   // Calculate paginated teams
   const paginatedTeams = useMemo(() => {
@@ -315,6 +318,12 @@ const Teams = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedTeam(null);
+  };
+
+  const handleTeamSuccess = (message: string) => {
+    setSnackbarMessage(message);
+    setShowSuccessSnackbar(true);
+    setTimeout(() => setShowSuccessSnackbar(false), 3000);
   };
 
   return (
@@ -389,7 +398,14 @@ const Teams = () => {
                 onClick={() => {}}
               />
             </section>
-            <TeamsList teams={paginatedTeams} viewType={viewType} />
+            <TeamsList
+              teams={paginatedTeams}
+              viewType={viewType}
+              onTeamSave={(data) => {
+                const message = "Successfully updated team";
+                handleTeamSuccess(message);
+              }}
+            />
             {totalPages > 1 && (
               <section className="flex justify-end">
                 <Pagination
@@ -407,7 +423,22 @@ const Teams = () => {
         onClose={handleCloseModal}
         mode={modalMode}
         selectedTeam={selectedTeam}
-        onSave={() => {}}
+        onSave={(data) => {
+          const message =
+            modalMode === "add"
+              ? "Successfully added a new Team"
+              : "Successfully updated team";
+          handleTeamSuccess(message);
+          handleCloseModal();
+        }}
+      />
+      <SnackbarAlert
+        isOpen={showSuccessSnackbar}
+        onClose={() => setShowSuccessSnackbar(false)}
+        showCloseButton={true}
+        type="success"
+        title={snackbarMessage}
+        animation="slide-up"
       />
     </div>
   );

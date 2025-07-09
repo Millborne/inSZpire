@@ -1,4 +1,3 @@
-import React from "react";
 import TeamCard from "../components/TeamCard";
 import TeamsTable from "../components/TeamsTable";
 import { Employee } from "..";
@@ -12,9 +11,14 @@ interface Team {
 interface TeamsListProps {
   teams: Team[];
   viewType: "card" | "table";
+  onTeamSave?: (data: any) => void;
 }
 
-const TeamsList = ({ teams, viewType = "card" }: TeamsListProps) => {
+const TeamsList = ({
+  teams,
+  viewType = "card",
+  onTeamSave,
+}: TeamsListProps) => {
   return (
     <div className="grid grid-cols-1 gap-[20px] w-full">
       {viewType === "card"
@@ -23,6 +27,7 @@ const TeamsList = ({ teams, viewType = "card" }: TeamsListProps) => {
               key={team.id}
               teamName={team.name}
               employees={team.employees}
+              onSave={onTeamSave}
             />
           ))
         : teams.map((team) => (
@@ -30,6 +35,7 @@ const TeamsList = ({ teams, viewType = "card" }: TeamsListProps) => {
               key={team.id}
               teamName={team.name}
               employees={team.employees}
+              onSave={onTeamSave}
             />
           ))}
     </div>
