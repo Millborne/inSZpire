@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Avatar, Button, Inputs, Modal, Document, Dropdown } from "enterprisze-global-components";
+import { Avatar, Button, Inputs, Modal, Document, Dropdown, CustomDatePicker } from "enterprisze-global-components";
 import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
 import { Trash, Calendar } from "iconsax-reactjs";
 import EmployeeConfirmationModal from "./EmployeeConfirmationModal";
@@ -47,6 +47,41 @@ interface EmployeeModalProps {
     mode: "add" | "edit";
 }
 const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode }: EmployeeModalProps) => {
+    const [formData, setFormData] = useState<addEmployeeData>({
+        fullName: {
+            lastName: "",
+            firstName: "",
+            middleName: "",
+            nickname: "",
+            extension: "",
+            dateOfBirth: "",
+        },
+        work: {
+            dateHired: "",
+            position: "",
+            positionStatus: "",
+            employmentStatus: "",
+            workEmail: "",
+        },
+        address: {
+            region: "",
+            province: "",
+            cityMunicipality: "",
+            barangay: "",
+            streetHouseNoLot: "",
+            postalCode: "",
+            country: "",
+        },
+        others: {
+            religion: "",
+            sex: "",
+            civilStatus: "",
+            gender: "",
+            pronouns: "",
+            bloodType: "",
+        },
+    });
+
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [currentAddEmployeeData, setCurrentAddEmployeeData] = useState<addEmployeeData | null>(
         mode === "edit" && addEmployeeData ? addEmployeeData : null
@@ -90,7 +125,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                 ]}
                 content={
                     <div className="flex flex-col w-full gap-[16px]">
-                        <div className="flex flex-col w-full gap-[8px]">
+                        {/* <div className="flex flex-col w-full gap-[8px]">
                             <div className="flex justify-between">
                                 <h6 className="text-h6 text-szPrimary700">Set up profile</h6>
                             </div>
@@ -122,19 +157,19 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                     />
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
                         <div className="flex flex-col w-full gap-[8px]">
                             <div className="flex justify-between">
                                 <h6 className="text-h6 text-szPrimary700">Name and Birthday</h6>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                                <Inputs label="LAST NAME" placeholder="Lee" />
-                                <Inputs label="FIRST NAME" placeholder="Frederick" />
-                                <Inputs label="MIDDLE NAME" placeholder="Hill" />
-                                <Inputs label="EXTENSION" placeholder="Fred" />
-                                <Inputs label="NICKNAME" placeholder="Red" />
-                                <Inputs label="BIRTHDAY" placeholder="12/01/2000" icon={Calendar} />
-                                {/*<CustomDatePicker label="BIRTHDAY" value="12/01/2000" />*/}
+                                <Inputs label="LAST NAME" value={formData.fullName.lastName || ""} />
+                                <Inputs label="FIRST NAME" value={formData.fullName.firstName || ""} />
+                                <Inputs label="MIDDLE NAME" value={formData.fullName.middleName || ""} />
+                                <Inputs label="EXTENSION" value={formData.fullName.extension || ""} />
+                                <Inputs label="NICKNAME" value={formData.fullName.nickname || ""} />
+                                {/* <Inputs label="BIRTHDAY" value={formData.fullName.dateOfBirth || ""} icon={Calendar} /> */}
+                                <CustomDatePicker label="BIRTHDAY" value="12/01/2000" />
                             </div>
                         </div>
                         <div className="flex flex-col w-full gap-[8px]">
@@ -142,14 +177,36 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                 <h6 className="text-h6 text-szPrimary700">Work</h6>
                             </div>
                             <div className="flex flex-col w-full gap-[15px]">
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                                    <Inputs label="DATE HIRED" placeholder="12/01/2000" icon={Calendar} />
-                                    <Dropdown label="POSITION" placeholder="Junior Developer 2" options={[]} onSelectionChange={() => {}} />
-                                    <Dropdown label="POSITION STATUS" placeholder="Trainee" options={[]} onSelectionChange={() => {}} />
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center z-[50]">
+                                    {/* <Inputs label="DATE HIRED" value={formData.work.dateHired || ""} icon={Calendar} /> */}
+                                    <CustomDatePicker label="DATE HIRED" value="12/01/2000" />
+
+                                    <Dropdown
+                                        label="POSITION"
+                                        placeholder="Select position"
+                                        options={[]}
+                                        onSelectionChange={() => {}}
+                                        value={
+                                            formData.work.position
+                                                ? { label: formData.work.position, value: formData.work.position }
+                                                : undefined
+                                        }
+                                    />
+                                    <Dropdown
+                                        label="POSITION STATUS"
+                                        placeholder="Select position status"
+                                        options={[]}
+                                        onSelectionChange={() => {}}
+                                    />
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                                    <Dropdown label="EMPLOYMENT STATUS" placeholder="Regular" options={[]} onSelectionChange={() => {}} />
-                                    <Inputs label="WORK EMAIL" placeholder="justin.baldoni@supportzebra.com" />
+                                    <Dropdown
+                                        label="EMPLOYMENT STATUS"
+                                        placeholder="Select employment status"
+                                        options={[]}
+                                        onSelectionChange={() => {}}
+                                    />
+                                    <Inputs label="WORK EMAIL" value={formData.work.workEmail || ""} />
                                 </div>
                             </div>
                         </div>
@@ -158,23 +215,23 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                 <h6 className="text-h6 text-szPrimary700">Address</h6>
                             </div>
                             <div className="flex flex-col w-full gap-[15px]">
-                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-center">
-                                    <Dropdown label="REGION" placeholder="Region X" options={[]} onSelectionChange={() => {}} />
-                                    <Dropdown label="PROVINCE" placeholder="Misamis Oriental" options={[]} onSelectionChange={() => {}} />
+                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-center z-[50]">
+                                    <Dropdown label="REGION" placeholder="Select region" options={[]} onSelectionChange={() => {}} />
+                                    <Dropdown label="PROVINCE" placeholder="Select province" options={[]} onSelectionChange={() => {}} />
                                     <Dropdown
                                         label="CITY / MUNICIPALITY"
-                                        placeholder="CDO City"
+                                        placeholder="Select city"
                                         options={[]}
                                         onSelectionChange={() => {}}
                                     />
-                                    <Dropdown label="BARANGAY" placeholder="Carmen" options={[]} onSelectionChange={() => {}} />
+                                    <Dropdown label="BARANGAY" placeholder="Select barangay" options={[]} onSelectionChange={() => {}} />
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-6 gap-[16px]">
                                     <div className="sm:col-span-4 col-span-1">
-                                        <Inputs label="STREET / HOUSE NUMBER / LOT" placeholder="Blk 5 Lot 3, Villa Luz Subdivision" />
+                                        <Inputs label="STREET / HOUSE NUMBER / LOT" value={formData.address.streetHouseNoLot || ""} />
                                     </div>
                                     <div className="sm:col-span-1 col-span-2">
-                                        <Inputs label="POSTAL CODE" placeholder="9000" />
+                                        <Inputs label="POSTAL CODE" value={formData.address.postalCode || ""} />
                                     </div>
                                 </div>
                             </div>
@@ -185,13 +242,23 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                             </div>
                             <div className="flex flex-col w-full gap-[15px]">
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                                    <Dropdown label="RELIGION" placeholder="Roman Catholic" options={[]} onSelectionChange={() => {}} />
-                                    <Dropdown label="CIVIL STATUS" placeholder="Single" options={[]} onSelectionChange={() => {}} />
-                                    <Dropdown label="BLOOD TYPE" placeholder="B+" options={[]} onSelectionChange={() => {}} />
+                                    <Dropdown label="RELIGION" placeholder="Select religion" options={[]} onSelectionChange={() => {}} />
+                                    <Dropdown
+                                        label="CIVIL STATUS"
+                                        placeholder="Select civil status"
+                                        options={[]}
+                                        onSelectionChange={() => {}}
+                                    />
+                                    <Dropdown
+                                        label="BLOOD TYPE"
+                                        placeholder="Select blood type"
+                                        options={[]}
+                                        onSelectionChange={() => {}}
+                                    />
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                                    <Dropdown label="GENDER" placeholder="Male" options={[]} onSelectionChange={() => {}} />
-                                    <Dropdown label="PRONOUNS" placeholder="She/Her" options={[]} onSelectionChange={() => {}} />
+                                    <Dropdown label="GENDER" placeholder="Select gender" options={[]} onSelectionChange={() => {}} />
+                                    <Dropdown label="PRONOUNS" placeholder="Select pronouns" options={[]} onSelectionChange={() => {}} />
                                 </div>
                             </div>
                         </div>
