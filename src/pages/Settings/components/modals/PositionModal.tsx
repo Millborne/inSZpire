@@ -365,26 +365,13 @@ const PositionModal: React.FC<PositionModalProps> = ({ isOpen, onClose, mode, se
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] mt-1">
                             <div className="flex flex-col gap-[24px]">
                                 <Inputs
-                                    label="JOB TITLE"
+                                    label="BASIC SALARY"
                                     value={formData.position}
                                     onChange={(e) => handleInputChange("position", e.target.value)}
                                     // TODO: Backend Integration - Add validation
                                     // error={errors.position}
                                     // disabled={isLoading}
                                 />
-                                <div className="z-30">
-                                    <Dropdown
-                                        label="SITE"
-                                        size="small"
-                                        options={teamOptions}
-                                        placeholder="Select Team"
-                                        // value={formData.status ? { label: formData.status, value: formData.status } : undefined}
-                                        onSelectionChange={(value) => {
-                                            const statusValue = Array.isArray(value) ? value[0]?.value : value?.value;
-                                            handleInputChange("team", statusValue || "");
-                                        }}
-                                    />
-                                </div>
 
                                 {mode === "edit" && (
                                     <>
@@ -421,23 +408,12 @@ const PositionModal: React.FC<PositionModalProps> = ({ isOpen, onClose, mode, se
                             <div className="flex flex-col gap-[24px]">
                                 <div className="z-50">
                                     <Dropdown
-                                        label="POSITION TYPE"
+                                        label="TAGS"
                                         size="small"
                                         options={positionTypeOptions}
                                         placeholder="Select Job Title"
-                                        // value={formData.status ? { label: formData.status, value: formData.status } : undefined}
-                                        onSelectionChange={(value) => {
-                                            const statusValue = Array.isArray(value) ? value[0]?.value : value?.value;
-                                            handleInputChange("jobTitle", statusValue || "");
-                                        }}
-                                    />
-                                </div>
-                                <div className="z-20">
-                                    <Dropdown
-                                        label="WORK SETUP"
-                                        size="small"
-                                        options={positionStatusOptions}
-                                        placeholder="Select Job Title"
+                                        multiSelect
+                                        isCheckbox
                                         // value={formData.status ? { label: formData.status, value: formData.status } : undefined}
                                         onSelectionChange={(value) => {
                                             const statusValue = Array.isArray(value) ? value[0]?.value : value?.value;

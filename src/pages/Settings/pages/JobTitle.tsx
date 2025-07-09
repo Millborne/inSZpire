@@ -175,8 +175,9 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                                         // onClick={() => navigate("/job-titles")}
                                     />
                                 )}
-                                <h6 className="text-h6 text-szPrimary700">{mode === "archived" ? "Archived Job Titles" : "Job Titles"}</h6>
                                 <HamburgerMenu className="text-szPrimary700 cursor-pointer blcok md:hidden" onClick={toggleSidebar} />
+
+                                <h6 className="text-h6 text-szPrimary700">{mode === "archived" ? "Archived Job Titles" : "Job Titles"}</h6>
                                 {mode === "all-job-titles" && (
                                     <div className="flex-1">
                                         <PopoverMenu
