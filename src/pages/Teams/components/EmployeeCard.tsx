@@ -20,6 +20,9 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
         ${isSelected ? "border-szPrimary700 bg-szPrimary50" : ""}
         hover:border-szPrimary700
       `}
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
     >
       <Avatar src={avatar} size="medium" />
       <div>

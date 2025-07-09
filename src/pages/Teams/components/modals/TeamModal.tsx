@@ -54,7 +54,14 @@ const TeamModal: React.FC<TeamModalProps> = ({
   // Load selected account data when it changes
   useEffect(() => {
     if (selectedTeam) {
-      setFormData(selectedTeam);
+      setFormData({
+        id: selectedTeam.id || "",
+        name: selectedTeam.name || "",
+        description: selectedTeam.description || "",
+        reference: selectedTeam.reference || "",
+        manager: selectedTeam.manager || "",
+        tags: selectedTeam.tags || [],
+      });
       // TODO: Backend Integration - Set archived status from API data
       // setToggle(selectedAccount.isArchived || false);
     } else {
@@ -70,7 +77,10 @@ const TeamModal: React.FC<TeamModalProps> = ({
   }, [selectedTeam]);
 
   // Handle input changes
-  const handleInputChange = (field: keyof TeamDataType, value: string) => {
+  const handleInputChange = (
+    field: keyof TeamDataType,
+    value: string | string[]
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -124,7 +134,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
       variant: "primary",
       onClick:
         mode === "edit"
-          ? () => handleConfirmationOpen("update")
+          ? () => handleSave()
           : () => handleConfirmationOpen("add"),
       size: "medium",
     });
@@ -144,66 +154,87 @@ const TeamModal: React.FC<TeamModalProps> = ({
         footerOptions="stacked-left"
         footerButtons={footerButtons}
         content={
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] mt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] mt-1 z-60">
             <div className="flex flex-col gap-[24px]">
               <Inputs
                 label="TEAM NAME"
                 value={formData.name}
-                // onChange={(e) => handleInputChange("account", e.target.value)}
+                onChange={(e) => handleInputChange("name", e.target.value)}
                 // TODO: Backend Integration - Add validation
-                // error={errors.account}
+                // error={errors.name}
                 // disabled={isLoading}
               />
               <div className="z-auto">
                 <Dropdown
                   label="TEAM REFERENCE"
                   size="small"
-                  options={[]} //add options based on the backend
+                  options={[
+                    { label: "Team 1", value: "team1" },
+                    { label: "Team 2", value: "team2" },
+                    { label: "Team 3", value: "team3" },
+                  ]} //change options based on the backend
                   placeholder="Select team reference"
-                  value={
-                    formData.reference
-                      ? { label: formData.reference, value: formData.reference }
-                      : undefined
-                  }
+                  // value={
+                  //   formData.reference
+                  //     ? { label: formData.reference, value: formData.reference }
+                  //     : null
+                  // }
                   onSelectionChange={(value) => {
                     const referenceValue = Array.isArray(value)
                       ? value[0]?.value
                       : value?.value;
-                    // handleInputChange("reference", referenceValue || "");
+                    handleInputChange("reference", referenceValue || "");
                   }}
+                  usePortal={true}
                 />
               </div>
               <div className="z-auto">
                 <Dropdown
                   label="MANAGED BY"
                   size="small"
-                  options={[]} //add options based on the backend
+                  options={[
+                    { label: "John Doe", value: "john-doe" },
+                    { label: "Jane Smith", value: "jane-smith" },
+                    { label: "Michael Brown", value: "michael-brown" },
+                  ]} //change options based on the backend
                   placeholder="Select manager"
-                  value={
-                    formData.manager
-                      ? { label: formData.manager, value: formData.manager }
-                      : undefined
-                  }
+                  // value={
+                  //   formData.manager
+                  //     ? { label: formData.manager, value: formData.manager }
+                  //     : null
+                  // }
                   onSelectionChange={(value) => {
                     const managerValue = Array.isArray(value)
                       ? value[0]?.value
                       : value?.value;
-                    // handleInputChange("reference", managerValue || "");
+                    handleInputChange("manager", managerValue || "");
                   }}
+                  usePortal={true}
                 />
               </div>
-              <div className="z-auto">
+              <div className="z-[90] h-[20px]">
                 <Dropdown
                   label="TAGS"
                   placeholder="Select tags"
-                  options={[]} //add options based on the backend
-                  onSelectionChange={() => {}}
+                  options={[
+                    { label: "Tag 1", value: "tag1" },
+                    { label: "Tag 2", value: "tag2" },
+                  ]} //change options based on the backend
+                  onSelectionChange={(value) => {
+                    const tagValues = Array.isArray(value)
+                      ? value.map((v) => v.value)
+                      : value
+                      ? [value.value]
+                      : [];
+                    handleInputChange("tags", tagValues);
+                  }}
                   multiSelect
                   size="small"
+                  usePortal={true}
                 />
               </div>
             </div>
-            <div className="z-0">
+            <div className="z-0 mt-[40px] sm:mt-0">
               <Inputs
                 label="TEAM DESCRIPTION"
                 className="h-[256px]"
@@ -227,7 +258,10 @@ const TeamModal: React.FC<TeamModalProps> = ({
         onClick={async () => {
           try {
             if (confirmationAction === "add") {
-              // TODO: Backend Integration - Call archive API
+              // TODO: Backend Integration - Call add API
+              if (onSave) {
+                await onSave(formData);
+              }
               setIsConfirmationModalOpen(false);
             } else {
               handleSave();
