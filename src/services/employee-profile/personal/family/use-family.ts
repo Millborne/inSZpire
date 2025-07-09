@@ -55,235 +55,69 @@ export const useFamily = ({
 
 // Family-specific interfaces based on API documentation
 export interface FamilyData {
-    family_ID?: string;
-    employee_ID?: string;
-    family_member_type:
-        | "spouse"
-        | "child"
-        | "parent"
-        | "sibling"
-        | "dependent"
-        | "other";
+    profile_family_ID?: string;
+    profile_ID: string;
     first_name: string;
     last_name: string;
     middle_name?: string;
-    maiden_name?: string;
-    relationship: string;
+    name_ext?: string;
+    relation: string;
     date_of_birth?: string;
-    place_of_birth?: string;
-    gender?: "male" | "female" | "other";
-    civil_status?: "single" | "married" | "divorced" | "widowed" | "separated";
-    nationality?: string;
-    religion?: string;
-    occupation?: string;
-    employer?: string;
-    employer_address?: string;
-    employer_phone?: string;
-    employer_email?: string;
     contact_number?: string;
-    email?: string;
-    address?: {
-        present_address?: string;
-        permanent_address?: string;
-        city?: string;
-        state?: string;
-        zip_code?: string;
-        country?: string;
-    };
-    government_ids?: {
-        sss_number?: string;
-        tin_number?: string;
-        philhealth_number?: string;
-        passport_number?: string;
-        driver_license_number?: string;
-    };
-    is_beneficiary: boolean;
-    is_dependent: boolean;
-    is_emergency_contact: boolean;
-    emergency_contact_priority?: number;
-    health_conditions?: string;
-    allergies?: string;
-    medications?: string;
-    special_needs?: string;
-    education_level?:
-        | "elementary"
-        | "high_school"
-        | "vocational"
-        | "bachelor"
-        | "master"
-        | "doctorate"
-        | "post_graduate"
-        | "other";
-    school_name?: string;
-    school_address?: string;
-    course_degree?: string;
-    family_status: "active" | "pending" | "inactive" | "suspended";
-    is_archived?: number;
+    address?: string;
+    is_emergency_contact?: boolean;
+    user_type?: string;
     created_at?: string;
     updated_at?: string;
 }
 
 export interface CreateFamilyRequest {
-    employee_ID: string;
-    family_member_type:
-        | "spouse"
-        | "child"
-        | "parent"
-        | "sibling"
-        | "dependent"
-        | "other";
+    profile_ID: string;
     first_name: string;
     last_name: string;
     middle_name?: string;
-    maiden_name?: string;
-    relationship: string;
+    name_ext?: string;
+    relation: string;
     date_of_birth?: string;
-    place_of_birth?: string;
-    gender?: "male" | "female" | "other";
-    civil_status?: "single" | "married" | "divorced" | "widowed" | "separated";
-    nationality?: string;
-    religion?: string;
-    occupation?: string;
-    employer?: string;
-    employer_address?: string;
-    employer_phone?: string;
-    employer_email?: string;
     contact_number?: string;
-    email?: string;
-    address?: {
-        present_address?: string;
-        permanent_address?: string;
-        city?: string;
-        state?: string;
-        zip_code?: string;
-        country?: string;
-    };
-    government_ids?: {
-        sss_number?: string;
-        tin_number?: string;
-        philhealth_number?: string;
-        passport_number?: string;
-        driver_license_number?: string;
-    };
-    is_beneficiary: boolean;
-    is_dependent: boolean;
-    is_emergency_contact: boolean;
-    emergency_contact_priority?: number;
-    health_conditions?: string;
-    allergies?: string;
-    medications?: string;
-    special_needs?: string;
-    education_level?:
-        | "elementary"
-        | "high_school"
-        | "vocational"
-        | "bachelor"
-        | "master"
-        | "doctorate"
-        | "post_graduate"
-        | "other";
-    school_name?: string;
-    school_address?: string;
-    course_degree?: string;
-    family_status: "active" | "pending" | "inactive" | "suspended";
-    is_archived?: number;
+    address?: string;
+    is_emergency_contact?: boolean;
+    user_type?: string;
 }
 
 export interface UpdateFamilyRequest {
-    family_ID: string;
-    family_member_type?:
-        | "spouse"
-        | "child"
-        | "parent"
-        | "sibling"
-        | "dependent"
-        | "other";
+    profile_family_ID: string;
     first_name?: string;
     last_name?: string;
     middle_name?: string;
-    maiden_name?: string;
-    relationship?: string;
+    name_ext?: string;
+    relation?: string;
     date_of_birth?: string;
-    place_of_birth?: string;
-    gender?: "male" | "female" | "other";
-    civil_status?: "single" | "married" | "divorced" | "widowed" | "separated";
-    nationality?: string;
-    religion?: string;
-    occupation?: string;
-    employer?: string;
-    employer_address?: string;
-    employer_phone?: string;
-    employer_email?: string;
     contact_number?: string;
-    email?: string;
-    address?: {
-        present_address?: string;
-        permanent_address?: string;
-        city?: string;
-        state?: string;
-        zip_code?: string;
-        country?: string;
-    };
-    government_ids?: {
-        sss_number?: string;
-        tin_number?: string;
-        philhealth_number?: string;
-        passport_number?: string;
-        driver_license_number?: string;
-    };
-    is_beneficiary?: boolean;
-    is_dependent?: boolean;
+    address?: string;
     is_emergency_contact?: boolean;
-    emergency_contact_priority?: number;
-    health_conditions?: string;
-    allergies?: string;
-    medications?: string;
-    special_needs?: string;
-    education_level?:
-        | "elementary"
-        | "high_school"
-        | "vocational"
-        | "bachelor"
-        | "master"
-        | "doctorate"
-        | "post_graduate"
-        | "other";
-    school_name?: string;
-    school_address?: string;
-    course_degree?: string;
-    family_status?: "active" | "pending" | "inactive" | "suspended";
-    is_archived?: number;
 }
 
 export interface ViewFamilyRequest {
-    employee_ID: string;
-    family_member_type?:
-        | "spouse"
-        | "child"
-        | "parent"
-        | "sibling"
-        | "dependent"
-        | "other";
-    relationship?: string;
-    is_beneficiary?: boolean;
-    is_dependent?: boolean;
-    is_emergency_contact?: boolean;
-    family_status?: "active" | "pending" | "inactive" | "suspended";
-    is_archived?: number;
+    profile_ID?: string;
+    search?: string;
     offset?: number;
     limit?: number;
 }
 
 export interface GetFamilyRequest {
-    family_ID: string;
+    profile_family_ID: string;
 }
 
-export interface BatchUpdateStatusRequest {
-    req_IDs: string[];
-    family_status: "active" | "pending" | "inactive" | "suspended";
+export interface DeleteFamilyRequest {
+    profile_family_ID: string;
 }
 
-// Specific family service methods
+export interface InformationUpdateRequest {
+    profile_ID?: string;
+}
+
+// Specific family service methods based on API documentation
 export const useFamilyService = () => {
     const [
         generalAction,
@@ -297,57 +131,60 @@ export const useFamilyService = () => {
         },
     ] = useActionFamilyMutation();
 
-    // List family members
     const listFamily = async (filters: ViewFamilyRequest) => {
         return generalAction({
-            queryParameters: "/list",
-            method: "POST",
+            queryParameters: "/getFamilyContacts",
+            method: "GET",
             body: filters,
         });
     };
 
-    // Create family member
     const createFamily = async (familyData: CreateFamilyRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/create",
             method: "POST",
             body: familyData,
         });
     };
 
-    // Edit family member
     const updateFamily = async (familyData: UpdateFamilyRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/updateFamilyContact",
             method: "PUT",
             body: familyData,
         });
     };
 
-    // Get specific family member
     const getFamily = async (familyData: GetFamilyRequest) => {
         return generalAction({
-            queryParameters: "/get",
-            method: "POST",
-            body: familyData,
+            queryParameters: `/getFamilyContacts?profile_family_ID=${familyData.profile_family_ID}`,
+            method: "GET",
         });
     };
 
-    // View family members with filters
     const viewFamily = async (filters: ViewFamilyRequest) => {
         return generalAction({
-            queryParameters: "/view",
-            method: "POST",
+            queryParameters: "/getFamilyContacts",
+            method: "GET",
             body: filters,
         });
     };
 
-    // Batch update status
-    const batchUpdateStatus = async (batchData: BatchUpdateStatusRequest) => {
+    const deleteFamily = async (familyData: DeleteFamilyRequest) => {
         return generalAction({
-            queryParameters: "/batch-update-status",
+            queryParameters: "/deleteFamilyContact",
+            method: "DELETE",
+            body: familyData,
+        });
+    };
+
+    const getInformationUpdateRequests = async (
+        request: InformationUpdateRequest
+    ) => {
+        return generalAction({
+            queryParameters: "/getInformationUpdateRequests",
             method: "POST",
-            body: batchData,
+            body: request,
         });
     };
 
@@ -366,6 +203,7 @@ export const useFamilyService = () => {
         updateFamily,
         getFamily,
         viewFamily,
-        batchUpdateStatus,
+        deleteFamily,
+        getInformationUpdateRequests,
     };
 };

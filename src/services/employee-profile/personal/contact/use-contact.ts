@@ -53,141 +53,71 @@ export const useContact = ({
     };
 };
 
-// Contact-specific interfaces based on API documentation
+// Contact-specific interfaces based on API documentation (using family endpoints)
 export interface ContactData {
-    contact_ID?: string;
-    employee_ID?: string;
-    contact_type:
-        | "emergency"
-        | "personal"
-        | "professional"
-        | "reference"
-        | "other";
+    profile_family_ID?: string;
+    profile_ID: string;
     first_name: string;
     last_name: string;
     middle_name?: string;
-    relationship: string;
-    company_name?: string;
-    job_title?: string;
-    department?: string;
-    phone_number: string;
-    mobile_number?: string;
-    email?: string;
-    address?: {
-        street_address?: string;
-        city?: string;
-        state?: string;
-        zip_code?: string;
-        country?: string;
-    };
-    is_emergency_contact: boolean;
-    emergency_contact_priority?: number;
-    is_beneficiary: boolean;
-    is_reference: boolean;
-    is_guarantor: boolean;
-    contact_status: "active" | "pending" | "inactive" | "suspended";
-    is_archived?: number;
+    name_ext?: string;
+    relation: string;
+    date_of_birth?: string;
+    contact_number?: string;
+    address?: string;
+    is_emergency_contact?: boolean;
+    user_type?: string;
     created_at?: string;
     updated_at?: string;
 }
 
 export interface CreateContactRequest {
-    employee_ID: string;
-    contact_type:
-        | "emergency"
-        | "personal"
-        | "professional"
-        | "reference"
-        | "other";
+    profile_ID: string;
     first_name: string;
     last_name: string;
     middle_name?: string;
-    relationship: string;
-    company_name?: string;
-    job_title?: string;
-    department?: string;
-    phone_number: string;
-    mobile_number?: string;
-    email?: string;
-    address?: {
-        street_address?: string;
-        city?: string;
-        state?: string;
-        zip_code?: string;
-        country?: string;
-    };
-    is_emergency_contact: boolean;
-    emergency_contact_priority?: number;
-    is_beneficiary: boolean;
-    is_reference: boolean;
-    is_guarantor: boolean;
-    contact_status: "active" | "pending" | "inactive" | "suspended";
-    is_archived?: number;
+    name_ext?: string;
+    relation: string;
+    date_of_birth?: string;
+    contact_number?: string;
+    address?: string;
+    is_emergency_contact?: boolean;
+    user_type?: string;
 }
 
 export interface UpdateContactRequest {
-    contact_ID: string;
-    contact_type?:
-        | "emergency"
-        | "personal"
-        | "professional"
-        | "reference"
-        | "other";
+    profile_family_ID: string;
     first_name?: string;
     last_name?: string;
     middle_name?: string;
-    relationship?: string;
-    company_name?: string;
-    job_title?: string;
-    department?: string;
-    phone_number?: string;
-    mobile_number?: string;
-    email?: string;
-    address?: {
-        street_address?: string;
-        city?: string;
-        state?: string;
-        zip_code?: string;
-        country?: string;
-    };
+    name_ext?: string;
+    relation?: string;
+    date_of_birth?: string;
+    contact_number?: string;
+    address?: string;
     is_emergency_contact?: boolean;
-    emergency_contact_priority?: number;
-    is_beneficiary?: boolean;
-    is_reference?: boolean;
-    is_guarantor?: boolean;
-    contact_status?: "active" | "pending" | "inactive" | "suspended";
-    is_archived?: number;
 }
 
 export interface ViewContactRequest {
-    employee_ID: string;
-    contact_type?:
-        | "emergency"
-        | "personal"
-        | "professional"
-        | "reference"
-        | "other";
-    relationship?: string;
-    is_emergency_contact?: boolean;
-    is_beneficiary?: boolean;
-    is_reference?: boolean;
-    is_guarantor?: boolean;
-    contact_status?: "active" | "pending" | "inactive" | "suspended";
-    is_archived?: number;
+    profile_ID?: string;
+    search?: string;
     offset?: number;
     limit?: number;
 }
 
 export interface GetContactRequest {
-    contact_ID: string;
+    profile_family_ID: string;
 }
 
-export interface BatchUpdateStatusRequest {
-    req_IDs: string[];
-    contact_status: "active" | "pending" | "inactive" | "suspended";
+export interface DeleteContactRequest {
+    profile_family_ID: string;
 }
 
-// Specific contact service methods
+export interface InformationUpdateRequest {
+    profile_ID?: string;
+}
+
+// Specific contact service methods based on API documentation (using family endpoints)
 export const useContactService = () => {
     const [
         generalAction,
@@ -201,57 +131,60 @@ export const useContactService = () => {
         },
     ] = useActionContactMutation();
 
-    // List contacts
     const listContact = async (filters: ViewContactRequest) => {
         return generalAction({
-            queryParameters: "/list",
-            method: "POST",
+            queryParameters: "/getFamilyContacts",
+            method: "GET",
             body: filters,
         });
     };
 
-    // Create contact
     const createContact = async (contactData: CreateContactRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/create",
             method: "POST",
             body: contactData,
         });
     };
 
-    // Edit contact
     const updateContact = async (contactData: UpdateContactRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/updateFamilyContact",
             method: "PUT",
             body: contactData,
         });
     };
 
-    // Get specific contact
     const getContact = async (contactData: GetContactRequest) => {
         return generalAction({
-            queryParameters: "/get",
-            method: "POST",
-            body: contactData,
+            queryParameters: `/getFamilyContacts?profile_family_ID=${contactData.profile_family_ID}`,
+            method: "GET",
         });
     };
 
-    // View contacts with filters
     const viewContact = async (filters: ViewContactRequest) => {
         return generalAction({
-            queryParameters: "/view",
-            method: "POST",
+            queryParameters: "/getFamilyContacts",
+            method: "GET",
             body: filters,
         });
     };
 
-    // Batch update status
-    const batchUpdateStatus = async (batchData: BatchUpdateStatusRequest) => {
+    const deleteContact = async (contactData: DeleteContactRequest) => {
         return generalAction({
-            queryParameters: "/batch-update-status",
+            queryParameters: "/deleteFamilyContact",
+            method: "DELETE",
+            body: contactData,
+        });
+    };
+
+    const getInformationUpdateRequests = async (
+        request: InformationUpdateRequest
+    ) => {
+        return generalAction({
+            queryParameters: "/getInformationUpdateRequests",
             method: "POST",
-            body: batchData,
+            body: request,
         });
     };
 
@@ -270,6 +203,7 @@ export const useContactService = () => {
         updateContact,
         getContact,
         viewContact,
-        batchUpdateStatus,
+        deleteContact,
+        getInformationUpdateRequests,
     };
 };

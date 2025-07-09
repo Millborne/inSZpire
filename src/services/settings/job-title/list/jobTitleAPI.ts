@@ -27,11 +27,11 @@ export const jobTitleAPI = createApi({
     endpoints: (builder) => ({
         fetchJobTitles: builder.query({
             query: (data: generalProps) =>
-                `api/job-title${data.queryParameters}`,
+                `/api/v1/job-title${data.queryParameters}`,
         }),
         actionJobTitles: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/api/job-title${data.queryParameters}`,
+                url: `/api/v1/job-title${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),

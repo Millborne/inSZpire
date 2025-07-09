@@ -26,11 +26,12 @@ export const teamsAPI = createApi({
     tagTypes: ["teams"],
     endpoints: (builder) => ({
         fetchTeams: builder.query({
-            query: (data: generalProps) => `api/teams${data.queryParameters}`,
+            query: (data: generalProps) =>
+                `/api/v1/teams${data.queryParameters}`,
         }),
         actionTeams: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/api/teams${data.queryParameters}`,
+                url: `/api/v1/teams${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),

@@ -59,46 +59,75 @@ export const usePositions = ({
 // Position-specific interfaces based on API documentation
 export interface PositionData {
     position_ID?: string;
+    node_reference?: string;
+    position_code: string;
     position_name: string;
-    position_description?: string;
-    position_code?: string;
-    department_ID?: string;
-    department_name?: string;
-    job_title_ID?: string;
-    job_title_name?: string;
-    position_status: "active" | "pending" | "inactive" | "suspended";
+    team_ID: string;
+    site_ID?: string;
+    job_ID: string;
+    reports_to_position_ID?: string;
+    reports_to_node?: string;
+    team_level?: string;
+    position_type_ID: string;
+    work_setup_ID: string;
+    basic_salary: number;
+    is_approved?: number;
     is_archived?: number;
+    created_by?: string;
+    updated_by?: string;
     created_at?: string;
     updated_at?: string;
+    tags?: Array<{
+        tag_ID: string;
+        tag_name: string;
+        tag_type: string;
+        description?: string;
+    }>;
 }
 
 export interface CreatePositionRequest {
+    position_code: string;
     position_name: string;
-    position_description?: string;
-    position_code?: string;
-    department_ID?: string;
-    job_title_ID?: string;
-    position_status: "active" | "pending" | "inactive" | "suspended";
+    team_ID: string;
+    site_ID?: string;
+    job_ID: string;
+    reports_to_position_ID?: string;
+    reports_to_node?: string;
+    team_level?: string;
+    position_type_ID: string;
+    work_setup_ID: string;
+    basic_salary: number;
+    is_approved?: number;
     is_archived?: number;
+    created_by: string;
+    updated_by?: string;
+    tag_IDs?: string[];
 }
 
 export interface UpdatePositionRequest {
     position_ID: string;
-    position_name?: string;
-    position_description?: string;
+    node_reference?: number;
     position_code?: string;
-    department_ID?: string;
-    job_title_ID?: string;
-    position_status?: "active" | "pending" | "inactive" | "suspended";
+    position_name?: string;
+    team_ID?: string;
+    site_ID?: string;
+    job_ID?: string;
+    reports_to_position_ID?: string;
+    reports_to_node?: string;
+    team_level?: string;
+    position_type_ID?: string;
+    work_setup_ID?: string;
+    basic_salary?: number;
+    is_approved?: number;
     is_archived?: number;
+    updated_by: string;
+    tag_IDs?: string[];
 }
 
 export interface ViewPositionsRequest {
     search?: string;
     is_archived?: number;
-    position_status?: "active" | "pending" | "inactive" | "suspended";
-    department_ID?: string;
-    job_title_ID?: string;
+    position_ID?: string;
     offset?: number;
     limit?: number;
 }
@@ -107,12 +136,15 @@ export interface GetPositionRequest {
     position_ID: string;
 }
 
-export interface BatchUpdateStatusRequest {
-    req_IDs: string[];
-    position_status: "active" | "pending" | "inactive" | "suspended";
+export interface DeletePositionRequest {
+    position_ID: string;
 }
 
-// Specific position service methods
+export interface GetTagsByTypeRequest {
+    tag_type: string;
+}
+
+// Specific position service methods based on API documentation
 export const usePositionService = () => {
     const [
         generalAction,
@@ -126,57 +158,58 @@ export const usePositionService = () => {
         },
     ] = useActionPositionsMutation();
 
-    // List positions
     const listPositions = async (filters: ViewPositionsRequest) => {
         return generalAction({
-            queryParameters: "/list",
+            queryParameters: "/getPositions",
             method: "POST",
             body: filters,
         });
     };
 
-    // Create position
     const createPosition = async (positionData: CreatePositionRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/create",
             method: "POST",
             body: positionData,
         });
     };
 
-    // Edit position
     const updatePosition = async (positionData: UpdatePositionRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/updatePosition",
             method: "PUT",
             body: positionData,
         });
     };
 
-    // View position details
     const getPosition = async (positionData: GetPositionRequest) => {
         return generalAction({
-            queryParameters: "/view",
+            queryParameters: `/getPositions?position_ID=${positionData.position_ID}`,
             method: "POST",
-            body: positionData,
+            body: { position_ID: positionData.position_ID },
         });
     };
 
-    // View positions with filters
     const viewPositions = async (filters: ViewPositionsRequest) => {
         return generalAction({
-            queryParameters: "/view",
+            queryParameters: "/getPositions",
             method: "POST",
             body: filters,
         });
     };
 
-    // Batch update status
-    const batchUpdateStatus = async (batchData: BatchUpdateStatusRequest) => {
+    const deletePosition = async (positionData: DeletePositionRequest) => {
         return generalAction({
-            queryParameters: "/batch-update-status",
-            method: "POST",
-            body: batchData,
+            queryParameters: "/deletePosition",
+            method: "DELETE",
+            body: positionData,
+        });
+    };
+
+    const getTagsByType = async (tagType: string) => {
+        return generalAction({
+            queryParameters: `/tags/${tagType}`,
+            method: "GET",
         });
     };
 
@@ -195,6 +228,7 @@ export const usePositionService = () => {
         updatePosition,
         getPosition,
         viewPositions,
-        batchUpdateStatus,
+        deletePosition,
+        getTagsByType,
     };
 };

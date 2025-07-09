@@ -27,11 +27,11 @@ export const employeeDetailsAPI = createApi({
     endpoints: (builder) => ({
         fetchEmployeeDetails: builder.query({
             query: (data: generalProps) =>
-                `api/employee-details${data.queryParameters}`,
+                `/api/v1/profile${data.queryParameters}`,
         }),
         actionEmployeeDetails: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/api/employee-details${data.queryParameters}`,
+                url: `/api/v1/profile${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),
@@ -39,4 +39,7 @@ export const employeeDetailsAPI = createApi({
     }),
 });
 
-export const { useFetchEmployeeDetailsQuery, useActionEmployeeDetailsMutation } = employeeDetailsAPI; 
+export const {
+    useFetchEmployeeDetailsQuery,
+    useActionEmployeeDetailsMutation,
+} = employeeDetailsAPI;

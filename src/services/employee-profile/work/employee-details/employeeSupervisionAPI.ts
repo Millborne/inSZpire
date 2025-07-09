@@ -9,8 +9,8 @@ interface generalProps {
     body?: any;
 }
 
-export const positionsAPI = createApi({
-    reducerPath: "positions",
+export const employeeSupervisionAPI = createApi({
+    reducerPath: "employeeSupervision",
     baseQuery: fetchBaseQuery({
         baseUrl: VITE_TEAM_AND_POSITION_SERVICE,
         prepareHeaders: (headers) => {
@@ -23,13 +23,13 @@ export const positionsAPI = createApi({
             return headers;
         },
     }),
-    tagTypes: ["positions"],
+    tagTypes: ["employeeSupervision"],
     endpoints: (builder) => ({
-        fetchPositions: builder.query({
+        fetchEmployeeSupervision: builder.query({
             query: (data: generalProps) =>
                 `/api/v1/position${data.queryParameters}`,
         }),
-        actionPositions: builder.mutation({
+        actionEmployeeSupervision: builder.mutation({
             query: (data: generalProps) => ({
                 url: `/api/v1/position${data.queryParameters}`,
                 method: data.method,
@@ -39,5 +39,7 @@ export const positionsAPI = createApi({
     }),
 });
 
-export const { useFetchPositionsQuery, useActionPositionsMutation } =
-    positionsAPI;
+export const {
+    useFetchEmployeeSupervisionQuery,
+    useActionEmployeeSupervisionMutation,
+} = employeeSupervisionAPI; 

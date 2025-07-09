@@ -27,11 +27,11 @@ export const educationAPI = createApi({
     endpoints: (builder) => ({
         fetchEducation: builder.query({
             query: (data: generalProps) =>
-                `api/personal/education${data.queryParameters}`,
+                `/api/v1/education${data.queryParameters}`,
         }),
         actionEducation: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/api/personal/education${data.queryParameters}`,
+                url: `/api/v1/education${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),

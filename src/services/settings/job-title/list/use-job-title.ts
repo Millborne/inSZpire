@@ -58,47 +58,48 @@ export const useJobTitles = ({
 
 // Job Title-specific interfaces based on API documentation
 export interface JobTitleData {
-    job_title_ID?: string;
-    job_title_name: string;
-    job_title_description?: string;
-    job_title_code?: string;
-    job_title_status: "active" | "pending" | "inactive" | "suspended";
+    job_ID?: string;
+    job_code: string;
+    job_title: string;
+    job_description?: string;
+    basic_salary?: number;
+    status?: string;
     is_archived?: number;
     created_at?: string;
     updated_at?: string;
 }
 
 export interface CreateJobTitleRequest {
-    job_title_name: string;
-    job_title_description?: string;
-    job_title_code?: string;
-    job_title_status: "active" | "pending" | "inactive" | "suspended";
+    job_code: string;
+    job_title: string;
+    job_description?: string;
+    basic_salary?: number;
+    status?: string;
     is_archived?: number;
 }
 
 export interface UpdateJobTitleRequest {
-    job_title_ID: string;
-    job_title_name?: string;
-    job_title_description?: string;
-    job_title_code?: string;
-    job_title_status?: "active" | "pending" | "inactive" | "suspended";
+    job_ID: string;
+    job_code?: string;
+    job_title?: string;
+    job_description?: string;
+    basic_salary?: number;
+    status?: string;
     is_archived?: number;
 }
 
 export interface ViewJobTitlesRequest {
     search?: string;
     is_archived?: number;
-    job_title_status?: "active" | "pending" | "inactive" | "suspended";
-    offset?: number;
+    page?: number;
     limit?: number;
 }
 
-export interface BatchUpdateStatusRequest {
-    req_IDs: string[];
-    job_title_status: "active" | "pending" | "inactive" | "suspended";
+export interface GetJobTitleRequest {
+    job_ID: string;
 }
 
-// Specific job title service methods
+// Specific job title service methods based on API documentation
 export const useJobTitleService = () => {
     const [
         generalAction,
@@ -114,7 +115,7 @@ export const useJobTitleService = () => {
 
     const createJobTitle = async (jobTitleData: CreateJobTitleRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/create",
             method: "POST",
             body: jobTitleData,
         });
@@ -122,17 +123,25 @@ export const useJobTitleService = () => {
 
     const updateJobTitle = async (jobTitleData: UpdateJobTitleRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/update",
             method: "PUT",
             body: jobTitleData,
         });
     };
 
-    const viewJobTitles = async (filters: ViewJobTitlesRequest) => {
+    const listJobTitles = async (filters: ViewJobTitlesRequest) => {
         return generalAction({
-            queryParameters: "/view",
+            queryParameters: "/list",
             method: "POST",
             body: filters,
+        });
+    };
+
+    const getJobTitle = async (jobTitleData: GetJobTitleRequest) => {
+        return generalAction({
+            queryParameters: `/list?job_ID=${jobTitleData.job_ID}`,
+            method: "POST",
+            body: { job_ID: jobTitleData.job_ID },
         });
     };
 
@@ -148,6 +157,7 @@ export const useJobTitleService = () => {
         // methods
         createJobTitle,
         updateJobTitle,
-        viewJobTitles,
+        listJobTitles,
+        getJobTitle,
     };
 };

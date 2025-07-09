@@ -27,11 +27,11 @@ export const contactAPI = createApi({
     endpoints: (builder) => ({
         fetchContact: builder.query({
             query: (data: generalProps) =>
-                `api/personal/contact${data.queryParameters}`,
+                `/api/v1/family${data.queryParameters}`,
         }),
         actionContact: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/api/personal/contact${data.queryParameters}`,
+                url: `/api/v1/family${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),

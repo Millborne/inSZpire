@@ -26,11 +26,12 @@ export const tagsAPI = createApi({
     tagTypes: ["tags"],
     endpoints: (builder) => ({
         fetchTags: builder.query({
-            query: (data: generalProps) => `api/tags${data.queryParameters}`,
+            query: (data: generalProps) =>
+                `/api/v1/position${data.queryParameters}`,
         }),
         actionTags: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/api/tags${data.queryParameters}`,
+                url: `/api/v1/position${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),

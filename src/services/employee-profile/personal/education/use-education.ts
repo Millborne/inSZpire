@@ -58,134 +58,71 @@ export const useEducation = ({
 
 // Education-specific interfaces based on API documentation
 export interface EducationData {
-    education_ID?: string;
-    employee_ID?: string;
-    education_level:
-        | "elementary"
-        | "high_school"
-        | "vocational"
-        | "bachelor"
-        | "master"
-        | "doctorate"
-        | "post_graduate"
-        | "other";
-    school_name: string;
-    school_address?: string;
-    course_degree?: string;
-    major_field?: string;
-    minor_field?: string;
-    start_date: string;
-    end_date?: string;
-    graduation_date?: string;
-    gpa?: number;
-    honors_awards?: string;
-    thesis_dissertation?: string;
-    academic_achievements?: string;
-    extracurricular_activities?: string;
-    scholarships?: string;
-    education_status: "completed" | "ongoing" | "incomplete" | "transferred";
-    is_graduated: boolean;
-    is_current: boolean;
-    education_status_detail: "active" | "pending" | "inactive" | "suspended";
-    is_archived?: number;
+    educ_ID?: string;
+    profile_ID: string;
+    education_level_ID: string;
+    school_ID: string;
+    degree?: string;
+    course?: string;
+    year_started?: string | number;
+    year_left?: string | number;
+    honors_received?: string;
+    user_type?: string;
     created_at?: string;
     updated_at?: string;
 }
 
 export interface CreateEducationRequest {
-    employee_ID: string;
-    education_level:
-        | "elementary"
-        | "high_school"
-        | "vocational"
-        | "bachelor"
-        | "master"
-        | "doctorate"
-        | "post_graduate"
-        | "other";
-    school_name: string;
-    school_address?: string;
-    course_degree?: string;
-    major_field?: string;
-    minor_field?: string;
-    start_date: string;
-    end_date?: string;
-    graduation_date?: string;
-    gpa?: number;
-    honors_awards?: string;
-    thesis_dissertation?: string;
-    academic_achievements?: string;
-    extracurricular_activities?: string;
-    scholarships?: string;
-    education_status: "completed" | "ongoing" | "incomplete" | "transferred";
-    is_graduated: boolean;
-    is_current: boolean;
-    education_status_detail: "active" | "pending" | "inactive" | "suspended";
-    is_archived?: number;
+    profile_ID: string;
+    education_level_ID: string;
+    school_ID: string;
+    degree?: string;
+    course?: string;
+    year_started?: string | number;
+    year_left?: string | number;
+    honors_received?: string;
+    user_type?: string;
 }
 
 export interface UpdateEducationRequest {
-    education_ID: string;
-    education_level?:
-        | "elementary"
-        | "high_school"
-        | "vocational"
-        | "bachelor"
-        | "master"
-        | "doctorate"
-        | "post_graduate"
-        | "other";
-    school_name?: string;
-    school_address?: string;
-    course_degree?: string;
-    major_field?: string;
-    minor_field?: string;
-    start_date?: string;
-    end_date?: string;
-    graduation_date?: string;
-    gpa?: number;
-    honors_awards?: string;
-    thesis_dissertation?: string;
-    academic_achievements?: string;
-    extracurricular_activities?: string;
-    scholarships?: string;
-    education_status?: "completed" | "ongoing" | "incomplete" | "transferred";
-    is_graduated?: boolean;
-    is_current?: boolean;
-    education_status_detail?: "active" | "pending" | "inactive" | "suspended";
-    is_archived?: number;
+    educ_ID: string;
+    fields: {
+        education_level_ID?: string;
+        school_ID?: string;
+        degree?: string;
+        course?: string;
+        year_started?: string | number;
+        year_left?: string | number;
+        honors_received?: string;
+        user_type?: string;
+    };
 }
 
 export interface ViewEducationRequest {
-    employee_ID: string;
-    education_level?:
-        | "elementary"
-        | "high_school"
-        | "vocational"
-        | "bachelor"
-        | "master"
-        | "doctorate"
-        | "post_graduate"
-        | "other";
-    education_status?: "completed" | "ongoing" | "incomplete" | "transferred";
-    education_status_detail?: "active" | "pending" | "inactive" | "suspended";
-    is_graduated?: boolean;
-    is_current?: boolean;
-    is_archived?: number;
-    offset?: number;
-    limit?: number;
+    filters?: {
+        profile_ID?: string;
+        education_level_ID?: string;
+        school_ID?: string;
+        degree?: string;
+        course?: string;
+        year_started?: string | number;
+        year_left?: string | number;
+        honors_received?: string;
+        user_type?: string;
+    };
 }
 
 export interface GetEducationRequest {
-    education_ID: string;
+    educ_ID: string;
 }
 
-export interface BatchUpdateStatusRequest {
-    req_IDs: string[];
-    education_status_detail: "active" | "pending" | "inactive" | "suspended";
+export interface DeleteEducationRequest {
+    educ_ID: string;
+    profile_ID: string;
+    user_type: string;
 }
 
-// Specific education service methods
+// Specific education service methods based on API documentation
 export const useEducationService = () => {
     const [
         generalAction,
@@ -199,7 +136,6 @@ export const useEducationService = () => {
         },
     ] = useActionEducationMutation();
 
-    // List education records
     const listEducation = async (filters: ViewEducationRequest) => {
         return generalAction({
             queryParameters: "/list",
@@ -208,48 +144,43 @@ export const useEducationService = () => {
         });
     };
 
-    // Create education record
     const createEducation = async (educationData: CreateEducationRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/create",
             method: "POST",
             body: educationData,
         });
     };
 
-    // Edit education record
     const updateEducation = async (educationData: UpdateEducationRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/update",
             method: "PUT",
             body: educationData,
         });
     };
 
-    // Get specific education record
     const getEducation = async (educationData: GetEducationRequest) => {
         return generalAction({
-            queryParameters: "/get",
+            queryParameters: `/list?educ_ID=${educationData.educ_ID}`,
             method: "POST",
-            body: educationData,
+            body: { filters: { educ_ID: educationData.educ_ID } },
         });
     };
 
-    // View education records with filters
     const viewEducation = async (filters: ViewEducationRequest) => {
         return generalAction({
-            queryParameters: "/view",
+            queryParameters: "/list",
             method: "POST",
             body: filters,
         });
     };
 
-    // Batch update status
-    const batchUpdateStatus = async (batchData: BatchUpdateStatusRequest) => {
+    const deleteEducation = async (educationData: DeleteEducationRequest) => {
         return generalAction({
-            queryParameters: "/batch-update-status",
+            queryParameters: "/delete",
             method: "POST",
-            body: batchData,
+            body: educationData,
         });
     };
 
@@ -268,6 +199,6 @@ export const useEducationService = () => {
         updateEducation,
         getEducation,
         viewEducation,
-        batchUpdateStatus,
+        deleteEducation,
     };
 };
