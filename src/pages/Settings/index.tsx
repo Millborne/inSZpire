@@ -22,53 +22,58 @@ const Settings = () => {
     setSidebarVisible((prev) => !prev);
   };
 
-  const sidebarMenuItems = [
-    {
-      id: "accounts",
-      label: "Accounts",
-      url: "accounts",
-    },
-    {
-      id: "tags",
-      label: "Tags",
-      url: "tags",
-    },
-    {
-      id: "positions",
-      label: "Positions",
-      url: "positions",
-    },
-    {
-      id: "job-title",
-      label: "Job Title",
-      url: "job-title",
-    },
-    // {
-    //     id: "fields",
-    //     label: "Fields",
-    //     url: "fields",
-    // },
-    // {
-    //     id: "resolution-center",
-    //     label: "Resolution Center",
-    //     url: "resolution-center",
-    // },
-    // {
-    //     id: "request-approval-settings",
-    //     label: "Request Approval Settings",
-    //     url: "request-approval-settings",
-    // },
-    // {
-    //     id: "in-szpire-access",
-    //     label: "inSZpire Access",
-    //     url: "in-szpire-access",
-    // },
-    // {
-    //     id: "hoof-trail",
-    //     label: "Hoof Trail",
-    //     url: "hoof-trail",
-    // },
-  ];
+    const sidebarMenuItems = [
+        {
+            id: "accounts",
+            label: "Accounts",
+            url: "accounts",
+        },
+        {
+            id: "archived",
+            label: "Archived Accounts",
+            url: "archived",
+        },
+        {
+            id: "tags",
+            label: "Tags",
+            url: "tags",
+        },
+        {
+            id: "positions",
+            label: "Positions",
+            url: "positions",
+        },
+        {
+            id: "job-title",
+            label: "Job Title",
+            url: "job-title",
+        },
+        // {
+        //     id: "fields",
+        //     label: "Fields",
+        //     url: "fields",
+        // },
+        // {
+        //     id: "resolution-center",
+        //     label: "Resolution Center",
+        //     url: "resolution-center",
+        // },
+        // {
+        //     id: "request-approval-settings",
+        //     label: "Request Approval Settings",
+        //     url: "request-approval-settings",
+        // },
+        // {
+        //     id: "in-szpire-access",
+        //     label: "inSZpire Access",
+        //     url: "in-szpire-access",
+        // },
+        // {
+        //     id: "hoof-trail",
+        //     label: "Hoof Trail",
+        //     url: "hoof-trail",
+        // },
+    ];
 
   const handleMenuSelect = (id: string) => {
     setSelected(id);

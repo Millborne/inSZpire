@@ -92,8 +92,6 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    console.log(accounts);
-
     //! Get headers based on mode
     const headers = getHeaders(mode);
 
@@ -147,9 +145,15 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
         setCurrentPage(page);
     };
 
-    const handleOpenModal = (account: AccountDataType, mode: ModalMode) => {
-        setSelectedAccount(account);
-        setModalMode(mode);
+    const handleOpenModal = (
+        account: AccountDataType,
+        modalMode: ModalMode
+    ) => {
+        setSelectedAccount({
+            ...account,
+            is_archived: mode === "archived" ? 1 : 0,
+        });
+        setModalMode(modalMode);
         setIsModalOpen(true);
     };
 
@@ -176,8 +180,7 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                 await accountService.createAccount(accountData);
             } else if (
                 modalMode === "edit" &&
-                selectedAccount?.id &&
-                data.is_archived
+                selectedAccount?.id
             ) {
                 const accountData = {
                     acc_ID: selectedAccount.id,
@@ -197,20 +200,22 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                 await accountService.updateAccount(accountDataEdit);
 
                 await accountService.updateAccount(accountData);
-            } else if (modalMode === "edit" && selectedAccount?.id) {
-                const accountData = {
-                    acc_ID: selectedAccount.id,
-                    acc_code: data.code,
-                    acc_name: data.account,
-                    acc_description: data.description || "",
-                    acc_status: data.status as
-                        | "active"
-                        | "pending"
-                        | "inactive"
-                        | "suspended",
-                };
-                await accountService.updateAccount(accountData);
-            }
+            } 
+            
+            // else if (modalMode === "edit" && selectedAccount?.id) {
+            //     const accountData = {
+            //         acc_ID: selectedAccount.id,
+            //         acc_code: data.code,
+            //         acc_name: data.account,
+            //         acc_description: data.description || "",
+            //         acc_status: data.status as
+            //             | "active"
+            //             | "pending"
+            //             | "inactive"
+            //             | "suspended",
+            //     };
+            //     await accountService.updateAccount(accountData);
+            // }
             // Refresh accounts after save
             const filters = {
                 search: searchTerm,
@@ -271,7 +276,6 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
             icon: <Edit2 />,
             label: "Edit Account",
             onClick: (index: number) => {
-                console.log(index);
                 handleOpenModal(modalData[index], "edit");
             },
         },
@@ -293,7 +297,7 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                                     <ArrowLeft
                                         className="text-szPrimary700 cursor-pointer"
                                         // TODO: Backend Integration - Add navigation handler
-                                        // onClick={() => navigate("/accounts")}
+                                        onClick={() => navigate(-1)}
                                     />
                                 )}
                                 <HamburgerMenu

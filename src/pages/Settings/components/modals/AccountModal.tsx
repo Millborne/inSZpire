@@ -44,6 +44,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
         description: "",
         status: "",
     });
+
     const [toggle, setToggle] = useState(false);
     const [isConfirmationModalOpen, setIsConfirmationModalOpen] =
         useState(false);
@@ -58,8 +59,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
     useEffect(() => {
         if (selectedAccount) {
             setFormData(selectedAccount);
-            // TODO: Backend Integration - Set archived status from API data
-            // setToggle(selectedAccount.isArchived || false);
+            setToggle(selectedAccount?.is_archived === 1 ? true : false);
         } else {
             setFormData({
                 id: "",
