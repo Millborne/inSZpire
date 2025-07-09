@@ -1,0 +1,41 @@
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import Cookies from "js-cookie";
+
+const { VITE_EMPLOYMENT_SERVICE } = import.meta.env;
+
+interface generalProps {
+    queryParameters: string;
+    method?: string;
+    body?: any;
+}
+
+export const summaryAPI = createApi({
+    reducerPath: "summary",
+    baseQuery: fetchBaseQuery({
+        baseUrl: VITE_EMPLOYMENT_SERVICE,
+        prepareHeaders: (headers) => {
+            const token = Cookies.get("token");
+
+            if (token) {
+                headers.set("Authorization", `Bearer ${token}`);
+            }
+
+            return headers;
+        },
+    }),
+    tagTypes: ["summary"],
+    endpoints: (builder) => ({
+        fetchSummary: builder.query({
+            query: (data: generalProps) => `api/summary${data.queryParameters}`,
+        }),
+        actionSummary: builder.mutation({
+            query: (data: generalProps) => ({
+                url: `/api/summary${data.queryParameters}`,
+                method: data.method,
+                body: data.body ?? undefined,
+            }),
+        }),
+    }),
+});
+
+export const { useFetchSummaryQuery, useActionSummaryMutation } = summaryAPI;
