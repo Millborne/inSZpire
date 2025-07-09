@@ -16,6 +16,7 @@ import Compensation from "./pages/Employees/pages/Compensation";
 import Payslip from "./pages/Employees/pages/Payslip";
 import HoofTrails from "./pages/Employees/pages/HoofTrails";
 import EmployeeList from "./pages/Employees/pages/EmployeeList";
+import ChangePassword from "./pages/ChangePassword";
 import NotFound from "./pages/NotFound";
 import Accounts from "./pages/Settings/pages/Accounts";
 import Tags from "./pages/Settings/pages/Tags";
@@ -27,6 +28,7 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/home/*" element={<Home />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="employees" element={<EmployeeList />} />
