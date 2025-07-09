@@ -53,13 +53,12 @@ export const useTags = ({
     };
 };
 
-// Tag-specific interfaces based on API documentation
+// Tag-specific interfaces based on API documentation (using position endpoints)
 export interface TagData {
     tag_ID?: string;
     tag_name: string;
-    tag_description?: string;
-    tag_color?: string;
-    tag_status: "active" | "pending" | "inactive" | "suspended";
+    tag_type: string;
+    description?: string;
     is_archived?: number;
     created_at?: string;
     updated_at?: string;
@@ -67,35 +66,29 @@ export interface TagData {
 
 export interface CreateTagRequest {
     tag_name: string;
-    tag_description?: string;
-    tag_color?: string;
-    tag_status: "active" | "pending" | "inactive" | "suspended";
+    tag_type: string;
+    description?: string;
     is_archived?: number;
 }
 
 export interface UpdateTagRequest {
     tag_ID: string;
     tag_name?: string;
-    tag_description?: string;
-    tag_color?: string;
-    tag_status?: "active" | "pending" | "inactive" | "suspended";
+    tag_type?: string;
+    description?: string;
     is_archived?: number;
 }
 
 export interface ViewTagsRequest {
-    search?: string;
+    tag_type?: string;
     is_archived?: number;
-    tag_status?: "active" | "pending" | "inactive" | "suspended";
-    offset?: number;
-    limit?: number;
 }
 
-export interface BatchUpdateStatusRequest {
-    req_IDs: string[];
-    tag_status: "active" | "pending" | "inactive" | "suspended";
+export interface GetTagsByTypeRequest {
+    tag_type: string;
 }
 
-// Specific tag service methods
+// Specific tag service methods based on API documentation (using position endpoints)
 export const useTagService = () => {
     const [
         generalAction,
@@ -109,35 +102,17 @@ export const useTagService = () => {
         },
     ] = useActionTagsMutation();
 
-    const createTag = async (tagData: CreateTagRequest) => {
+    const getTagsByType = async (tagType: string) => {
         return generalAction({
-            queryParameters: "/",
-            method: "POST",
-            body: tagData,
-        });
-    };
-
-    const updateTag = async (tagData: UpdateTagRequest) => {
-        return generalAction({
-            queryParameters: "/",
-            method: "PUT",
-            body: tagData,
+            queryParameters: `/tags/${tagType}`,
+            method: "GET",
         });
     };
 
     const viewTags = async (filters: ViewTagsRequest) => {
         return generalAction({
-            queryParameters: "/view",
-            method: "POST",
-            body: filters,
-        });
-    };
-
-    const batchUpdateStatus = async (batchData: BatchUpdateStatusRequest) => {
-        return generalAction({
-            queryParameters: "/batch-update-status",
-            method: "POST",
-            body: batchData,
+            queryParameters: `/tags/${filters.tag_type || "skill"}`,
+            method: "GET",
         });
     };
 
@@ -151,9 +126,7 @@ export const useTagService = () => {
         actionReset,
 
         // methods
-        createTag,
-        updateTag,
+        getTagsByType,
         viewTags,
-        batchUpdateStatus,
     };
 };

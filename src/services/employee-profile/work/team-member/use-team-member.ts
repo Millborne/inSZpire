@@ -56,7 +56,7 @@ export const useTeamMembers = ({
     };
 };
 
-// Team Member-specific interfaces
+// Team Member-specific interfaces based on API documentation
 export interface TeamMemberData {
     tm_ID?: string;
     emp_ID: string;
@@ -88,6 +88,29 @@ export interface TeamMemberData {
     };
 }
 
+export interface CreateTeamMemberRequest {
+    emp_ID: string;
+    team_ID: string;
+    tm_role: string;
+    tm_status: "active" | "pending" | "inactive";
+    tm_start_date: string;
+    tm_end_date?: string;
+    tm_notes?: string;
+    is_archived?: number;
+}
+
+export interface UpdateTeamMemberRequest {
+    tm_ID: string;
+    emp_ID?: string;
+    team_ID?: string;
+    tm_role?: string;
+    tm_status?: "active" | "pending" | "inactive";
+    tm_start_date?: string;
+    tm_end_date?: string;
+    tm_notes?: string;
+    is_archived?: number;
+}
+
 export interface ViewTeamMembersRequest {
     emp_ID?: string;
     team_ID?: string;
@@ -102,7 +125,11 @@ export interface TeamMemberDetailsRequest {
     tm_ID: string;
 }
 
-// Specific team member service methods
+export interface GetTeamMemberRequest {
+    tm_ID: string;
+}
+
+// Specific team member service methods based on API documentation
 export const useTeamMemberService = () => {
     const [
         generalAction,
@@ -116,9 +143,29 @@ export const useTeamMemberService = () => {
         },
     ] = useActionTeamMembersMutation();
 
+    const createTeamMember = async (
+        teamMemberData: CreateTeamMemberRequest
+    ) => {
+        return generalAction({
+            queryParameters: "/create",
+            method: "POST",
+            body: teamMemberData,
+        });
+    };
+
+    const updateTeamMember = async (
+        teamMemberData: UpdateTeamMemberRequest
+    ) => {
+        return generalAction({
+            queryParameters: "/update",
+            method: "PUT",
+            body: teamMemberData,
+        });
+    };
+
     const viewTeamMembers = async (filters: ViewTeamMembersRequest) => {
         return generalAction({
-            queryParameters: "/view",
+            queryParameters: "/list",
             method: "POST",
             body: filters,
         });
@@ -145,6 +192,14 @@ export const useTeamMemberService = () => {
         });
     };
 
+    const getTeamMember = async (teamMemberData: GetTeamMemberRequest) => {
+        return generalAction({
+            queryParameters: `/list?tm_ID=${teamMemberData.tm_ID}`,
+            method: "POST",
+            body: { tm_ID: teamMemberData.tm_ID },
+        });
+    };
+
     return {
         // mutation
         actionData,
@@ -155,9 +210,12 @@ export const useTeamMemberService = () => {
         actionReset,
 
         // methods
+        createTeamMember,
+        updateTeamMember,
         viewTeamMembers,
         viewTeamMemberDetails,
         viewTeamMembersByEmployee,
         viewTeamMembersByTeam,
+        getTeamMember,
     };
 };

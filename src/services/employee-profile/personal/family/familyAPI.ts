@@ -27,11 +27,11 @@ export const familyAPI = createApi({
     endpoints: (builder) => ({
         fetchFamily: builder.query({
             query: (data: generalProps) =>
-                `api/personal/family${data.queryParameters}`,
+                `/api/v1/family${data.queryParameters}`,
         }),
         actionFamily: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/api/personal/family${data.queryParameters}`,
+                url: `/api/v1/family${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),

@@ -87,12 +87,11 @@ export interface ViewTeamsRequest {
     limit?: number;
 }
 
-export interface BatchUpdateStatusRequest {
-    req_IDs: string[];
-    team_status: "active" | "inactive";
+export interface GetTeamRequest {
+    team_ID: string;
 }
 
-// Specific team service methods
+// Specific team service methods based on API documentation
 export const useTeamService = () => {
     const [
         generalAction,
@@ -108,7 +107,7 @@ export const useTeamService = () => {
 
     const createTeam = async (teamData: CreateTeamRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/create",
             method: "POST",
             body: teamData,
         });
@@ -116,7 +115,7 @@ export const useTeamService = () => {
 
     const updateTeam = async (teamData: UpdateTeamRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/update",
             method: "PUT",
             body: teamData,
         });
@@ -124,9 +123,17 @@ export const useTeamService = () => {
 
     const viewTeams = async (filters: ViewTeamsRequest) => {
         return generalAction({
-            queryParameters: "/view",
+            queryParameters: "/list",
             method: "POST",
             body: filters,
+        });
+    };
+
+    const getTeam = async (teamData: GetTeamRequest) => {
+        return generalAction({
+            queryParameters: `/list?team_ID=${teamData.team_ID}`,
+            method: "POST",
+            body: { team_ID: teamData.team_ID },
         });
     };
 
@@ -143,5 +150,6 @@ export const useTeamService = () => {
         createTeam,
         updateTeam,
         viewTeams,
+        getTeam,
     };
 };
