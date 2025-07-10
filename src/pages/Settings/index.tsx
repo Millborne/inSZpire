@@ -84,25 +84,18 @@ const Settings = () => {
   useEffect(() => {
     const pathSegments = location.pathname.split("/").filter(Boolean);
 
-    // Check if we're on any archived route (archived-accounts, archived-tags, etc.)
-    const archivedSegment = pathSegments.find((segment) =>
-      segment.startsWith("archived-")
+    // Check if we're in the settings section
+    const settingsIndex = pathSegments.findIndex(
+      (segment) => segment === "settings"
     );
-    if (archivedSegment) {
-      const baseRoute = archivedSegment.replace("archived-", "");
-      const matchedMenu = sidebarMenuItems.find(
-        (item) => item.url === baseRoute
-      );
-      if (matchedMenu) {
-        setSelected(matchedMenu.id);
-        return;
-      }
-    }
+    if (settingsIndex === -1) return;
 
-    const lastSegment = pathSegments[pathSegments.length - 1];
+    // Get the route after settings
+    const routeAfterSettings = pathSegments[settingsIndex + 1];
 
+    // Find the matched menu item
     const matchedMenu = sidebarMenuItems.find(
-      (item) => item.url === lastSegment
+      (item) => item.url === routeAfterSettings
     );
 
     if (matchedMenu) {

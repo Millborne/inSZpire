@@ -16,20 +16,17 @@ import Compensation from "./pages/Employees/pages/Compensation";
 import Payslip from "./pages/Employees/pages/Payslip";
 import HoofTrails from "./pages/Employees/pages/HoofTrails";
 import EmployeeList from "./pages/Employees/pages/EmployeeList";
-import ChangePassword from "./pages/ChangePassword";
 import NotFound from "./pages/NotFound";
 import Accounts from "./pages/Settings/pages/Accounts";
 import Tags from "./pages/Settings/pages/Tags";
 import Positions from "./pages/Settings/pages/Positions";
 import JobTitle from "./pages/Settings/pages/JobTitle";
 import Teams from "./pages/Teams/index";
-import SpecificTeam from "./pages/Teams/pages/SpecificTeam";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/home/*" element={<Home />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="employees" element={<EmployeeList />} />
@@ -45,21 +42,22 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Route>
           <Route path="teams" element={<Teams />} />
-          <Route path="teams/:id/specificteam" element={<SpecificTeam />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="analytics-and-report" element={<AnalyticsAndReport />} />
           <Route path="employee-transition" element={<EmployeeTransition />} />
           <Route path="settings/*" element={<Settings />}>
             <Route path="accounts" element={<Accounts mode="all-accounts" />} />
+            <Route
+              path="accounts/archived-accounts"
+              element={<Accounts mode="archived" />}
+            />
             <Route path="tags" element={<Tags mode="all-tags" />} />
             <Route
-              path="positions"
-              element={<Positions mode="all-positions" />}
+              path="tags/archived-tags"
+              element={<Tags mode="archived" />}
             />
-            <Route
-              path="job-title"
-              element={<JobTitle mode="all-job-titles" />}
-            />
+            <Route path="positions" element={<Positions />} />
+            <Route path="job-title" element={<JobTitle />} />
           </Route>
           <Route path="*" element={<NotFound />} />
           {/* Catch-all route for 404 */}

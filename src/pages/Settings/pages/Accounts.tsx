@@ -164,13 +164,17 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
     try {
       if (modalMode === "add") {
         console.log("Adding new account:", data);
-        // TODO: await createAccount(data).unwrap();
+        // TODO: INSER BACKEND LOGIC
+        setSnackbarAction("add");
+        setIsSnackbarOpen(true);
       } else if (modalMode === "edit") {
         console.log("Updating account:", data);
-        // TODO: await updateAccount({ id: selectedAccount?.id, ...data }).unwrap();
+        // TODO: INSER BACKEND LOGIC
+        setSnackbarAction("update");
+        setIsSnackbarOpen(true);
       }
     } catch (error) {
-      // TODO: Add error handling
+      // TODO: INSER BACKEND LOGIC
       console.error("Error saving account:", error);
     }
   };
@@ -185,10 +189,12 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
     try {
       if (accountToArchive) {
         console.log("Archiving account:", accountToArchive);
-        // TODO: await archiveAccount(accountToArchive.id).unwrap();
+        // TODO: INSER BACKEND LOGIC
+        setSnackbarAction("archive");
+        setIsSnackbarOpen(true);
       }
     } catch (error) {
-      // TODO: Add error handling
+      // TODO: INSER BACKEND LOGIC
       console.error("Error archiving account:", error);
     } finally {
       setIsArchiveConfirmationOpen(false);
@@ -219,8 +225,7 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                 {mode === "archived" && (
                   <ArrowLeft
                     className="text-szPrimary700 cursor-pointer"
-                    // TODO: Backend Integration - Add navigation handler
-                    // onClick={() => navigate("/accounts")}
+                    onClick={() => navigate("/home/settings/accounts")}
                   />
                 )}
                 <HamburgerMenu
@@ -245,8 +250,9 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                           label: "View Archived Accounts",
                           icon: <ArchiveBox />,
                           onClick: () => {
-                            // TODO: Backend Integration - Replace with proper navigation
-                            window.location.href = "/archived-accounts";
+                            navigate(
+                              "/home/settings/accounts/archived-accounts"
+                            );
                           },
                         },
                       ]}
@@ -298,6 +304,18 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
         description="Are you sure you want to archive this account?"
         buttonLabel="Archive"
         buttonFooterIcon={<ArchiveBox />}
+      />
+      <SnackbarAlert
+        isOpen={isSnackbarOpen}
+        onClose={() => setIsSnackbarOpen(false)}
+        title={
+          snackbarAction === "add"
+            ? "Successfully added Account"
+            : snackbarAction === "update"
+            ? "Successfully updated Account"
+            : "Successfully archived Account"
+        }
+        type="success"
       />
     </>
   );
