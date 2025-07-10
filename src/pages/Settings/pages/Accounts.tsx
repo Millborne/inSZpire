@@ -91,10 +91,12 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
         useState<AccountDataType | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [accounts, setAccounts] = useState<AccountData[]>([]);
+    const [totalCount, setTotalCount] = useState(0);
     const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
-    const [snackbarAction, setSnackbarAction] = useState<
-        "add" | "update" | "archive" | "restore"
-    >("add");
+    const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [snackbarType, setSnackbarType] = useState<
+        "success" | "error" | "warning" | "info"
+    >("success");
 
     //! Get headers based on mode
     const headers = getHeaders(mode);
@@ -161,6 +163,7 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                 const result = await accountService.viewAccounts(filters);
                 if (result.data?.data) {
                     setAccounts(result.data.data);
+                    setTotalCount(result.data.total_count);
                 }
             } catch (error) {
                 console.error("Error fetching accounts:", error);
@@ -212,10 +215,24 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                         | "suspended",
                     is_archived: 0,
                 };
-                await accountService.createAccount(accountData);
+                let result = await accountService.createAccount(accountData);
 
-                setSnackbarAction("add");
-                setIsSnackbarOpen(true);
+                if (result.data?.data) {
+                    console.log(result);
+                    setSnackbarMessage(result.data?.message);
+                    setSnackbarType("success");
+                    setIsSnackbarOpen(true);
+                    setIsModalOpen(false);
+                } else {
+                    const errorMessage =
+                        result.error && "data" in result.error
+                            ? (result.error.data as any)?.message
+                            : (result.error as any)?.message ||
+                              "An error occurred";
+                    setSnackbarMessage(errorMessage);
+                    setSnackbarType("error");
+                    setIsSnackbarOpen(true);
+                }
             } else if (modalMode === "edit" && selectedAccount?.id) {
                 const accountDataEdit = {
                     acc_ID: selectedAccount.id,
@@ -233,27 +250,48 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                     acc_ID: selectedAccount.id,
                     is_archived: data.is_archived,
                 };
-                await accountService.updateAccount(accountDataEdit);
-                await accountService.updateAccount(accountData);
+                let resultUpdate = await accountService.updateAccount(
+                    accountDataEdit
+                );
+                let resultArchive = await accountService.updateAccount(
+                    accountData
+                );
+                console.log(resultUpdate);
+                if (resultUpdate.data?.data) {
+                    setSnackbarMessage(resultUpdate.data?.message);
+                    setSnackbarType("success");
+                    setIsSnackbarOpen(true);
+                    setIsModalOpen(false);
+                } else {
+                    const errorMessage =
+                        resultUpdate.error && "data" in resultUpdate.error
+                            ? (resultUpdate.error.data as any)?.message
+                            : (resultUpdate.error as any)?.message ||
+                              "An error occurred";
+                    setSnackbarMessage(errorMessage);
+                    setSnackbarType("error");
+                    setIsSnackbarOpen(true);
+                }
 
-                setSnackbarAction("update");
-                setIsSnackbarOpen(true);
+                if (data.is_archived === 1) {
+                    if (resultArchive.data?.data) {
+                        setSnackbarMessage(resultArchive.data?.message);
+                        setSnackbarType("success");
+                        setIsSnackbarOpen(true);
+                        setIsModalOpen(false);
+                    } else {
+                        const errorMessage =
+                            resultArchive.error && "data" in resultArchive.error
+                                ? (resultArchive.error.data as any)?.message
+                                : (resultArchive.error as any)?.message ||
+                                  "An error occurred";
+                        setSnackbarMessage(errorMessage);
+                        setSnackbarType("error");
+                        setIsSnackbarOpen(true);
+                    }
+                }
             }
 
-            // else if (modalMode === "edit" && selectedAccount?.id) {
-            //     const accountData = {
-            //         acc_ID: selectedAccount.id,
-            //         acc_code: data.code,
-            //         acc_name: data.account,
-            //         acc_description: data.description || "",
-            //         acc_status: data.status as
-            //             | "active"
-            //             | "pending"
-            //             | "inactive"
-            //             | "suspended",
-            //     };
-            //     await accountService.updateAccount(accountData);
-            // }
             // Refresh accounts after save
             const filters = {
                 search: searchTerm,
@@ -264,11 +302,13 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
             const result = await accountService.viewAccounts(filters);
             if (result.data?.data) {
                 setAccounts(result.data.data);
-                // TODO: Set total count for pagination
-                // setTotalCount(result.data.total_count);
+                setTotalCount(result.data.total_count);
             }
         } catch (error) {
-            console.error("Error saving account:", error);
+            console.log("Error saving account:", error);
+            setSnackbarMessage("Failed to save account. Please try again.");
+            setSnackbarType("error");
+            setIsSnackbarOpen(true);
         }
     };
 
@@ -286,11 +326,24 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                     acc_ID: account.id,
                     is_archived: 0,
                 };
-                await accountService.updateAccount(accountData);
+                let resultRestore = await accountService.updateAccount(
+                    accountData
+                );
 
-                setSnackbarAction("restore");
-                setIsSnackbarOpen(true);
-
+                if (resultRestore.data?.data) {
+                    setSnackbarMessage(resultRestore.data?.message);
+                    setSnackbarType("success");
+                    setIsSnackbarOpen(true);
+                } else {
+                    const errorMessage =
+                        resultRestore.error && "data" in resultRestore.error
+                            ? (resultRestore.error.data as any)?.message
+                            : (resultRestore.error as any)?.message ||
+                              "An error occurred";
+                    setSnackbarMessage(errorMessage);
+                    setSnackbarType("error");
+                    setIsSnackbarOpen(true);
+                }
                 // Refresh accounts after archive
                 const filters = {
                     search: searchTerm,
@@ -301,10 +354,14 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                 const result = await accountService.viewAccounts(filters);
                 if (result.data?.data) {
                     setAccounts(result.data.data);
+                    setTotalCount(result.data.total_count);
                 }
             }
         } catch (error) {
-            console.error("Error archiving account:", error);
+            console.error("Error restoring account:", error);
+            setSnackbarMessage("Failed to restore account. Please try again.");
+            setSnackbarType("error");
+            setIsSnackbarOpen(true);
         } finally {
             setIsArchiveConfirmationOpen(false);
             setAccountToArchive(null);
@@ -320,7 +377,8 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                 };
                 await accountService.updateAccount(accountData);
 
-                setSnackbarAction("archive");
+                setSnackbarMessage("Account has been successfully archived");
+                setSnackbarType("success");
                 setIsSnackbarOpen(true);
 
                 // Refresh accounts after archive
@@ -333,10 +391,14 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                 const result = await accountService.viewAccounts(filters);
                 if (result.data?.data) {
                     setAccounts(result.data.data);
+                    setTotalCount(result.data.total_count);
                 }
             }
         } catch (error) {
             console.error("Error archiving account:", error);
+            setSnackbarMessage("Failed to archive account. Please try again.");
+            setSnackbarType("error");
+            setIsSnackbarOpen(true);
         } finally {
             setIsArchiveConfirmationOpen(false);
             setAccountToArchive(null);
@@ -368,6 +430,20 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
         },
     ];
 
+    useEffect(() => {
+        if (accountService.actionIsError) {
+            const errorMessage =
+                accountService.actionError &&
+                "data" in accountService.actionError
+                    ? (accountService.actionError.data as any)?.message
+                    : (accountService.actionError as any)?.message ||
+                      "An error occurred";
+            setSnackbarMessage(errorMessage);
+            setSnackbarType("error");
+            setIsSnackbarOpen(true);
+        }
+    }, [accountService.actionError]);
+
     return (
         <>
             <CardContainer
@@ -378,8 +454,10 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                                 {mode === "archived" && (
                                     <ArrowLeft
                                         className="text-szPrimary700 cursor-pointer"
-                                        // TODO: Backend Integration - Add navigation handler
-                                        onClick={() => navigate(-1)}
+                                        onClick={() => {
+                                            setCurrentPage(1);
+                                            navigate(-1);
+                                        }}
                                     />
                                 )}
                                 <HamburgerMenu
@@ -409,6 +487,7 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                                                     label: "View Archived Accounts",
                                                     icon: <ArchiveBox />,
                                                     onClick: () => {
+                                                        setCurrentPage(1);
                                                         navigate("archived");
                                                     },
                                                 },
@@ -440,9 +519,7 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                         <section className="flex justify-end">
                             <Pagination
                                 currentPage={currentPage}
-                                totalPages={Math.ceil(
-                                    (accounts.length || 0) / 10
-                                )}
+                                totalPages={Math.ceil(totalCount / 10)}
                                 visiblePages={3}
                                 onChange={handlePageChange}
                             />
@@ -475,16 +552,8 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
             <SnackbarAlert
                 isOpen={isSnackbarOpen}
                 onClose={() => setIsSnackbarOpen(false)}
-                title={
-                    snackbarAction === "add"
-                        ? "Successfully added Account"
-                        : snackbarAction === "update"
-                        ? "Successfully updated Account"
-                        : snackbarAction === "archive"
-                        ? "Successfully archived Account"
-                        : "Successfully restored Account"
-                }
-                type="success"
+                title={snackbarMessage || "Operation completed successfully"}
+                type={snackbarType}
             />
         </>
     );

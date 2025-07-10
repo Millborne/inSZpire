@@ -63,7 +63,11 @@ const AccountModal: React.FC<AccountModalProps> = ({
     >("update");
     const [errors, setErrors] = useState<ValidationErrors>({});
 
-    const [noUpdatedSnackbarOpen, setNoUpdatedSnackbarOpen] = useState(false);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [snackbarType, setSnackbarType] = useState<"error" | "success">(
+        "error"
+    );
 
     // TODO: Backend Integration - Add loading state for form operations
     // const [isLoading, setIsLoading] = useState(false);
@@ -124,6 +128,19 @@ const AccountModal: React.FC<AccountModalProps> = ({
         }
 
         setErrors(newErrors);
+        // Check if any data has been entered
+        const hasData =
+            formData.account?.trim() &&
+            formData.code?.trim() &&
+            formData.status?.trim() &&
+            formData.description?.trim();
+
+        if (!hasData) {
+            setSnackbarMessage("Please fill all fields to proceed");
+            setSnackbarType("error");
+            setSnackbarOpen(true);
+            return false;
+        }
         return Object.keys(newErrors).length === 0;
     };
 
@@ -141,7 +158,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
             if (onSave) {
                 await onSave({ ...formData, is_archived: toggle ? 1 : 0 });
             }
-            onClose();
+            // onClose();
         } catch (error) {
             // TODO: Add error handling
             console.error("Error saving account:", error);
@@ -170,7 +187,9 @@ const AccountModal: React.FC<AccountModalProps> = ({
                 toggle !== (selectedAccount?.is_archived === 1);
 
             if (!hasChanges) {
-                setNoUpdatedSnackbarOpen(true);
+                setSnackbarMessage("Please update the details to proceed");
+                setSnackbarType("error");
+                setSnackbarOpen(true);
                 return; // Exit if no changes detected
             }
         }
@@ -509,12 +528,12 @@ const AccountModal: React.FC<AccountModalProps> = ({
             />
 
             <SnackbarAlert
-                isOpen={noUpdatedSnackbarOpen}
+                isOpen={snackbarOpen}
                 onClose={() => {
-                    setNoUpdatedSnackbarOpen(false);
+                    setSnackbarOpen(false);
                 }}
-                title={"Please update the details to proceed"}
-                type="error"
+                title={snackbarMessage}
+                type={snackbarType}
             />
         </>
     );
