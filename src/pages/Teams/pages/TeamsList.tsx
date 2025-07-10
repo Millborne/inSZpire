@@ -3,7 +3,7 @@ import TeamsTable from "../components/TeamsTable";
 import { Employee } from "..";
 
 interface Team {
-  id: number;
+  id: number | string;
   name: string;
   employees: Employee[];
 }
