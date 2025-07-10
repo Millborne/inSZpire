@@ -3,24 +3,22 @@ import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { SidebarMenu } from "enterprisze-global-components";
 
 export const SidebarContext = createContext({
-  isSidebarOpen: false,
-  toggleSidebar: () => {},
-  // closeSidebar: () => {},
+    isSidebarOpen: false,
+    toggleSidebar: () => {},
+    // closeSidebar: () => {},
 });
 
 const Settings = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+    const navigate = useNavigate();
+    const location = useLocation();
 
-  const [sidebarVisible, setSidebarVisible] = useState(
-    window.innerWidth >= 768
-  );
-  const [selected, setSelected] = useState("accounts");
-  const isLargeScreen = window.innerWidth >= 768;
+    const [sidebarVisible, setSidebarVisible] = useState(window.innerWidth >= 768);
+    const [selected, setSelected] = useState("accounts");
+    const isLargeScreen = window.innerWidth >= 768;
 
-  const toggleSidebar = () => {
-    setSidebarVisible((prev) => !prev);
-  };
+    const toggleSidebar = () => {
+        setSidebarVisible((prev) => !prev);
+    };
 
     const sidebarMenuItems = [
         {
@@ -76,70 +74,22 @@ const Settings = () => {
         // },
     ];
 
-  const handleMenuSelect = (id: string) => {
-    setSelected(id);
-    const selectedMenu = sidebarMenuItems.find((item) => item.id === id);
-    if (selectedMenu) {
-      navigate(`${selectedMenu.url}`);
-    }
-    if (!isLargeScreen) {
-      toggleSidebar(); // 👈 Close overlay on mobile
-    }
-  };
-
-  useEffect(() => {
-    const pathSegments = location.pathname.split("/").filter(Boolean);
-
-    // Check if we're in the settings section
-    const settingsIndex = pathSegments.findIndex(
-      (segment) => segment === "settings"
-    );
-    if (settingsIndex === -1) return;
-
-    // Get the route after settings
-    const routeAfterSettings = pathSegments[settingsIndex + 1];
-
-    // Find the matched menu item
-    const matchedMenu = sidebarMenuItems.find(
-      (item) => item.url === routeAfterSettings
-    );
-
-    if (matchedMenu) {
-      setSelected(matchedMenu.id);
-    } else {
-      // fallback to accounts if route is invalid
-      navigate("accounts", { replace: true });
-    }
-  }, [location.pathname, navigate]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      const isLarge = window.innerWidth >= 768;
-      setSidebarVisible(isLarge);
+    const handleMenuSelect = (id: string) => {
+        setSelected(id);
+        const selectedMenu = sidebarMenuItems.find((item) => item.id === id);
+        if (selectedMenu) {
+            navigate(`${selectedMenu.url}`);
+        }
+        if (!isLargeScreen) {
+            toggleSidebar(); // 👈 Close overlay on mobile
+        }
     };
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-    // }, [sidebarVisible]);
-  }, []);
-  return (
-    <>
-      <SidebarContext.Provider
-        value={{ isSidebarOpen: sidebarVisible, toggleSidebar }}
-      >
-        <section className="relative flex h-full w-full">
-          {/* Sidebar for lg and up */}
+    useEffect(() => {
+        const pathSegments = location.pathname.split("/").filter(Boolean);
+        const lastSegment = pathSegments[pathSegments.length - 1];
 
-          {isLargeScreen && (
-            <div className="relative flex h-full">
-              <SidebarMenu
-                sidebarMenuItems={sidebarMenuItems}
-                selected={selected}
-                setSelected={handleMenuSelect}
-                onToggleSidebar={toggleSidebar}
-              />
-            </div>
-          )}
+        const matchedMenu = sidebarMenuItems.find((item) => item.url === lastSegment);
 
         if (matchedMenu) {
             setSelected(matchedMenu.id);
