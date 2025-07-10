@@ -4,6 +4,7 @@ import {
     Dropdown,
     Inputs,
     Modal,
+    SnackbarAlert,
     Toggle,
 } from "enterprisze-global-components";
 import { ArchiveBox, Edit2 } from "iconsax-reactjs";
@@ -27,6 +28,14 @@ interface AccountModalProps {
     mode: ModalMode;
     selectedAccount?: AccountDataType | null;
     onSave?: (data: AccountDataType) => void;
+    setModalMode?: (mode: ModalMode) => void;
+}
+
+interface ValidationErrors {
+    account?: string;
+    code?: string;
+    status?: string;
+    description?: string;
 }
 
 const AccountModal: React.FC<AccountModalProps> = ({
@@ -35,6 +44,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
     mode,
     selectedAccount,
     onSave,
+    setModalMode,
 }) => {
     // Form state
     const [formData, setFormData] = useState<AccountDataType>({
@@ -51,6 +61,9 @@ const AccountModal: React.FC<AccountModalProps> = ({
     const [confirmationAction, setConfirmationAction] = useState<
         "update" | "add" | "archive"
     >("update");
+    const [errors, setErrors] = useState<ValidationErrors>({});
+
+    const [noUpdatedSnackbarOpen, setNoUpdatedSnackbarOpen] = useState(false);
 
     // TODO: Backend Integration - Add loading state for form operations
     // const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +83,9 @@ const AccountModal: React.FC<AccountModalProps> = ({
             });
             setToggle(false);
         }
-    }, [selectedAccount]);
+        // Clear errors when modal opens or data changes
+        setErrors({});
+    }, [selectedAccount, isOpen]);
 
     // Handle input changes
     const handleInputChange = (field: keyof AccountDataType, value: string) => {
@@ -78,10 +93,47 @@ const AccountModal: React.FC<AccountModalProps> = ({
             ...prev,
             [field]: value,
         }));
+
+        // Clear error for this field when user starts typing
+        if (errors[field as keyof ValidationErrors]) {
+            setErrors((prev) => ({
+                ...prev,
+                [field]: undefined,
+            }));
+        }
+    };
+
+    // Validation function
+    const validateForm = (): boolean => {
+        const newErrors: ValidationErrors = {};
+
+        if (!formData.account?.trim()) {
+            newErrors.account = "Account name is required";
+        }
+
+        if (!formData.code?.trim()) {
+            newErrors.code = "Account code is required";
+        }
+
+        if (!formData.status?.trim()) {
+            newErrors.status = "Status is required";
+        }
+
+        if (!formData.description?.trim()) {
+            newErrors.description = "Account description is required";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     // TODO: Backend Integration - Add validation before saving
     const handleSave = async () => {
+        // Validate form before saving
+        if (!validateForm()) {
+            return;
+        }
+
         try {
             // TODO: Add loading state
             // setIsLoading(true);
@@ -100,6 +152,29 @@ const AccountModal: React.FC<AccountModalProps> = ({
     };
 
     const handleConfirmationOpen = (action: "update" | "add" | "archive") => {
+        // Always run validation to show errors, but only proceed if validation passes
+        if (action !== "archive") {
+            const isValid = validateForm();
+            if (!isValid) {
+                return; // Don't open confirmation modal if validation fails
+            }
+        }
+
+        if (action === "update") {
+            // Check if any data has been updated
+            const hasChanges =
+                formData.account !== selectedAccount?.account ||
+                formData.code !== selectedAccount?.code ||
+                formData.status !== selectedAccount?.status ||
+                formData.description !== selectedAccount?.description ||
+                toggle !== (selectedAccount?.is_archived === 1);
+
+            if (!hasChanges) {
+                setNoUpdatedSnackbarOpen(true);
+                return; // Exit if no changes detected
+            }
+        }
+
         setConfirmationAction(action);
         setIsConfirmationModalOpen(true);
     };
@@ -164,32 +239,56 @@ const AccountModal: React.FC<AccountModalProps> = ({
                             variant="edit"
                             sectionLabel="ACCOUNT"
                             data={[
-                                //change this based on integration
-                                {
-                                    label: "Account Name",
-                                    value: "",
-                                    oldValue: selectedAccount?.account || "—",
-                                    newValue: formData.account || "—",
-                                },
-                                {
-                                    label: "Account Code",
-                                    value: "",
-                                    oldValue: selectedAccount?.code || "—",
-                                    newValue: formData.code || "—",
-                                },
-                                {
-                                    label: "Status",
-                                    value: "",
-                                    oldValue: selectedAccount?.status || "—",
-                                    newValue: formData.status || "—",
-                                },
-                                {
-                                    label: "Description",
-                                    value: "",
-                                    oldValue:
-                                        selectedAccount?.description || "—",
-                                    newValue: formData.description || "—",
-                                },
+                                ...(formData.account !==
+                                selectedAccount?.account
+                                    ? [
+                                          {
+                                              label: "Account Name",
+                                              value: "",
+                                              oldValue:
+                                                  selectedAccount?.account ||
+                                                  "—",
+                                              newValue: formData.account || "—",
+                                          },
+                                      ]
+                                    : []),
+                                ...(formData.code !== selectedAccount?.code
+                                    ? [
+                                          {
+                                              label: "Account Code",
+                                              value: "",
+                                              oldValue:
+                                                  selectedAccount?.code || "—",
+                                              newValue: formData.code || "—",
+                                          },
+                                      ]
+                                    : []),
+                                ...(formData.status !== selectedAccount?.status
+                                    ? [
+                                          {
+                                              label: "Status",
+                                              value: "",
+                                              oldValue:
+                                                  selectedAccount?.status ||
+                                                  "—",
+                                              newValue: formData.status || "—",
+                                          },
+                                      ]
+                                    : []),
+                                ...(formData.description !==
+                                selectedAccount?.description
+                                    ? [
+                                          {
+                                              label: "Description",
+                                              value: "",
+                                              oldValue:
+                                                  selectedAccount?.description ||
+                                                  "—",
+                                              newValue:
+                                                  formData.description || "—",
+                                          },
+                                      ]
+                                    : []),
                             ]}
                         />
                     </div>
@@ -253,6 +352,11 @@ const AccountModal: React.FC<AccountModalProps> = ({
                 title={getTitle()}
                 showButton={mode !== "view" ? false : true}
                 buttonLabel="Edit Account"
+                buttonOnClick={() => {
+                    if (mode === "view") {
+                        setModalMode?.("edit");
+                    }
+                }}
                 modalWidth="w-[900px]"
                 contentHeight="h-[400px] min-h-[120px] max-h-[55vh]"
                 buttonIcon={<Edit2 />}
@@ -265,22 +369,28 @@ const AccountModal: React.FC<AccountModalProps> = ({
                             <Inputs
                                 label="ACCOUNT NAME"
                                 value={formData.account}
-                                onChange={(e) =>
+                                onChange={(
+                                    e: React.ChangeEvent<
+                                        HTMLInputElement | HTMLTextAreaElement
+                                    >
+                                ) =>
                                     handleInputChange("account", e.target.value)
                                 }
                                 // TODO: Backend Integration - Add validation
-                                // error={errors.account}
-                                // disabled={isLoading}
+                                error={!!errors.account}
+                                disabled={mode === "view"}
                             />
                             <Inputs
                                 label="ACCOUNT CODE"
                                 value={formData.code}
-                                onChange={(e) =>
-                                    handleInputChange("code", e.target.value)
-                                }
+                                onChange={(
+                                    e: React.ChangeEvent<
+                                        HTMLInputElement | HTMLTextAreaElement
+                                    >
+                                ) => handleInputChange("code", e.target.value)}
                                 // TODO: Backend Integration - Add validation
-                                // error={errors.code}
-                                // disabled={isLoading}
+                                error={!!errors.code}
+                                disabled={mode === "view"}
                             />
                             <div className="z-20">
                                 <Dropdown
@@ -296,7 +406,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
                                               }
                                             : undefined
                                     }
-                                    onSelectionChange={(value) => {
+                                    onSelectionChange={(value: any) => {
                                         const statusValue = Array.isArray(value)
                                             ? value[0]?.value
                                             : value?.value;
@@ -305,7 +415,13 @@ const AccountModal: React.FC<AccountModalProps> = ({
                                             statusValue || ""
                                         );
                                     }}
+                                    disabled={mode === "view"}
                                 />
+                                {errors.status && (
+                                    <p className="text-caption-reg text-red-500 mt-1">
+                                        {errors.status}
+                                    </p>
+                                )}
                             </div>
 
                             {mode === "edit" && (
@@ -352,12 +468,16 @@ const AccountModal: React.FC<AccountModalProps> = ({
                             maxCharacter={200}
                             isTextarea
                             value={formData.description || ""}
-                            onChange={(e) =>
+                            onChange={(
+                                e: React.ChangeEvent<
+                                    HTMLInputElement | HTMLTextAreaElement
+                                >
+                            ) =>
                                 handleInputChange("description", e.target.value)
                             }
                             // TODO: Backend Integration - Add validation
-                            // error={errors.description}
-                            // disabled={isLoading}
+                            error={!!errors.description}
+                            disabled={mode === "view"}
                         />
                     </div>
                 }
@@ -386,6 +506,15 @@ const AccountModal: React.FC<AccountModalProps> = ({
                 buttonLabel={confirmationProps.buttonLabel}
                 content={getConfirmationContent()}
                 buttonFooterIcon={confirmationProps.buttonFooterIcon}
+            />
+
+            <SnackbarAlert
+                isOpen={noUpdatedSnackbarOpen}
+                onClose={() => {
+                    setNoUpdatedSnackbarOpen(false);
+                }}
+                title={"Please update the details to proceed"}
+                type="error"
             />
         </>
     );

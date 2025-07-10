@@ -6,6 +6,7 @@ import {
     Table,
     HeaderType,
     Pagination,
+    SnackbarAlert,
 } from "enterprisze-global-components";
 
 //icons
@@ -15,6 +16,7 @@ import {
     ArrowLeft,
     Edit2,
     HamburgerMenu,
+    RotateLeft,
     SearchNormal,
 } from "iconsax-reactjs";
 
@@ -89,8 +91,10 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
         useState<AccountDataType | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [accounts, setAccounts] = useState<AccountData[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
+    const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+    const [snackbarAction, setSnackbarAction] = useState<
+        "add" | "update" | "archive" | "restore"
+    >("add");
 
     //! Get headers based on mode
     const headers = getHeaders(mode);
@@ -107,10 +111,38 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
     };
 
     // Transform accounts for table display with colored status
-    const tableData = transformAccountsToTableData(accounts).map((row) => ({
-        ...row,
-        status: getColoredStatus(row.status),
-    }));
+    const tableData = transformAccountsToTableData(accounts).map(
+        (row, index) => ({
+            ...row,
+            account: (
+                <span
+                    onClick={() => {
+                        if (mode === "all-accounts") handleRowClick(index);
+                    }}
+                >
+                    {row.account}
+                </span>
+            ),
+            code: (
+                <span
+                    onClick={() => {
+                        if (mode === "all-accounts") handleRowClick(index);
+                    }}
+                >
+                    {row.code}
+                </span>
+            ),
+            status: (
+                <span
+                    onClick={() => {
+                        if (mode === "all-accounts") handleRowClick(index);
+                    }}
+                >
+                    {getColoredStatus(row.status)}
+                </span>
+            ),
+        })
+    );
 
     // Transform accounts for modal (keeping original string status)
     const modalData = transformAccountsToTableData(accounts);
@@ -118,7 +150,6 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
     // Fetch accounts on component mount and when mode changes
     useEffect(() => {
         const fetchAccounts = async () => {
-            setIsLoading(true);
             try {
                 const filters = {
                     search: searchTerm,
@@ -133,8 +164,6 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                 }
             } catch (error) {
                 console.error("Error fetching accounts:", error);
-            } finally {
-                setIsLoading(false);
             }
         };
 
@@ -162,9 +191,15 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
         setSelectedAccount(null);
     };
 
+    const handleRowClick = (index: number) => {
+        const account = modalData[index];
+        setSelectedAccount(account);
+        setModalMode("view");
+        setIsModalOpen(true);
+    };
+
     const handleSaveAccount = async (data: AccountDataType) => {
         try {
-            setIsSaving(true);
             if (modalMode === "add") {
                 const accountData = {
                     acc_code: data.code,
@@ -178,14 +213,10 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                     is_archived: 0,
                 };
                 await accountService.createAccount(accountData);
-            } else if (
-                modalMode === "edit" &&
-                selectedAccount?.id
-            ) {
-                const accountData = {
-                    acc_ID: selectedAccount.id,
-                    is_archived: data.is_archived,
-                };
+
+                setSnackbarAction("add");
+                setIsSnackbarOpen(true);
+            } else if (modalMode === "edit" && selectedAccount?.id) {
                 const accountDataEdit = {
                     acc_ID: selectedAccount.id,
                     acc_code: data.code,
@@ -197,11 +228,18 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                         | "inactive"
                         | "suspended",
                 };
-                await accountService.updateAccount(accountDataEdit);
 
+                const accountData = {
+                    acc_ID: selectedAccount.id,
+                    is_archived: data.is_archived,
+                };
+                await accountService.updateAccount(accountDataEdit);
                 await accountService.updateAccount(accountData);
-            } 
-            
+
+                setSnackbarAction("update");
+                setIsSnackbarOpen(true);
+            }
+
             // else if (modalMode === "edit" && selectedAccount?.id) {
             //     const accountData = {
             //         acc_ID: selectedAccount.id,
@@ -231,8 +269,6 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
             }
         } catch (error) {
             console.error("Error saving account:", error);
-        } finally {
-            setIsSaving(false);
         }
     };
 
@@ -240,6 +276,39 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
         const account = modalData[index];
         setAccountToArchive(account);
         setIsArchiveConfirmationOpen(true);
+    };
+
+    const handleRestotrArchiveAccount = async (index: number) => {
+        const account = modalData[index];
+        try {
+            if (account?.id) {
+                const accountData = {
+                    acc_ID: account.id,
+                    is_archived: 0,
+                };
+                await accountService.updateAccount(accountData);
+
+                setSnackbarAction("restore");
+                setIsSnackbarOpen(true);
+
+                // Refresh accounts after archive
+                const filters = {
+                    search: searchTerm,
+                    is_archived: mode === "archived" ? 1 : 0,
+                    offset: (currentPage - 1) * 10,
+                    limit: 10,
+                };
+                const result = await accountService.viewAccounts(filters);
+                if (result.data?.data) {
+                    setAccounts(result.data.data);
+                }
+            }
+        } catch (error) {
+            console.error("Error archiving account:", error);
+        } finally {
+            setIsArchiveConfirmationOpen(false);
+            setAccountToArchive(null);
+        }
     };
 
     const handleArchiveConfirm = async () => {
@@ -250,6 +319,9 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                     is_archived: 1,
                 };
                 await accountService.updateAccount(accountData);
+
+                setSnackbarAction("archive");
+                setIsSnackbarOpen(true);
 
                 // Refresh accounts after archive
                 const filters = {
@@ -283,6 +355,16 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
             icon: <ArchiveBox />,
             label: "Archive Account",
             onClick: (index: number) => handleArchiveAccount(index),
+        },
+    ];
+
+    const moreOptionsForArchived = [
+        {
+            icon: <RotateLeft />,
+            label: "Restore Account",
+            onClick: (index: number) => {
+                handleRestotrArchiveAccount(index);
+            },
         },
     ];
 
@@ -348,7 +430,12 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                         <Table
                             headers={headers}
                             data={tableData}
-                            moreOptions={moreOptions}
+                            moreOptions={
+                                mode === "archived"
+                                    ? moreOptionsForArchived
+                                    : moreOptions
+                            }
+                            // onRowClick={handleRowClick}
                         />
                         <section className="flex justify-end">
                             <Pagination
@@ -367,6 +454,7 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                             mode={modalMode}
                             selectedAccount={selectedAccount}
                             onSave={handleSaveAccount}
+                            setModalMode={setModalMode}
                         />
                     </div>
                 }
@@ -382,6 +470,21 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                 description="Are you sure you want to archive this account?"
                 buttonLabel="Archive"
                 buttonFooterIcon={<ArchiveBox />}
+            />
+
+            <SnackbarAlert
+                isOpen={isSnackbarOpen}
+                onClose={() => setIsSnackbarOpen(false)}
+                title={
+                    snackbarAction === "add"
+                        ? "Successfully added Account"
+                        : snackbarAction === "update"
+                        ? "Successfully updated Account"
+                        : snackbarAction === "archive"
+                        ? "Successfully archived Account"
+                        : "Successfully restored Account"
+                }
+                type="success"
             />
         </>
     );
