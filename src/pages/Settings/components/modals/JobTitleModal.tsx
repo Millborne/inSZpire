@@ -8,6 +8,7 @@ export interface JobTitleDataType {
     jobTitle: string;
     description?: string;
     salary: string;
+    is_archived?: number;
 }
 
 export type ModalMode = "view" | "edit" | "add";
