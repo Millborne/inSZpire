@@ -2,21 +2,25 @@ import { useState } from "react";
 import EmployeeCard from "./EmployeeCard";
 import { ArrowDown2, ArrowUp2 } from "iconsax-reactjs";
 import TeamModal, { TeamDataType } from "./modals/TeamModal";
+import { useNavigate } from "react-router-dom";
 
 interface Employee {
-    id: string;
+    id: number;
     name: string;
     position: string;
     avatar: string;
 }
 
 interface TeamCardProps {
+    id: number;
     teamName: string;
     employees: Employee[];
     onSave?: (data: any) => void;
 }
 
-const TeamCard: React.FC<TeamCardProps> = ({ teamName, employees, onSave }) => {
+const TeamCard: React.FC<TeamCardProps> = ({ id, teamName, employees, onSave }) => {
+    const navigate = useNavigate();
+
     const [showAll, setShowAll] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -46,6 +50,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ teamName, employees, onSave }) => {
             <div
                 className="flex flex-col gap-[12px] p-[16px] border border-szPrimary200 rounded-lg cursor-pointer"
                 // onClick={() => setIsModalOpen(true)} // echange ra ni og naa nay specific team na page
+                onClick={() => navigate(`/home/teams/${id}/specificteam`)}
             >
                 <p className="text-body-base-strong">{teamName}</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[12px]">

@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { CardContainer, Chip, Tab, TextContent } from "enterprisze-global-components";
-import { ArrowLeft, Data2, Hierarchy2, More, People, Tag } from "iconsax-reactjs";
+import { CardContainer, Chip, PopoverMenu, SnackbarAlert, Tab, TextContent } from "enterprisze-global-components";
+import { ArchiveBox, ArrowLeft, Data2, Edit2, Hierarchy2, People, Tag } from "iconsax-reactjs";
 import SpecificTeamCard from "../components/SpecificTeamCard";
+import SpecificTeamModal, { ModalMode, SpecificTeamDataType } from "../components/modals/SpecificTeamModal";
+import ConfirmSpecificTeamArchive from "../components/modals/ConfirmSpecificTeamArchive";
 
 const SpecificTeamData = [
     {
@@ -23,7 +25,34 @@ const SpecificTeamData = [
 ];
 
 const SpecificTeam = ({}) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
+    const [modalMode, setModalMode] = useState<ModalMode>("add");
+    const [selectedSpecificTeam, setSelectedSpecificTeam] = useState<SpecificTeamDataType | null>(null);
     const [viewType, setViewType] = useState<"team" | "underlings">("team");
+    const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
+
+    const handleOpenModal = (team: SpecificTeamDataType, mode: ModalMode) => {
+        setSelectedSpecificTeam(team);
+        setModalMode(mode);
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedSpecificTeam(null);
+    };
+
+    const handleSpecificTeamSuccess = (message: string) => {
+        setSnackbarMessage(message);
+        setShowSuccessSnackbar(true);
+        setTimeout(() => setShowSuccessSnackbar(false), 3000);
+    };
+
+    const handleOpenArchiveModal = () => {
+        setIsArchiveModalOpen(true);
+    };
 
     return (
         <>
@@ -33,7 +62,23 @@ const SpecificTeam = ({}) => {
                         <div className="flex items-center gap-[8px]">
                             <ArrowLeft className="text-szPrimary700" />
                             <h5 className="text-h5 text-szPrimary700">Business Solutions and Innovation</h5>
-                            <More />
+                            <div className="flex-1">
+                                <PopoverMenu
+                                    size="small"
+                                    items={[
+                                        {
+                                            label: "Edit Team Info",
+                                            icon: <Edit2 />,
+                                            onClick: () => handleOpenModal({} as SpecificTeamDataType, "edit"),
+                                        },
+                                        {
+                                            label: "Archive Team",
+                                            icon: <ArchiveBox />,
+                                            onClick: () => handleOpenArchiveModal(),
+                                        },
+                                    ]}
+                                />
+                            </div>
                         </div>
                         <div className="flex flex-col gap-[20px]">
                             <p className="text-body-small-strong text-szDarkGrey600">
@@ -46,7 +91,7 @@ const SpecificTeam = ({}) => {
                                 <div className="flex flex-row justify-between">
                                     <div className="flex flex-row gap-[8px]">
                                         <Hierarchy2 />
-                                        <div className="flex flex-row gap-[75px]">
+                                        <div className="flex flex-col lg:flex-row lg:gap-[75px]">
                                             <p className="text-caption-all-caps text-szGrey500">TEAM REFERENCE</p>
                                             <p className="text-body-small-strong">Office of the President and COO</p>
                                         </div>
@@ -57,7 +102,7 @@ const SpecificTeam = ({}) => {
                                             <Tag className="text-szPrimary700" />
                                         </div>
 
-                                        <div className="flex flex-row gap-[8px]">
+                                        <div className="flex flex-col lg:flex-row gap-[8px]">
                                             {[
                                                 { label: "Tag1", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
                                                 { label: "Tag2", description: "Sed do eiusmod tempor incididunt ut labore." },
@@ -129,6 +174,45 @@ const SpecificTeam = ({}) => {
                         </div>
                     </div>
                 }
+            />
+            <SpecificTeamModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                mode={modalMode}
+                selectedTeam={selectedSpecificTeam}
+                onSave={(data) => {
+                    const message = modalMode === "add" ? "Successfully added a new Team" : "Successfully updated team";
+                    handleSpecificTeamSuccess(message);
+                    handleCloseModal();
+                }}
+            />
+
+            <ConfirmSpecificTeamArchive
+                isOpen={isArchiveModalOpen}
+                onClose={() => setIsArchiveModalOpen(false)}
+                onClick={async () => {
+                    try {
+                        // TODO: Backend Integration - Call add API
+                        setIsArchiveModalOpen(false);
+                    } catch (error) {
+                        // TODO: Add error handling
+                        console.error("Error in confirmation action:", error);
+                    }
+                    handleSpecificTeamSuccess("Successfully archived team");
+                }}
+                description="Are you sure to archive this Team?"
+                subDescription="All contents of the Business Solutions and Innovation team will be archived. Please ensure all employees are reassigned to new teams to maintain organizational structure."
+                buttonLabel="Archive Team"
+                buttonFooterIcon={<ArchiveBox />}
+            />
+
+            <SnackbarAlert
+                isOpen={showSuccessSnackbar}
+                onClose={() => setShowSuccessSnackbar(false)}
+                showCloseButton={true}
+                type="success"
+                title={snackbarMessage}
+                animation="slide-up"
             />
         </>
     );
