@@ -202,10 +202,10 @@ const EmployeeList = () => {
     ];
 
     const moreOptions = [
-        {
-            label: "View",
-            onClick: (index: number) => navigate(`${data[index]?.id}/summary`),
-        },
+        // {
+        //     label: "View",
+        //     onClick: (index: number) => navigate(`${data[index]?.id}/summary`),
+        // },
         {
             label: "Edit Employee",
             icon: <Edit2 />,
@@ -246,12 +246,22 @@ const EmployeeList = () => {
 
                     <div className="h-full">
                         <div className="hidden lg:block">
-                            <Table headers={headers} data={data} moreOptions={moreOptions} tableHeight="h-[400px]" />
-                            {/* onRowClick={handleRowClick} */}
+                            <Table
+                                headers={headers}
+                                data={data}
+                                moreOptions={moreOptions}
+                                tableHeight="h-[400px]"
+                                onRowClick={handleRowClick}
+                            />
                         </div>
                         <div className="block lg:hidden">
-                            <Table headers={headersSmall} data={data} moreOptions={moreOptions} tableHeight="h-[400px]" />
-                            {/* onRowClick={handleRowClick} */}
+                            <Table
+                                headers={headersSmall}
+                                data={data}
+                                moreOptions={moreOptions}
+                                tableHeight="h-[400px]"
+                                onRowClick={handleRowClick}
+                            />
                         </div>
                         <div className="flex justify-end">
                             <Pagination currentPage={1} totalPages={10} visiblePages={5} onChange={() => {}} />
