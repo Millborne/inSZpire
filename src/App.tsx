@@ -63,6 +63,10 @@ function App() {
               element={<Positions mode="all-positions" />}
             />
             <Route
+              path="positions/archived-positions"
+              element={<Positions mode="archived" />}
+            />
+            <Route
               path="job-title"
               element={<JobTitle mode="all-job-titles" />}
             />
