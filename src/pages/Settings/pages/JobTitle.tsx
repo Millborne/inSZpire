@@ -174,7 +174,7 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                 if (result.data?.data) {
                     setJobTitles(result.data.data);
                     setTotalCount(
-                        result.data.total_count || result.data.data.length
+                        result.data.total|| result.data.data.length
                     );
                 }
             } catch (error) {
@@ -222,7 +222,7 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                     job_description: data.description || "",
                     basic_salary:
                         parseFloat(data.salary.replace(/[₱,\s]/g, "")) || 0,
-                    status: "pending",
+                    status: "active",
                     is_archived: 0,
                 };
                 let result = await jobTitleService.createJobTitle(jobTitleData);
@@ -281,7 +281,7 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                 }
 
                 if (data.is_archived === 1) {
-                    if (resultArchive.data?.data) {
+                    if (resultArchive.data) {
                         setSnackbarMessage(resultArchive.data?.message);
                         setSnackbarType("success");
                         setIsSnackbarOpen(true);
@@ -310,7 +310,7 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
             if (result.data?.data) {
                 setJobTitles(result.data.data);
                 setTotalCount(
-                    result.data.total_count || result.data.data.length
+                    result.data.total || result.data.data.length
                 );
             }
         } catch (error) {
@@ -339,7 +339,7 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                     jobTitleData
                 );
 
-                if (resultRestore.data?.data) {
+                if (resultRestore.data) {
                     setSnackbarMessage(resultRestore.data?.message);
                     setSnackbarType("success");
                     setIsSnackbarOpen(true);
@@ -364,7 +364,7 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                 if (result.data?.data) {
                     setJobTitles(result.data.data);
                     setTotalCount(
-                        result.data.total_count || result.data.data.length
+                        result.data.total || result.data.data.length
                     );
                 }
             }
@@ -392,7 +392,7 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                     jobTitleData
                 );
 
-                if (resultArchive.data?.data) {
+                if (resultArchive.data) {
                     setSnackbarMessage(resultArchive.data?.message);
                     setSnackbarType("success");
                     setIsSnackbarOpen(true);
@@ -418,7 +418,7 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                 if (result.data?.data) {
                     setJobTitles(result.data.data);
                     setTotalCount(
-                        result.data.total_count || result.data.data.length
+                        result.data.total || result.data.data.length
                     );
                 }
             }
@@ -518,7 +518,7 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                                                     icon: <ArchiveBox />,
                                                     onClick: () => {
                                                         setCurrentPage(1);
-                                                        navigate("archived");
+                                                        navigate("job-title-archived");
                                                     },
                                                 },
                                             ]}

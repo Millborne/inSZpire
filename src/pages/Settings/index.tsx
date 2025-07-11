@@ -12,72 +12,77 @@ const Settings = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [sidebarVisible, setSidebarVisible] = useState(
-    window.innerWidth >= 768
-  );
-  const [selected, setSelected] = useState("accounts");
-  const isLargeScreen = window.innerWidth >= 768;
+    const [sidebarVisible, setSidebarVisible] = useState(
+        window.innerWidth >= 768
+    );
+    const [selected, setSelected] = useState("accounts");
+    const isLargeScreen = window.innerWidth >= 768;
 
   const toggleSidebar = () => {
     setSidebarVisible((prev) => !prev);
   };
 
-  const sidebarMenuItems = [
-    {
-      id: "accounts",
-      label: "Accounts",
-      url: "accounts",
-      display: true,
-    },
-    {
-      id: "tags",
-      label: "Tags",
-      url: "tags",
-      display: true,
-    },
-    {
-      id: "positions",
-      label: "Positions",
-      url: "positions",
-      display: true,
-    },
-    {
-      id: "job-title",
-      label: "Job Title",
-      url: "job-title",
-      display: true,
-    },
-    // {
-    //     id: "fields",
-    //     label: "Fields",
-    //     url: "fields",
-    //     display: true,
-    // },
-    // {
-    //     id: "resolution-center",
-    //     label: "Resolution Center",
-    //     url: "resolution-center",
-    //     display: true,
-    // },
-    // {
-    //     id: "request-approval-settings",
-    //     label: "Request Approval Settings",
-    //     url: "request-approval-settings",
-    //     display: true,
-    // },
-    // {
-    //     id: "in-szpire-access",
-    //     label: "inSZpire Access",
-    //     url: "in-szpire-access",
-    //     display: true,
-    // },
-    // {
-    //     id: "hoof-trail",
-    //     label: "Hoof Trail",
-    //     url: "hoof-trail",
-    //     display: true,
-    // },
-  ];
+    const sidebarMenuItems = [
+        {
+            id: "accounts",
+            label: "Accounts",
+            url: "accounts",
+        },
+        {
+            id: "archived",
+            label: "Archived Accounts",
+            url: "archived",
+            display: false,
+            anchor: "accounts",
+        },
+        {
+            id: "tags",
+            label: "Tags",
+            url: "tags",
+        },
+        {
+            id: "positions",
+            label: "Positions",
+            url: "positions",
+        },
+        {
+            id: "job-title",
+            label: "Job Title",
+            url: "job-title",
+        },
+        {
+            id: "archived-job-titles",
+            label: "Archived Job Titles",
+            url: "job-title-archived",
+            display: false,
+            anchor: "job-title",
+        },
+        // {
+        //     id: "fields",
+        //     label: "Fields",
+        //     url: "fields",
+        // },
+        // {
+        //     id: "resolution-center",
+        //     label: "Resolution Center",
+        //     url: "resolution-center",
+        // },
+        // {
+        //     id: "request-approval-settings",
+        //     label: "Request Approval Settings",
+        //     url: "request-approval-settings",
+        // },
+        // {
+        //     id: "in-szpire-access",
+        //     label: "inSZpire Access",
+        //     url: "in-szpire-access",
+        // },
+        // {
+        //     id: "hoof-trail",
+        //     label: "Hoof Trail",
+        //     url: "hoof-trail",
+        // },
+    ];
 
   const handleMenuSelect = (id: string) => {
     setSelected(id);
