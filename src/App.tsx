@@ -22,6 +22,7 @@ import Tags from "./pages/Settings/pages/Tags";
 import Positions from "./pages/Settings/pages/Positions";
 import JobTitle from "./pages/Settings/pages/JobTitle";
 import Teams from "./pages/Teams/index";
+import SpecificTeam from "./pages/Teams/pages/SpecificTeam";
 
 function App() {
   return (
@@ -42,19 +43,29 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Route>
           <Route path="teams" element={<Teams />} />
+          <Route path="teams/:id/specificteam" element={<SpecificTeam />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="analytics-and-report" element={<AnalyticsAndReport />} />
           <Route path="employee-transition" element={<EmployeeTransition />} />
           <Route path="settings/*" element={<Settings />}>
             <Route path="accounts" element={<Accounts mode="all-accounts" />} />
-            <Route path="accounts/archived" element={<Accounts mode="archived" />} />
+            <Route
+              path="accounts/archived"
+              element={<Accounts mode="archived" />}
+            />
             <Route path="tags" element={<Tags mode="all-tags" />} />
             <Route
               path="tags/archived-tags"
               element={<Tags mode="archived" />}
             />
-            <Route path="positions" element={<Positions />} />
-            <Route path="job-title" element={<JobTitle />} />
+            <Route
+              path="positions"
+              element={<Positions mode="all-positions" />}
+            />
+            <Route
+              path="job-title"
+              element={<JobTitle mode="all-job-titles" />}
+            />
           </Route>
           <Route path="*" element={<NotFound />} />
           {/* Catch-all route for 404 */}

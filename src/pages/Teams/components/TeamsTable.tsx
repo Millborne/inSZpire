@@ -3,8 +3,10 @@ import { ArrowUp2, ArrowDown2 } from "iconsax-reactjs";
 import { Employee } from "..";
 import { Avatar } from "enterprisze-global-components";
 import TeamModal, { TeamDataType } from "./modals/TeamModal";
+import { useNavigate } from "react-router-dom";
 
 interface TeamsTableProps {
+  id: number;
   teamName: string;
   employees: Employee[];
   isSelected?: boolean;
@@ -12,11 +14,13 @@ interface TeamsTableProps {
 }
 
 const TeamsTable: React.FC<TeamsTableProps> = ({
+  id,
   teamName,
   employees,
   isSelected,
   onSave,
 }) => {
+  const navigate = useNavigate();
   const [showAll, setShowAll] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -63,7 +67,7 @@ const TeamsTable: React.FC<TeamsTableProps> = ({
     <>
       <div
         className="w-full max-w-full flex flex-col gap-[12px] p-[16px] border border-szPrimary200 rounded-lg cursor-pointer"
-        // onClick={() => setIsModalOpen(true)} // echange ra ni og naa nay specific team na page
+        onClick={() => navigate(`/home/teams/${id}/specificteam`)}
       >
         <p className="text-body-base-strong">{teamName}</p>
 
