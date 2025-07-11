@@ -59,30 +59,28 @@ export const usePositions = ({
 // Position-specific interfaces based on API documentation
 export interface PositionData {
     position_ID?: string;
-    node_reference?: string;
     position_code: string;
     position_name: string;
-    team_ID: string;
-    site_ID?: string;
-    job_ID: string;
-    reports_to_position_ID?: string;
-    reports_to_node?: string;
-    team_level?: string;
-    position_type_ID: string;
-    work_setup_ID: string;
-    basic_salary: number;
+    team_name?: string;
+    team_code?: string;
+    job_title?: string;
+    job_code?: string;
+    position_type?: string | null;
+    work_setup?: string | null;
+    basic_salary: string | number;
     is_approved?: number;
     is_archived?: number;
-    created_by?: string;
-    updated_by?: string;
+    position_status_name?: string;
+    reports_to_position?: string;
+    employee_number?: string | null;
+    employee_name?: string | null;
+    preferred_name?: string | null;
+    reports_to_employee_name?: string;
+    reports_to_preferred_name?: string;
+    reports_to_employee_number?: string;
     created_at?: string;
     updated_at?: string;
-    tags?: Array<{
-        tag_ID: string;
-        tag_name: string;
-        tag_type: string;
-        description?: string;
-    }>;
+    tags?: string;
 }
 
 export interface CreatePositionRequest {
