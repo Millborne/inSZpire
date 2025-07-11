@@ -66,8 +66,6 @@ function App() {
               path="job-title"
               element={<JobTitle mode="all-job-titles" />}
             />
-            <Route path="positions" element={<Positions />} />
-            <Route path="job-title" element={<JobTitle mode="all-job-titles" />} />
             <Route path="job-title/job-title-archived" element={<JobTitle mode="archived" />} />
           </Route>
           <Route path="*" element={<NotFound />} />
