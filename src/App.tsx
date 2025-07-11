@@ -47,10 +47,7 @@ function App() {
           <Route path="employee-transition" element={<EmployeeTransition />} />
           <Route path="settings/*" element={<Settings />}>
             <Route path="accounts" element={<Accounts mode="all-accounts" />} />
-            <Route
-              path="accounts/archived-accounts"
-              element={<Accounts mode="archived" />}
-            />
+            <Route path="accounts/archived" element={<Accounts mode="archived" />} />
             <Route path="tags" element={<Tags mode="all-tags" />} />
             <Route
               path="tags/archived-tags"
