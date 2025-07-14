@@ -129,6 +129,12 @@ const Position: React.FC<PositionPageProps> = ({ mode }) => {
             team_ID: position.team_name || "",
             job_ID: position.team_code || "",
             site_ID: position.position_code,
+            position_status_name: position.position_status_name,
+            position_type_ID: position.position_type || undefined,
+            work_setup_ID: position.work_setup || undefined,
+            reports_to_position: position.reports_to_position,
+            is_approved: position.is_approved,
+            tag_IDs: position.tags ? position.tags.split(',').map(tag => tag.trim()) : undefined,
         }));
     };
 
@@ -337,8 +343,9 @@ const Position: React.FC<PositionPageProps> = ({ mode }) => {
                         "567890abcdef1234567890abcdef1234",
                     tag_IDs:
                         data.tag_IDs && data.tag_IDs.length > 0
-                            ? data.tag_IDs
+                            ? data.tag_IDs.map((tag) => sanitizeUUID(tag))
                             : undefined,
+                    position_status_name: data.position_status_name?.toLowerCase() || "active",
                 };
 
                 console.log("Creating position with data:", positionData);
@@ -457,7 +464,7 @@ const Position: React.FC<PositionPageProps> = ({ mode }) => {
                         "567890abcdef1234567890abcdef1234",
                     tag_IDs:
                         data.tag_IDs && data.tag_IDs.length > 0
-                            ? data.tag_IDs
+                            ? data.tag_IDs.map((tag) => sanitizeUUID(tag))
                             : undefined,
                 };
 

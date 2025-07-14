@@ -9,8 +9,8 @@ interface generalProps {
     body?: any;
 }
 
-export const tagsAPI = createApi({
-    reducerPath: "tags",
+export const positionTypeAPI = createApi({
+    reducerPath: "positionType",
     baseQuery: fetchBaseQuery({
         baseUrl: VITE_TEAM_AND_POSITION_SERVICE,
         prepareHeaders: (headers) => {
@@ -23,15 +23,15 @@ export const tagsAPI = createApi({
             return headers;
         },
     }),
-    tagTypes: ["tags"],
+    tagTypes: ["positionType"],
     endpoints: (builder) => ({
-        fetchTags: builder.query({
+        fetchPositionTypes: builder.query({
             query: (data: generalProps) =>
-                `/api/v1/tags${data.queryParameters}`,
+                `/api/v1/position-type${data.queryParameters}`,
         }),
-        actionTags: builder.mutation({
+        actionPositionTypes: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/api/v1/tags${data.queryParameters}`,
+                url: `/api/v1/position-type${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),
@@ -39,4 +39,5 @@ export const tagsAPI = createApi({
     }),
 });
 
-export const { useFetchTagsQuery, useActionTagsMutation } = tagsAPI;
+export const { useFetchPositionTypesQuery, useActionPositionTypesMutation } =
+    positionTypeAPI;
