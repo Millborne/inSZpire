@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Avatar, Button, Inputs, Modal, Document, Dropdown, CustomDatePicker } from "enterprisze-global-components";
-import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
-import { Trash, Calendar } from "iconsax-reactjs";
+import { Inputs, Modal, Dropdown, CustomDatePicker } from "enterprisze-global-components";
+// import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
+// import { Trash, Calendar } from "iconsax-reactjs";
 import EmployeeConfirmationModal from "./EmployeeConfirmationModal";
 
 export interface addEmployeeData {
@@ -86,7 +86,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
     const [currentAddEmployeeData, setCurrentAddEmployeeData] = useState<addEmployeeData | null>(
         mode === "edit" && addEmployeeData ? addEmployeeData : null
     );
-    const [profileImg, setProfileImg] = useState<string | undefined>();
+    // const [profileImg, setProfileImg] = useState<string | undefined>();
 
     const handleConfirmationClose = () => {
         setShowConfirmationModal(false);
@@ -209,6 +209,10 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                     <Inputs label="WORK EMAIL" value={formData.work.workEmail || ""} />
                                 </div>
                             </div>
+                            <p className="text-caption-reg">
+                                The employee your about to add will be in the{" "}
+                                <span className="text-szPrimary700">Business Solutions and Innovation Team</span>.
+                            </p>
                         </div>
                         <div className="flex flex-col w-full gap-[8px]">
                             <div className="flex justify-between">

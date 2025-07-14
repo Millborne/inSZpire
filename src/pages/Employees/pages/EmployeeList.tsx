@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, CardContainer, Inputs, Pagination, PopoverMenu, SnackbarAlert, Table } from "enterprisze-global-components";
+import { Button, ButtonsIcon, CardContainer, Inputs, Pagination, PopoverMenu, SnackbarAlert, Table } from "enterprisze-global-components";
 import { Add, Briefcase, Edit2, ExportCurve, Filter, InfoCircle, SearchNormal } from "iconsax-reactjs";
 
 // Components
@@ -241,7 +241,8 @@ const EmployeeList = () => {
                         <div className="w-full max-w-[355px]">
                             <Inputs placeholder="Search by Name, ID, Job Title, or Team" icon={SearchNormal} />
                         </div>
-                        <Button leftIcon={<Filter />} variant="ghost" size="large" onClick={() => setOpenFilter(true)} label={""} />
+                        <ButtonsIcon icon={<Filter />} variant="ghost" size="large" onClick={() => setOpenFilter(true)} />
+                        {/* <Button leftIcon={<Filter />} variant="ghost" size="large" onClick={() => setOpenFilter(true)} label={""} /> */}
                     </div>
 
                     <div className="h-full">

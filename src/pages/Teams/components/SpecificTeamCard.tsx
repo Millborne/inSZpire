@@ -8,8 +8,8 @@ interface SpecificTeamCardProps {
 
 const SpecificTeamCard = ({ name, jobTitle }: SpecificTeamCardProps) => {
     return (
-        <div className="flex flex-col gap-[10px] py-[12px]">
-            <div className="flex flex-row gap-2">
+        <div className="flex flex-col">
+            <div className="flex flex-row gap-2 items-center p-[10px]">
                 <Avatar size="small" src={noAvatar} />
                 <div className="flex flex-col">
                     <p className="text-body-small-strong text-szBlack800">{name}</p>
