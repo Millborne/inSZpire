@@ -1,281 +1,228 @@
-import { CardContainer } from "enterprisze-global-components";
-import { Edit2 } from "iconsax-reactjs";
-import papaZEager from "../../../assets/papaz-eager.png";
+import { useState } from "react";
+import { CardContainer, Chip, PopoverMenu, SnackbarAlert, Tab, TextContent } from "enterprisze-global-components";
+import { ArchiveBox, Data2, Edit2, Hierarchy2, People, Tag } from "iconsax-reactjs";
+import SpecificTeamCard from "../../Teams/components/SpecificTeamCard";
+import SpecificTeamModal, { ModalMode, SpecificTeamDataType } from "../../Teams/components/modals/SpecificTeamModal";
+import ConfirmSpecificTeamArchive from "../../Teams/components/modals/ConfirmSpecificTeamArchive";
 
-import { ReactFlow } from "@xyflow/react";
-
-import "@xyflow/react/dist/style.css";
-
-const initialNodes = [
-    { id: "1", data: { label: "SPT Supervisor 2" } },
+const SpecificTeamData = [
     {
-        id: "2",
-        data: { label: "Junior Web Developer 2" },
-        style: {
-            background: "#FF9900",
-            border: "1px solid #CC7A00",
-            borderRadius: "8px",
-            padding: "10px",
-            color: "#FFFFFF",
-        },
+        name: "Stephanie Germanotta",
+        jobTitle: "Web Dev",
+        // teamReference: "Office of the President and COO",
+        // tags: ["Tag1", "Tag2", "Tag3"],
+        // teamMembers: [
+        // ]
     },
     {
-        id: "3",
-        data: { label: "Junior Web Developer 3" },
+        name: "Daryl Simene",
+        jobTitle: "UX Designer",
     },
-].map((node, index) => ({
-    ...node,
-    // Calculate positions dynamically based on index
-    position: {
-        x: 400, // Center x position
-        y: 200 + index * 100, // Stack vertically with 100px spacing
+    {
+        name: "John Doe",
+        jobTitle: "Web Developer",
     },
-}));
-
-const initialEdges = [
-    { id: "e1-2", source: "1", target: initialNodes.length.toLocaleString() },
 ];
 
 const TeamMember = () => {
-    const showData = true;
-    // const headers: Array<
-    //     | { type: "string"; header: string; accessor: string }
-    //     | { type: "more"; header: React.ReactNode; accessor: "more" }
-    //     | { type: "checkbox"; header: React.ReactNode; accessor: "checkbox" }
-    // > = [
-    //     { type: "string", header: "Name", accessor: "name" },
-    //     { type: "string", header: "ID", accessor: "id" },
-    //     { type: "string", header: "Team", accessor: "team" },
-    //     { type: "string", header: "Job Title", accessor: "jobTitle" },
-    //     { type: "string", header: "Job Code", accessor: "jobCode" },
-    //     { type: "string", header: "Direct Head", accessor: "directHead" },
-    //     { type: "more", header: <></>, accessor: "more" },
-    // ];
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
+    const [modalMode, setModalMode] = useState<ModalMode>("add");
+    const [selectedSpecificTeam, setSelectedSpecificTeam] = useState<SpecificTeamDataType | null>(null);
+    const [viewType, setViewType] = useState<"team" | "underlings">("team");
+    const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
 
-    // const data = [
-    //     {
-    //         id: "1234567890",
-    //         name: (
-    //             <div className=" flex items-center gap-1">
-    //                 <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-    //                 <span className="text-body-base-reg">
-    //                     Germanotta, Stephanie Luke A.
-    //                 </span>
-    //             </div>
-    //         ),
-    //         team: "BSI",
-    //         jobTitle: "Junior Web Developer",
-    //         jobCode: "1234567890",
-    //         directHead: "John Doe",
-    //     },
-    //     {
-    //         id: "1234567890",
-    //         name: (
-    //             <div className=" flex items-center gap-1">
-    //                 <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-    //                 <span className="text-body-base-reg">
-    //                     Germanotta, Stephanie Luke A.
-    //                 </span>
-    //             </div>
-    //         ),
-    //         team: "BSI",
-    //         jobTitle: "Junior Web Developer",
-    //         jobCode: "1234567890",
-    //         directHead: "John Doe",
-    //     },
-    //     {
-    //         id: "1234567890",
-    //         name: (
-    //             <div className=" flex items-center gap-1">
-    //                 <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-    //                 <span className="text-body-base-reg">
-    //                     Germanotta, Stephanie Luke A.
-    //                 </span>
-    //             </div>
-    //         ),
-    //         team: "BSI",
-    //         jobTitle: "Junior Web Developer",
-    //         jobCode: "1234567890",
-    //         directHead: "John Doe",
-    //     },
-    //     {
-    //         id: "1234567890",
-    //         name: (
-    //             <div className=" flex items-center gap-1">
-    //                 <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-    //                 <span className="text-body-base-reg">
-    //                     Germanotta, Stephanie Luke A.
-    //                 </span>
-    //             </div>
-    //         ),
-    //         team: "BSI",
-    //         jobTitle: "Junior Web Developer",
-    //         jobCode: "1234567890",
-    //         directHead: "John Doe",
-    //     },
-    //     {
-    //         id: "1234567890",
-    //         name: (
-    //             <div className=" flex items-center gap-1">
-    //                 <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-    //                 <span className="text-body-base-reg">
-    //                     Germanotta, Stephanie Luke A.
-    //                 </span>
-    //             </div>
-    //         ),
-    //         team: "BSI",
-    //         jobTitle: "Junior Web Developer",
-    //         jobCode: "1234567890",
-    //         directHead: "John Doe",
-    //     },
-    //     {
-    //         id: "1234567890",
-    //         name: (
-    //             <div className=" flex items-center gap-1">
-    //                 <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-    //                 <span className="text-body-base-reg">
-    //                     Germanotta, Stephanie Luke A.
-    //                 </span>
-    //             </div>
-    //         ),
-    //         team: "BSI",
-    //         jobTitle: "Junior Web Developer",
-    //         jobCode: "1234567890",
-    //         directHead: "John Doe",
-    //     },
-    //     {
-    //         id: "1234567890",
-    //         name: (
-    //             <div className=" flex items-center gap-1">
-    //                 <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-    //                 <span className="text-body-base-reg">
-    //                     Germanotta, Stephanie Luke A.
-    //                 </span>
-    //             </div>
-    //         ),
-    //         team: "BSI",
-    //         jobTitle: "Junior Web Developer",
-    //         jobCode: "1234567890",
-    //         directHead: "John Doe",
-    //     },
-    //     {
-    //         id: "1234567890",
-    //         name: (
-    //             <div className=" flex items-center gap-1">
-    //                 <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-    //                 <span className="text-body-base-reg">
-    //                     Germanotta, Stephanie Luke A.
-    //                 </span>
-    //             </div>
-    //         ),
-    //         team: "BSI",
-    //         jobTitle: "Junior Web Developer",
-    //         jobCode: "1234567890",
-    //         directHead: "John Doe",
-    //     },
-    //     {
-    //         id: "1234567890",
-    //         name: (
-    //             <div className=" flex items-center gap-1">
-    //                 <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-    //                 <span className="text-body-base-reg">
-    //                     Germanotta, Stephanie Luke A.
-    //                 </span>
-    //             </div>
-    //         ),
-    //         team: "BSI",
-    //         jobTitle: "Junior Web Developer",
-    //         jobCode: "1234567890",
-    //         directHead: "John Doe",
-    //     },
-    // ];
+    const handleOpenModal = (team: SpecificTeamDataType, mode: ModalMode) => {
+        setSelectedSpecificTeam(team);
+        setModalMode(mode);
+        setIsModalOpen(true);
+    };
 
-    // const moreOptions = [
-    //     {
-    //         label: "View",
-    //         onClick: (index: number) => {
-    //             console.log("navigate to row:", index);
-    //         },
-    //     },
-    //     {
-    //         label: "Delete",
-    //         onClick: (index: number) => console.log("Delete row:", index),
-    //     },
-    // ];
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedSpecificTeam(null);
+    };
+
+    const handleSpecificTeamSuccess = (message: string) => {
+        setSnackbarMessage(message);
+        setShowSuccessSnackbar(true);
+        setTimeout(() => setShowSuccessSnackbar(false), 3000);
+    };
+
+    const handleOpenArchiveModal = () => {
+        setIsArchiveModalOpen(true);
+    };
 
     return (
-        <CardContainer
-            backgroundColor="bg-white"
-            content={
-                <div className="flex flex-col h-full gap-4 w-full">
-                    <div className="flex justify-between">
-                        <h6 className="text-h6 text-szPrimary700">
-                            Team Members
-                        </h6>
-                        <Edit2 className="icon-sm text-szPrimary900" />
-                    </div>
-                    <div
-                        className={`h-[500px] ${
-                            showData
-                                ? "overflow-x-auto"
-                                : "flex justify-center items-center "
-                        } `}
-                    >
-                        {showData ? (
-                            <>
-                                <div className="h-full overflow-y-auto">
-                                    <div className="bg-[#F9F9F9] h-full rounded-[16px] font-montserrat">
-                                        <ReactFlow
-                                            className="bg-[#F9F9F9] h-full rounded-[16px] font-montserrat"
-                                            nodes={initialNodes.map(
-                                                (node) => ({
-                                                    ...node,
-                                                    style: !node.style
-                                                        ? {
-                                                              background:
-                                                                  "#FFEFD6",
-                                                              border: "1px solid #FFDEAD",
-                                                              borderRadius:
-                                                                  "8px",
-                                                              padding: "10px",
-                                                          }
-                                                        : node.style,
-                                                })
-                                            )}
-                                            edges={initialEdges}
-                                            defaultEdgeOptions={{
-                                                style: {
-                                                    stroke: "#FFDEAD",
-                                                    strokeWidth: 2,
+        <>
+            <CardContainer
+                content={
+                    <div className="flex flex-col gap-[20px]">
+                        <div className="flex items-center gap-[8px]">
+                            <h5 className="text-h5 text-szPrimary700">Business Solutions and Innovation</h5>
+                            <div className="flex-1">
+                                <PopoverMenu
+                                    size="small"
+                                    items={[
+                                        {
+                                            label: "Edit Team Info",
+                                            icon: <Edit2 />,
+                                            onClick: () => handleOpenModal({} as SpecificTeamDataType, "edit"),
+                                        },
+                                        {
+                                            label: "Archive Team",
+                                            icon: <ArchiveBox />,
+                                            onClick: () => handleOpenArchiveModal(),
+                                        },
+                                    ]}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-[20px]">
+                            <p className="text-body-small-strong text-szDarkGrey600">
+                                The Business Solutions and Innovations team is dedicated to developing cutting-edge system applications that
+                                enhance operational efficiency across the company. Comprising talented developers, this team ensures that
+                                all software solutions are user-friendly and tailored to meet the diverse needs of our employees. Their
+                                commitment to innovation drives continuous improvement, empowering teams to achieve their goals effectively.
+                            </p>
+                            <div>
+                                <div className="flex flex-row justify-between">
+                                    <div className="flex flex-row gap-[8px]">
+                                        <Hierarchy2 />
+                                        <div className="flex flex-col lg:flex-row lg:gap-[75px]">
+                                            <p className="text-caption-all-caps text-szGrey500">TEAM REFERENCE</p>
+                                            <p className="text-body-small-strong">Office of the President and COO</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col gap-[8px]">
+                                        <div className="flex flex-row justify-end gap-[8px]">
+                                            <p className="text-caption-all-caps text-szGrey500">TAGS</p>
+                                            <Tag className="text-szPrimary700" />
+                                        </div>
+
+                                        <div className="flex flex-col lg:flex-row gap-[8px]">
+                                            {[
+                                                {
+                                                    label: "Tag1",
+                                                    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                                                 },
-                                                type: "default",
-                                                animated: false,
-                                            }}
+                                                {
+                                                    label: "Tag2",
+                                                    description: "Sed do eiusmod tempor incididunt ut labore.",
+                                                },
+                                                {
+                                                    label: "Tag 3",
+                                                    description: "Ut enim ad minim veniam, quis nostrud exercitation.",
+                                                },
+                                            ].map((tag, index) => (
+                                                <div key={index} className="relative group">
+                                                    {/* Chip base */}
+                                                    <Chip label={tag.label} />
+
+                                                    {/* Tooltip on hover */}
+                                                    <div className="absolute z-50 hidden group-hover:block top-full mt-2 w-[220px] bg-[#EBEFFF] rounded-lg shadow-md p-3 text-sm text-gray-700">
+                                                        <TextContent header="Tag Name" text={tag.label} />
+                                                        <TextContent header="Tag Description" text={tag.description} />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="relative flex w-full justify-center items-center">
+                                    {/* center line */}
+                                    <div className="absolute top-1/2 left-0 w-full h-[1px] bg-szGrey300 z-0" />
+
+                                    {/* Tab group overlapping the line */}
+                                    <div className="flex w-fit z-10">
+                                        <Tab
+                                            type="left"
+                                            active={viewType === "team"}
+                                            icon={
+                                                <div className="flex flex-row items-center gap-2">
+                                                    <People />
+                                                    <div className="w-[1px] h-[16px] bg-szGrey300" />
+                                                    <p
+                                                        className={`text-caption-strong ${
+                                                            viewType === "team" ? "text-szSecondary500" : "text-szGrey500"
+                                                        }`}
+                                                    >
+                                                        15
+                                                    </p>
+                                                </div>
+                                            }
+                                            onClick={() => setViewType("team")}
+                                        />
+                                        <Tab
+                                            type="right"
+                                            active={viewType === "underlings"}
+                                            icon={
+                                                <div className="flex flex-row gap-2">
+                                                    <Data2 />
+                                                    <div className="w-[1px] h-[16px] bg-szGrey300" />
+                                                    <p
+                                                        className={`text-caption-strong ${
+                                                            viewType === "underlings" ? "text-szSecondary500" : "text-szGrey500"
+                                                        }`}
+                                                    >
+                                                        9
+                                                    </p>
+                                                </div>
+                                            }
+                                            onClick={() => setViewType("underlings")}
                                         />
                                     </div>
                                 </div>
-                            </>
-                        ) : (
-                            <div className="md:flex justify-center items-center gap-[10px]">
-                                <div className="flex justify-center items-center">
-                                    <div className="w-[236px]">
-                                        <img src={papaZEager} alt="employee" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="text-center">
-                                        <span className="text-body-big-reg">
-                                            You don't have any team members
-                                            under you.
-                                        </span>
-                                    </div>
-                                </div>
+                                {SpecificTeamData.map((data) => (
+                                    <SpecificTeamCard name={data.name} jobTitle={data.jobTitle} />
+                                ))}
                             </div>
-                        )}
+                        </div>
                     </div>
-                </div>
-            }
-        />
+                }
+            />
+            <SpecificTeamModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                mode={modalMode}
+                selectedTeam={selectedSpecificTeam}
+                onSave={(data) => {
+                    const message = modalMode === "add" ? "Successfully added a new Team" : "Successfully updated team";
+                    handleSpecificTeamSuccess(message);
+                    handleCloseModal();
+                }}
+            />
+
+            <ConfirmSpecificTeamArchive
+                isOpen={isArchiveModalOpen}
+                onClose={() => setIsArchiveModalOpen(false)}
+                onClick={async () => {
+                    try {
+                        // TODO: Backend Integration - Call add API
+                        setIsArchiveModalOpen(false);
+                    } catch (error) {
+                        // TODO: Add error handling
+                        console.error("Error in confirmation action:", error);
+                    }
+                    handleSpecificTeamSuccess("Successfully archived team");
+                }}
+                description="Are you sure to archive this Team?"
+                subDescription="All contents of the Business Solutions and Innovation team will be archived. Please ensure all employees are reassigned to new teams to maintain organizational structure."
+                buttonLabel="Archive Team"
+                buttonFooterIcon={<ArchiveBox />}
+            />
+
+            <SnackbarAlert
+                isOpen={showSuccessSnackbar}
+                onClose={() => setShowSuccessSnackbar(false)}
+                showCloseButton={true}
+                type="success"
+                title={snackbarMessage}
+                animation="slide-up"
+            />
+        </>
     );
 };
 
