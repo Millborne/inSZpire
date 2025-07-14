@@ -23,6 +23,7 @@ import Positions from "./pages/Settings/pages/Positions";
 import JobTitle from "./pages/Settings/pages/JobTitle";
 import Teams from "./pages/Teams/index";
 import SpecificTeam from "./pages/Teams/pages/SpecificTeam";
+import ChangePassword from "./pages/ChangePassword";
 
 function App() {
   return (
@@ -70,11 +71,15 @@ function App() {
               path="job-title"
               element={<JobTitle mode="all-job-titles" />}
             />
-            <Route path="job-title/job-title-archived" element={<JobTitle mode="archived" />} />
+            <Route
+              path="job-title/job-title-archived"
+              element={<JobTitle mode="archived" />}
+            />
           </Route>
           <Route path="*" element={<NotFound />} />
           {/* Catch-all route for 404 */}
         </Route>
+        <Route path="change-password" element={<ChangePassword />} />
         <Route path="*" element={<>Go to .../home/dashboard</>} />
       </Routes>
     </Router>

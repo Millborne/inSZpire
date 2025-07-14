@@ -17,6 +17,7 @@ import {
   ArrowLeft,
   Edit2,
   HamburgerMenu,
+  RotateLeft,
   SearchNormal,
 } from "iconsax-reactjs";
 
@@ -165,6 +166,17 @@ const Tags: React.FC<TagsPageProps> = ({ mode }) => {
     setTagToArchive(null);
   };
 
+  const moreOptionsForArchived = [
+    {
+      icon: <RotateLeft />,
+      label: "Restore Tags",
+      onClick: (index: number) => {
+        console.log("Restore Tags", index);
+        // handleRestoreArchivePosition(index);
+      },
+    },
+  ];
+
   const moreOptions = [
     {
       icon: <Edit2 />,
@@ -233,7 +245,9 @@ const Tags: React.FC<TagsPageProps> = ({ mode }) => {
             <Table
               headers={headers}
               data={mockTags}
-              moreOptions={moreOptions}
+              moreOptions={
+                mode === "archived" ? moreOptionsForArchived : moreOptions
+              }
             />
             <section className="flex justify-end">
               <Pagination
