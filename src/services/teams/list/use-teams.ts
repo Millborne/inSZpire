@@ -123,7 +123,7 @@ export const useTeamService = () => {
 
     const viewTeams = async (filters: ViewTeamsRequest) => {
         return generalAction({
-            queryParameters: "/list",
+            queryParameters: "/view",
             method: "POST",
             body: filters,
         });

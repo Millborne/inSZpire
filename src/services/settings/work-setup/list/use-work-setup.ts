@@ -1,6 +1,9 @@
-import { useFetchTagsQuery, useActionTagsMutation } from "./tagsAPI";
+import {
+    useFetchWorkSetupsQuery,
+    useActionWorkSetupsMutation,
+} from "./workSetupAPI";
 
-export const useTags = ({
+export const useWorkSetups = ({
     queryParameters,
     method,
     disableFetch = false,
@@ -11,7 +14,7 @@ export const useTags = ({
 }) => {
     // fetch
     const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
-        useFetchTagsQuery(
+        useFetchWorkSetupsQuery(
             {
                 queryParameters: queryParameters ?? "",
                 method: method,
@@ -30,7 +33,7 @@ export const useTags = ({
             error: actionError,
             reset: actionReset,
         },
-    ] = useActionTagsMutation();
+    ] = useActionWorkSetupsMutation();
 
     return {
         // fetching
@@ -53,43 +56,40 @@ export const useTags = ({
     };
 };
 
-// Tag-specific interfaces based on API documentation (using position endpoints)
-export interface TagData {
-    tag_ID?: string;
-    tag_name: string;
-    tag_type: string;
-    description?: string;
+// Work Setup-specific interfaces based on API documentation
+export interface WorkSetupData {
+    setup_ID?: string;
+    setup_name: string;
+    work_setup_description?: string;
     is_archived?: number;
     created_at?: string;
     updated_at?: string;
 }
 
-export interface CreateTagRequest {
-    tag_name: string;
-    tag_type: string;
-    description?: string;
+export interface CreateWorkSetupRequest {
+    work_setup_name: string;
+    work_setup_description?: string;
     is_archived?: number;
 }
 
-export interface UpdateTagRequest {
-    tag_ID: string;
-    tag_name?: string;
-    tag_type?: string;
-    description?: string;
+export interface UpdateWorkSetupRequest {
+    work_setup_ID: string;
+    work_setup_name?: string;
+    work_setup_description?: string;
     is_archived?: number;
 }
 
-export interface ViewTagsRequest {
-    tag_type?: string;
+export interface ViewWorkSetupsRequest {
+    search?: string;
     is_archived?: number;
 }
 
-export interface GetTagsByTypeRequest {
-    tag_type: string;
+export interface GetWorkSetupRequest {
+    work_setup_ID: string;
 }
 
-// Specific tag service methods based on API documentation (using position endpoints)
-export const useTagService = () => {
+// Specific work setup service methods based on API documentation
+export const useWorkSetupService = () => {
     const [
         generalAction,
         {
@@ -100,20 +100,21 @@ export const useTagService = () => {
             error: actionError,
             reset: actionReset,
         },
-    ] = useActionTagsMutation();
+    ] = useActionWorkSetupsMutation();
 
-    const getTagsByType = async (tagType: string) => {
-        return generalAction({
-            queryParameters: `/tags/${tagType}`,
-            method: "GET",
-        });
-    };
-
-    const viewTags = async (filters: ViewTagsRequest) => {
+    const listWorkSetups = async (filters: ViewWorkSetupsRequest) => {
         return generalAction({
             queryParameters: "/view",
             method: "POST",
             body: filters,
+        });
+    };
+
+    const getWorkSetup = async (workSetupData: GetWorkSetupRequest) => {
+        return generalAction({
+            queryParameters: `/view?work_setup_ID=${workSetupData.work_setup_ID}`,
+            method: "POST",
+            body: { work_setup_ID: workSetupData.work_setup_ID },
         });
     };
 
@@ -127,7 +128,7 @@ export const useTagService = () => {
         actionReset,
 
         // methods
-        getTagsByType,
-        viewTags,
+        listWorkSetups,
+        getWorkSetup,
     };
 };

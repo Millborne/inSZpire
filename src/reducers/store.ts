@@ -19,6 +19,8 @@ import { employeeDetailsAPI } from "../services/employee-profile/work/employee-d
 import { teamMemberAPI } from "../services/employee-profile/work/team-member/teamMemberAPI";
 import { employeeHistoryAPI } from "../services/employee-profile/work/employee-history/employeeHistoryAPI";
 import { personalDocumentsAPI } from "../services/employee-profile/work/documents/personal/personalDocumentsAPI";
+import { positionTypeAPI } from "../services/settings/positions/type/positionTypeAPI";
+import { workSetupAPI } from "../services/settings/work-setup/list/workSetupAPI";
 
 // Slices
 // here
@@ -40,6 +42,8 @@ const rootReducer = combineReducers({
     [teamMemberAPI.reducerPath]: teamMemberAPI.reducer,
     [employeeHistoryAPI.reducerPath]: employeeHistoryAPI.reducer,
     [personalDocumentsAPI.reducerPath]: personalDocumentsAPI.reducer,
+    [positionTypeAPI.reducerPath]: positionTypeAPI.reducer,
+    [workSetupAPI.reducerPath]: workSetupAPI.reducer,
 });
 
 const configStore = configureStore({
@@ -61,7 +65,9 @@ const configStore = configureStore({
             employeeDetailsAPI.middleware,
             teamMemberAPI.middleware,
             employeeHistoryAPI.middleware,
-            personalDocumentsAPI.middleware
+            personalDocumentsAPI.middleware,
+            positionTypeAPI.middleware,
+            workSetupAPI.middleware
         ),
 });
 
