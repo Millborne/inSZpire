@@ -29,6 +29,7 @@ import {
     type WorkSetupData,
 } from "../../../../services/settings/work-setup/list";
 import { useTeamService, type TeamData } from "../../../../services/teams/list";
+import { sanitizeUUID } from "../../../../utils";
 
 export interface PositionDataType {
     id: string;
@@ -236,6 +237,7 @@ const PositionModal: React.FC<PositionModalProps> = ({
                     const resultGetTotal = await tagService.viewTags(
                         filtersGetTotal
                     );
+
                     if (resultGetTotal.data) {
                         const filters = {
                             is_archived: 0, // Only active tags
@@ -344,7 +346,7 @@ const PositionModal: React.FC<PositionModalProps> = ({
 
     // Transform tags to dropdown options
     const tagOptions = useMemo(() => {
-        return tags.map((tag) => ({
+        return (Array.isArray(tags) ? tags : []).map((tag) => ({
             label: tag.tag_name,
             value: tag.tag_ID || "",
         }));
@@ -390,7 +392,10 @@ const PositionModal: React.FC<PositionModalProps> = ({
 
     const reportsToOptions = useMemo(
         () => [
-            { label: "Supervisor", value: "f639b02d459e11f0b6b802dcb324866b" },
+            {
+                label: "Supervisor",
+                value: "f639b02d-459e-11f0-b6b8-02dcb324866b",
+            },
         ],
         []
     );
@@ -439,8 +444,6 @@ const PositionModal: React.FC<PositionModalProps> = ({
 
     // Update form data when selectedPosition or options change
     useEffect(() => {
-        console.log("test", selectedPosition);
-
         if (
             selectedPosition &&
             teamOptions.length > 0 &&
@@ -448,7 +451,7 @@ const PositionModal: React.FC<PositionModalProps> = ({
         ) {
             let updatedFormData = {
                 ...selectedPosition,
-                team_ID:
+                team:
                     teamOptions.find(
                         (team) => team.label === selectedPosition.team_ID
                     )?.value || "",
@@ -470,6 +473,20 @@ const PositionModal: React.FC<PositionModalProps> = ({
                             tagOptions.find((opt) => opt.label === tag)?.value
                     )
                     ?.filter((id): id is string => id !== undefined),
+
+                position_type_ID:
+                    positionTypeOptions.find(
+                        (type) =>
+                            type.label === selectedPosition.position_type_ID
+                    )?.value || "",
+                reports_to_position_ID:
+                    reportsToOptions.find(
+                        (opt) =>
+                            opt.value ===
+                                selectedPosition.reports_to_position_ID ||
+                            opt.label ===
+                                selectedPosition.reports_to_position_ID
+                    )?.value || "",
             };
             setFormData(updatedFormData);
             setSelectedPositionData(updatedFormData);
@@ -626,7 +643,11 @@ const PositionModal: React.FC<PositionModalProps> = ({
                 formData.work_setup_ID !==
                     selectedPositionData?.work_setup_ID ||
                 toggle !== (selectedPositionData?.is_archived === 1) ||
-                formData.tag_IDs !== selectedPositionData?.tag_IDs;
+                JSON.stringify(formData.tag_IDs) !==
+                    JSON.stringify(selectedPositionData?.tag_IDs) ||
+                formData.team_level !== selectedPositionData?.team_level ||
+                formData.reports_to_position_ID !==
+                    selectedPositionData?.reports_to_position_ID;
 
             if (!hasChanges) {
                 setSnackbarMessage("Please update the details to proceed");
@@ -721,6 +742,68 @@ const PositionModal: React.FC<PositionModalProps> = ({
                                             opt.value === formData.work_setup_ID
                                     )?.label || "—",
                             },
+                            ...(formData.site_ID
+                                ? [
+                                      {
+                                          label: "SITE",
+                                          value:
+                                              siteOptions.find(
+                                                  (opt) =>
+                                                      opt.value ===
+                                                      formData.site_ID
+                                              )?.label || "—",
+                                      },
+                                  ]
+                                : []),
+                            ...(formData.tag_IDs
+                                ? [
+                                      {
+                                          label: "TAGS",
+                                          value:
+                                              formData.tag_IDs
+                                                  .map(
+                                                      (tagId) =>
+                                                          tagOptions.find(
+                                                              (opt) =>
+                                                                  opt.value ===
+                                                                  tagId
+                                                          )?.label
+                                                  )
+                                                  .filter(Boolean)
+                                                  .join(", ") || "—",
+                                      },
+                                  ]
+                                : []),
+                            ...(formData.team_level
+                                ? [
+                                      {
+                                          label: "TEAM LEVEL",
+                                          value:
+                                              teamLevelOptions.find(
+                                                  (opt) =>
+                                                      opt.value ===
+                                                          formData.team_level?.toString() ||
+                                                      opt.label ===
+                                                          formData.team_level?.toString()
+                                              )?.label || "—",
+                                      },
+                                  ]
+                                : []),
+                            ...(formData.reports_to_position_ID
+                                ? [
+                                      {
+                                          label: "REPORTS TO POSITION",
+                                          value:
+                                              reportsToOptions.find(
+                                                  (opt) =>
+                                                      opt.value ===
+                                                          formData.reports_to_position_ID ||
+                                                      opt.label ===
+                                                          formData.reports_to_position_ID
+                                              )?.label || "—",
+                                      },
+                                  ]
+                                : []),
                         ]}
                     />
                 );
@@ -853,42 +936,140 @@ const PositionModal: React.FC<PositionModalProps> = ({
                                               label: "Work Setup",
                                               value: "",
                                               oldValue:
-                                                  selectedPositionData?.work_setup_ID ||
-                                                  "—",
+                                                  workSetupOptions.find(
+                                                      (opt) =>
+                                                          opt.value ===
+                                                              selectedPositionData?.work_setup_ID ||
+                                                          opt.label ===
+                                                              selectedPositionData?.work_setup_ID
+                                                  )?.label || "—",
                                               newValue:
-                                                  formData.work_setup_ID || "—",
+                                                  workSetupOptions.find(
+                                                      (opt) =>
+                                                          opt.value ===
+                                                              formData.work_setup_ID ||
+                                                          opt.label ===
+                                                              formData.work_setup_ID
+                                                  )?.label || "—",
                                           },
                                       ]
                                     : []),
-                                ...(formData.tag_IDs !==
-                                selectedPositionData?.tag_IDs
+                                ...(formData.site_ID !==
+                                selectedPositionData?.site_ID
+                                    ? [
+                                          {
+                                              label: "Site",
+                                              value: "",
+                                              oldValue:
+                                                  siteOptions.find(
+                                                      (opt) =>
+                                                          opt.value ===
+                                                              selectedPositionData?.site_ID ||
+                                                          opt.label ===
+                                                              selectedPositionData?.site_ID
+                                                  )?.label || "—",
+                                              newValue:
+                                                  siteOptions.find(
+                                                      (opt) =>
+                                                          opt.value ===
+                                                              formData.site_ID ||
+                                                          opt.label ===
+                                                              formData.site_ID
+                                                  )?.label || "—",
+                                          },
+                                      ]
+                                    : []),
+                                ...(JSON.stringify(formData.tag_IDs) !==
+                                JSON.stringify(selectedPositionData?.tag_IDs)
                                     ? [
                                           {
                                               label: "Tags",
                                               value: "",
                                               oldValue:
                                                   selectedPositionData?.tag_IDs
-                                                      ?.map((tag) =>
-                                                          tagOptions.find(
-                                                              (opt) =>
-                                                                  opt.value ===
-                                                                  tag
-                                                          )?.label
+                                                      ?.map(
+                                                          (tag) =>
+                                                              tagOptions.find(
+                                                                  (opt) =>
+                                                                      opt.value ===
+                                                                      tag
+                                                              )?.label
                                                       )
                                                       .join(", ") || "—",
                                               newValue:
                                                   formData.tag_IDs
-                                                      ?.map((tag) =>
-                                                          tagOptions.find(
-                                                              (opt) =>
-                                                                  opt.value ===
-                                                                  tag
-                                                          )?.label
+                                                      ?.map(
+                                                          (tag) =>
+                                                              tagOptions.find(
+                                                                  (opt) =>
+                                                                      opt.value ===
+                                                                      tag
+                                                              )?.label
                                                       )
                                                       .join(", ") || "—",
                                           },
                                       ]
                                     : []),
+                                ...(formData.team_level !==
+                                selectedPositionData?.team_level
+                                    ? [
+                                          {
+                                              label: "Team Level",
+                                              value: "",
+                                              oldValue:
+                                                  teamLevelOptions.find(
+                                                      (opt) =>
+                                                          opt.value ===
+                                                              selectedPositionData?.team_level?.toString() ||
+                                                          opt.label ===
+                                                              selectedPositionData?.team_level?.toString()
+                                                  )?.label || "—",
+                                              newValue:
+                                                  teamLevelOptions.find(
+                                                      (opt) =>
+                                                          opt.value ===
+                                                              formData.team_level?.toString() ||
+                                                          opt.label ===
+                                                              formData.team_level?.toString()
+                                                  )?.label || "—",
+                                          },
+                                      ]
+                                    : []),
+                                ...(formData.reports_to_position_ID !==
+                                selectedPositionData?.reports_to_position_ID
+                                    ? [
+                                          {
+                                              label: "Reports To Position",
+                                              value: "",
+                                              oldValue:
+                                                  reportsToOptions.find(
+                                                      (opt) =>
+                                                          opt.value ===
+                                                              selectedPositionData?.reports_to_position_ID ||
+                                                          opt.label ===
+                                                              selectedPositionData?.reports_to_position_ID
+                                                  )?.label || "—",
+                                              newValue:
+                                                  reportsToOptions.find(
+                                                      (opt) =>
+                                                          opt.value ===
+                                                              formData.reports_to_position_ID ||
+                                                          opt.label ===
+                                                              formData.reports_to_position_ID
+                                                  )?.label || "—",
+                                          },
+                                      ]
+                                    : []),
+                            ...(toggle
+                                ? [
+                                      {
+                                          label: "Archive Status",
+                                          value: "",
+                                          oldValue: "Active",
+                                          newValue: "Archived",
+                                      },
+                                  ]
+                                : [])
                             ]}
                         />
                     </div>
@@ -1068,7 +1249,7 @@ const PositionModal: React.FC<PositionModalProps> = ({
                                         </p>
                                     )}
                                 </div>
-                                <div className="z-[999]">
+                                {/* <div className="z-[999]">
                                     <Dropdown
                                         label="POSITION STATUS"
                                         size="small"
@@ -1099,7 +1280,7 @@ const PositionModal: React.FC<PositionModalProps> = ({
                                                 : undefined
                                         }
                                     />
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                         <div className="relative z-10">
@@ -1137,6 +1318,17 @@ const PositionModal: React.FC<PositionModalProps> = ({
                                                 siteValue || ""
                                             );
                                         }}
+                                        value={
+                                            formData.site_ID
+                                                ? siteOptions.find(
+                                                      (opt) =>
+                                                          opt.value ===
+                                                              formData.site_ID ||
+                                                          opt.label ===
+                                                              formData.site_ID
+                                                  )
+                                                : undefined
+                                        }
                                     />
                                 </div>
                             </div>
@@ -1272,6 +1464,19 @@ const PositionModal: React.FC<PositionModalProps> = ({
                                                 reportsToValue || ""
                                             );
                                         }}
+                                        value={
+                                            formData.reports_to_position_ID
+                                                ? reportsToOptions.find(
+                                                      (opt) =>
+                                                          opt.value ===
+                                                              formData.reports_to_position_ID ||
+                                                          "" ||
+                                                          opt.label ===
+                                                              formData.reports_to_position_ID ||
+                                                          ""
+                                                  )
+                                                : undefined
+                                        }
                                     />
                                 </div>
 
@@ -1292,6 +1497,17 @@ const PositionModal: React.FC<PositionModalProps> = ({
                                                 teamLevelValue || ""
                                             );
                                         }}
+                                        value={
+                                            formData.team_level
+                                                ? teamLevelOptions.find(
+                                                      (opt) =>
+                                                          opt.value ===
+                                                              formData.team_level?.toString() ||
+                                                          opt.label ===
+                                                              formData.team_level?.toString()
+                                                  )
+                                                : undefined
+                                        }
                                     />
                                 </div>
 

@@ -81,6 +81,9 @@ export interface PositionData {
     created_at?: string;
     updated_at?: string;
     tags?: string;
+    reports_to_position_ID?: string;
+    team_level?: string;
+    site_ID?: string;
 }
 
 export interface CreatePositionRequest {

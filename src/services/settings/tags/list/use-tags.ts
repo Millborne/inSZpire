@@ -111,9 +111,9 @@ export const useTagService = () => {
 
     const viewTags = async (filters: ViewTagsRequest) => {
         return generalAction({
-            queryParameters: "/view",
-            method: "POST",
+            queryParameters: `/tags/view`,
             body: filters,
+            method: "POST",
         });
     };
 
