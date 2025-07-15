@@ -127,14 +127,18 @@ const Position: React.FC<PositionPageProps> = ({ mode }) => {
             isArchived: position.is_archived || 0,
             // Keep original IDs for API operations
             team_ID: position.team_name || "",
-            job_ID: position.team_code || "",
-            site_ID: position.position_code,
+            // job_ID: position.team_code || "",
+            site_ID: position.site_ID || "",
             position_status_name: position.position_status_name,
             position_type_ID: position.position_type || undefined,
             work_setup_ID: position.work_setup || undefined,
             reports_to_position: position.reports_to_position,
             is_approved: position.is_approved,
-            tag_IDs: position.tags ? position.tags.split(',').map(tag => tag.trim()) : undefined,
+            tag_IDs: position.tags
+                ? position.tags.split(",").map((tag) => tag.trim())
+                : undefined,
+            reports_to_position_ID: position.reports_to_position_ID || "",
+            team_level: position.team_level || "",
         }));
     };
 
@@ -323,29 +327,22 @@ const Position: React.FC<PositionPageProps> = ({ mode }) => {
                     position_type_ID: sanitizeUUID(data.position_type_ID) || "",
                     work_setup_ID: sanitizeUUID(data.work_setup_ID) || "",
                     basic_salary: data.basicSalary || 0,
-                    created_by:
-                        sanitizeUUID("567890abcdef1234567890abcdef1234") ||
-                        "567890abcdef1234567890abcdef1234",
-
-                    // Optional fields
+                    created_by: sanitizeUUID(
+                        "123e4567e89b12d3a456426614174000"
+                    ),
                     site_ID: data.site_ID
                         ? sanitizeUUID(data.site_ID)
                         : undefined,
+
+                    // Optional fields
                     reports_to_position_ID: data.reports_to_position_ID
                         ? sanitizeUUID(data.reports_to_position_ID)
                         : undefined,
-                    reports_to_node: data.reports_to_node || "1.1",
-                    team_level: data.team_level || "0",
-                    is_approved: data.is_approved || 0,
-                    is_archived: 0,
-                    updated_by:
-                        sanitizeUUID("567890abcdef1234567890abcdef1234") ||
-                        "567890abcdef1234567890abcdef1234",
+                    team_level: data.team_level?.toString() || "0",
                     tag_IDs:
                         data.tag_IDs && data.tag_IDs.length > 0
                             ? data.tag_IDs.map((tag) => sanitizeUUID(tag))
                             : undefined,
-                    position_status_name: data.position_status_name?.toLowerCase() || "active",
                 };
 
                 console.log("Creating position with data:", positionData);
@@ -441,11 +438,38 @@ const Position: React.FC<PositionPageProps> = ({ mode }) => {
                     return;
                 }
 
+                // const positionData = {
+                //     // Required fields according to API documentation
+                //     position_code: data.positionCode?.trim() || "",
+                //     position_name: data.position?.trim() || "",
+                //     team_ID: sanitizeUUID(data.team_ID || data.team) || "",
+                //     job_ID: sanitizeUUID(data.job_ID || data.jobTitle) || "",
+                //     position_type_ID: sanitizeUUID(data.position_type_ID) || "",
+                //     work_setup_ID: sanitizeUUID(data.work_setup_ID) || "",
+                //     basic_salary: data.basicSalary || 0,
+                //     created_by: sanitizeUUID(
+                //         "123e4567e89b12d3a456426614174000"
+                //     ),
+                //     site_ID: data.site_ID
+                //         ? sanitizeUUID(data.site_ID)
+                //         : undefined,
+
+                //     // Optional fields
+                //     reports_to_position_ID: data.reports_to_position_ID
+                //         ? sanitizeUUID(data.reports_to_position_ID)
+                //         : undefined,
+                //     team_level: data.team_level?.toString() || "0",
+                //     tag_IDs:
+                //         data.tag_IDs && data.tag_IDs.length > 0
+                //             ? data.tag_IDs.map((tag) => sanitizeUUID(tag))
+                //             : undefined,
+                // };
+
                 const positionDataEdit = {
                     position_ID: selectedPosition.id,
                     position_code: data.positionCode?.trim() || "",
                     position_name: data.position?.trim() || "",
-                    team_ID: sanitizeUUID(data.team_ID || data.team) || "",
+                    team_ID: sanitizeUUID(data.team) || "",
                     site_ID: data.site_ID
                         ? sanitizeUUID(data.site_ID)
                         : undefined,
@@ -454,7 +478,7 @@ const Position: React.FC<PositionPageProps> = ({ mode }) => {
                         ? sanitizeUUID(data.reports_to_position_ID)
                         : undefined,
                     reports_to_node: data.reports_to_node || "1.1",
-                    team_level: data.team_level || "0",
+                    team_level: data.team_level?.toString() || "0",
                     position_type_ID: sanitizeUUID(data.position_type_ID) || "",
                     work_setup_ID: sanitizeUUID(data.work_setup_ID) || "",
                     basic_salary: data.basicSalary || 0,
