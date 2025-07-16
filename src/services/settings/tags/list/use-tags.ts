@@ -117,6 +117,22 @@ export const useTagService = () => {
         });
     };
 
+    const createTag = async (tagData: CreateTagRequest) => {
+        return generalAction({
+            queryParameters: `/tags`,
+            body: tagData,
+            method: "POST",
+        });
+    };
+
+    const updateTag = async (tagData: UpdateTagRequest) => {
+        return generalAction({
+            queryParameters: `/tags`,
+            body: tagData,
+            method: "PUT",
+        });
+    };
+
     return {
         // mutation
         actionData,
@@ -129,5 +145,7 @@ export const useTagService = () => {
         // methods
         getTagsByType,
         viewTags,
+        createTag,
+        updateTag,
     };
 };
