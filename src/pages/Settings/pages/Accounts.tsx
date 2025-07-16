@@ -500,9 +500,10 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
                                 <Inputs
                                     placeholder="Search"
                                     icon={SearchNormal}
-                                    onChange={(e) =>
-                                        setSearchTerm(e.target.value)
-                                    }
+                                    onChange={(e) => {
+                                        setSearchTerm(e.target.value);
+                                        setCurrentPage(1);
+                                    }}
                                 />
                             </div>
                         </section>

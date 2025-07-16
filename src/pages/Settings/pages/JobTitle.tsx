@@ -1,16 +1,37 @@
 import { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CardContainer, Inputs, PopoverMenu, Table, HeaderType, Pagination, SnackbarAlert } from "enterprisze-global-components";
+import {
+    CardContainer,
+    Inputs,
+    PopoverMenu,
+    Table,
+    HeaderType,
+    Pagination,
+    SnackbarAlert,
+} from "enterprisze-global-components";
 
 //icons
-import { Add, ArchiveBox, ArrowLeft, Edit2, HamburgerMenu, SearchNormal } from "iconsax-reactjs";
+import {
+    Add,
+    ArchiveBox,
+    ArrowLeft,
+    Edit2,
+    HamburgerMenu,
+    SearchNormal,
+} from "iconsax-reactjs";
 
 // components
-import JobTitleModal, { JobTitleDataType, ModalMode } from "../components/modals/JobTitleModal";
+import JobTitleModal, {
+    JobTitleDataType,
+    ModalMode,
+} from "../components/modals/JobTitleModal";
 import ConfirmationModal from "../../../components/ConfirmationModal";
 
 // services
-import { useJobTitleService, type JobTitleData } from "../../../services/settings/job-title/list";
+import {
+    useJobTitleService,
+    type JobTitleData,
+} from "../../../services/settings/job-title/list";
 
 import { SidebarContext } from "../index";
 //! for page mode
@@ -30,7 +51,10 @@ const getHeaders = (mode: JobTitlePageMode): HeaderType[] => {
     ];
 
     if (mode === "archived") {
-        return [{ type: "checkbox", header: <></>, accessor: "checkbox" }, ...baseHeaders];
+        return [
+            { type: "checkbox", header: <></>, accessor: "checkbox" },
+            ...baseHeaders,
+        ];
     }
 
     return baseHeaders;
@@ -57,16 +81,21 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [selectedJobTitle, setSelectedJobTitle] = useState<JobTitleDataType | null>(null);
+    const [selectedJobTitle, setSelectedJobTitle] =
+        useState<JobTitleDataType | null>(null);
     const [modalMode, setModalMode] = useState<ModalMode>("add");
-    const [isArchiveConfirmationOpen, setIsArchiveConfirmationOpen] = useState(false);
-    const [jobTitleToArchive, setJobTitleToArchive] = useState<JobTitleDataType | null>(null);
+    const [isArchiveConfirmationOpen, setIsArchiveConfirmationOpen] =
+        useState(false);
+    const [jobTitleToArchive, setJobTitleToArchive] =
+        useState<JobTitleDataType | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [jobTitles, setJobTitles] = useState<JobTitleData[]>([]);
     const [totalCount, setTotalCount] = useState(0);
     const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [snackbarType, setSnackbarType] = useState<"success" | "error" | "warning" | "info">("success");
+    const [snackbarType, setSnackbarType] = useState<
+        "success" | "error" | "warning" | "info"
+    >("success");
 
     //! Get headers based on mode
     const headers = getHeaders(mode);
@@ -77,51 +106,55 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
             id: jobTitle.job_ID || "",
             jobTitle: jobTitle.job_title,
             description: jobTitle.job_description || "",
-            salary: jobTitle.basic_salary ? `₱ ${jobTitle.basic_salary.toLocaleString()}` : "₱ 0",
+            salary: jobTitle.basic_salary
+                ? `₱ ${jobTitle.basic_salary.toLocaleString()}`
+                : "₱ 0",
             status: jobTitle.status || "pending",
         }));
     };
 
     // Transform job titles for table display with colored status
-    const tableData = transformJobTitlesToTableData(jobTitles).map((row, index) => ({
-        ...row,
-        jobTitle: (
-            <span
-                onClick={() => {
-                    if (mode === "all-job-titles") handleRowClick(index);
-                }}
-            >
-                {row.jobTitle}
-            </span>
-        ),
-        description: (
-            <span
-                onClick={() => {
-                    if (mode === "all-job-titles") handleRowClick(index);
-                }}
-            >
-                {row.description}
-            </span>
-        ),
-        salary: (
-            <span
-                onClick={() => {
-                    if (mode === "all-job-titles") handleRowClick(index);
-                }}
-            >
-                {row.salary}
-            </span>
-        ),
-        status: (
-            <span
-                onClick={() => {
-                    if (mode === "all-job-titles") handleRowClick(index);
-                }}
-            >
-                {getColoredStatus(row.status)}
-            </span>
-        ),
-    }));
+    const tableData = transformJobTitlesToTableData(jobTitles).map(
+        (row, index) => ({
+            ...row,
+            jobTitle: (
+                <span
+                    onClick={() => {
+                        if (mode === "all-job-titles") handleRowClick(index);
+                    }}
+                >
+                    {row.jobTitle}
+                </span>
+            ),
+            description: (
+                <span
+                    onClick={() => {
+                        if (mode === "all-job-titles") handleRowClick(index);
+                    }}
+                >
+                    {row.description}
+                </span>
+            ),
+            salary: (
+                <span
+                    onClick={() => {
+                        if (mode === "all-job-titles") handleRowClick(index);
+                    }}
+                >
+                    {row.salary}
+                </span>
+            ),
+            status: (
+                <span
+                    onClick={() => {
+                        if (mode === "all-job-titles") handleRowClick(index);
+                    }}
+                >
+                    {getColoredStatus(row.status)}
+                </span>
+            ),
+        })
+    );
 
     // Transform job titles for modal (keeping original string status)
     const modalData = transformJobTitlesToTableData(jobTitles);
@@ -154,7 +187,10 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
         setCurrentPage(page);
     };
 
-    const handleOpenModal = (jobTitle: JobTitleDataType, modalMode: ModalMode) => {
+    const handleOpenModal = (
+        jobTitle: JobTitleDataType,
+        modalMode: ModalMode
+    ) => {
         setSelectedJobTitle({
             ...jobTitle,
             is_archived: mode === "archived" ? 1 : 0,
@@ -182,7 +218,8 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                     job_code: data.jobTitle.replace(/\s+/g, "_").toUpperCase(),
                     job_title: data.jobTitle,
                     job_description: data.description || "",
-                    basic_salary: parseFloat(data.salary.replace(/[₱,\s]/g, "")) || 0,
+                    basic_salary:
+                        parseFloat(data.salary.replace(/[₱,\s]/g, "")) || 0,
                     status: "active",
                     is_archived: 0,
                 };
@@ -198,7 +235,8 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                     const errorMessage =
                         result.error && "data" in result.error
                             ? (result.error.data as any)?.message
-                            : (result.error as any)?.message || "An error occurred";
+                            : (result.error as any)?.message ||
+                              "An error occurred";
                     setSnackbarMessage(errorMessage);
                     setSnackbarType("error");
                     setIsSnackbarOpen(true);
@@ -209,15 +247,20 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                     job_code: data.jobTitle.replace(/\s+/g, "_").toUpperCase(),
                     job_title: data.jobTitle,
                     job_description: data.description || "",
-                    basic_salary: parseFloat(data.salary.replace(/[₱,\s]/g, "")) || 0,
+                    basic_salary:
+                        parseFloat(data.salary.replace(/[₱,\s]/g, "")) || 0,
                 };
 
                 const jobTitleData = {
                     job_ID: selectedJobTitle.id,
                     is_archived: data.is_archived,
                 };
-                let resultUpdate = await jobTitleService.updateJobTitle(jobTitleDataEdit);
-                let resultArchive = await jobTitleService.updateJobTitle(jobTitleData);
+                let resultUpdate = await jobTitleService.updateJobTitle(
+                    jobTitleDataEdit
+                );
+                let resultArchive = await jobTitleService.updateJobTitle(
+                    jobTitleData
+                );
 
                 if (resultUpdate.data) {
                     setSnackbarMessage(resultUpdate.data?.message);
@@ -228,7 +271,8 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                     const errorMessage =
                         resultUpdate.error && "data" in resultUpdate.error
                             ? (resultUpdate.error.data as any)?.message
-                            : (resultUpdate.error as any)?.message || "An error occurred";
+                            : (resultUpdate.error as any)?.message ||
+                              "An error occurred";
                     setSnackbarMessage(errorMessage);
                     setSnackbarType("error");
                     setIsSnackbarOpen(true);
@@ -244,7 +288,8 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                         const errorMessage =
                             resultArchive.error && "data" in resultArchive.error
                                 ? (resultArchive.error.data as any)?.message
-                                : (resultArchive.error as any)?.message || "An error occurred";
+                                : (resultArchive.error as any)?.message ||
+                                  "An error occurred";
                         setSnackbarMessage(errorMessage);
                         setSnackbarType("error");
                         setIsSnackbarOpen(true);
@@ -286,7 +331,9 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                     job_ID: jobTitle.id,
                     is_archived: 0,
                 };
-                let resultRestore = await jobTitleService.updateJobTitle(jobTitleData);
+                let resultRestore = await jobTitleService.updateJobTitle(
+                    jobTitleData
+                );
 
                 if (resultRestore.data) {
                     setSnackbarMessage(resultRestore.data?.message);
@@ -296,7 +343,8 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                     const errorMessage =
                         resultRestore.error && "data" in resultRestore.error
                             ? (resultRestore.error.data as any)?.message
-                            : (resultRestore.error as any)?.message || "An error occurred";
+                            : (resultRestore.error as any)?.message ||
+                              "An error occurred";
                     setSnackbarMessage(errorMessage);
                     setSnackbarType("error");
                     setIsSnackbarOpen(true);
@@ -316,7 +364,9 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
             }
         } catch (error) {
             console.error("Error restoring job title:", error);
-            setSnackbarMessage("Failed to restore job title. Please try again.");
+            setSnackbarMessage(
+                "Failed to restore job title. Please try again."
+            );
             setSnackbarType("error");
             setIsSnackbarOpen(true);
         } finally {
@@ -332,7 +382,9 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                     job_ID: jobTitleToArchive.id,
                     is_archived: 1,
                 };
-                let resultArchive = await jobTitleService.updateJobTitle(jobTitleData);
+                let resultArchive = await jobTitleService.updateJobTitle(
+                    jobTitleData
+                );
 
                 if (resultArchive.data) {
                     setSnackbarMessage(resultArchive.data?.message);
@@ -342,7 +394,8 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                     const errorMessage =
                         resultArchive.error && "data" in resultArchive.error
                             ? (resultArchive.error.data as any)?.message
-                            : (resultArchive.error as any)?.message || "An error occurred";
+                            : (resultArchive.error as any)?.message ||
+                              "An error occurred";
                     setSnackbarMessage(errorMessage);
                     setSnackbarType("error");
                     setIsSnackbarOpen(true);
@@ -363,7 +416,9 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
             }
         } catch (error) {
             console.error("Error archiving job title:", error);
-            setSnackbarMessage("Failed to archive job title. Please try again.");
+            setSnackbarMessage(
+                "Failed to archive job title. Please try again."
+            );
             setSnackbarType("error");
             setIsSnackbarOpen(true);
         } finally {
@@ -376,7 +431,8 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
         {
             icon: <Edit2 />,
             label: "Edit Job Title",
-            onClick: (index: number) => handleOpenModal(modalData[index], "edit"),
+            onClick: (index: number) =>
+                handleOpenModal(modalData[index], "edit"),
         },
         {
             icon: <ArchiveBox />,
@@ -398,9 +454,11 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
     useEffect(() => {
         if (jobTitleService.actionIsError) {
             const errorMessage =
-                jobTitleService.actionError && "data" in jobTitleService.actionError
+                jobTitleService.actionError &&
+                "data" in jobTitleService.actionError
                     ? (jobTitleService.actionError.data as any)?.message
-                    : (jobTitleService.actionError as any)?.message || "An error occurred";
+                    : (jobTitleService.actionError as any)?.message ||
+                      "An error occurred";
             setSnackbarMessage(errorMessage);
             setSnackbarType("error");
             setIsSnackbarOpen(true);
@@ -423,10 +481,15 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                                         }}
                                     />
                                 )}
-                                <HamburgerMenu className="text-szPrimary700 cursor-pointer blcok md:hidden" onClick={toggleSidebar} />
+                                <HamburgerMenu
+                                    className="text-szPrimary700 cursor-pointer blcok md:hidden"
+                                    onClick={toggleSidebar}
+                                />
 
                                 <h6 className="text-h6 text-szPrimary700 whitespace-nowrap">
-                                    {mode === "archived" ? "Archived Job Titles" : "Job Titles"}
+                                    {mode === "archived"
+                                        ? "Archived Job Titles"
+                                        : "Job Titles"}
                                 </h6>
                                 {mode === "all-job-titles" && (
                                     <div className="flex-1">
@@ -436,14 +499,20 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                                                 {
                                                     label: "Add Job Title",
                                                     icon: <Add />,
-                                                    onClick: () => handleOpenModal({} as JobTitleDataType, "add"),
+                                                    onClick: () =>
+                                                        handleOpenModal(
+                                                            {} as JobTitleDataType,
+                                                            "add"
+                                                        ),
                                                 },
                                                 {
                                                     label: "View Archived Job Titles",
                                                     icon: <ArchiveBox />,
                                                     onClick: () => {
                                                         setCurrentPage(1);
-                                                        navigate("job-title-archived");
+                                                        navigate(
+                                                            "job-title-archived"
+                                                        );
                                                     },
                                                 },
                                             ]}
@@ -452,13 +521,24 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
                                 )}
                             </div>
                             <div className="w-full max-w-[260px] min-w-[150px]">
-                                <Inputs placeholder="Search" icon={SearchNormal} onChange={(e) => setSearchTerm(e.target.value)} />
+                                <Inputs
+                                    placeholder="Search"
+                                    icon={SearchNormal}
+                                    onChange={(e) => {
+                                        setSearchTerm(e.target.value);
+                                        setCurrentPage(1);
+                                    }}
+                                />
                             </div>
                         </section>
                         <Table
                             headers={headers}
                             data={tableData}
-                            moreOptions={mode === "archived" ? moreOptionsForArchived : moreOptions}
+                            moreOptions={
+                                mode === "archived"
+                                    ? moreOptionsForArchived
+                                    : moreOptions
+                            }
                             // onRowClick={handleRowClick}
                         />
                         <section className="flex justify-end">
