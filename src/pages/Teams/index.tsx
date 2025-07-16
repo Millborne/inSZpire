@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
     CardContainer,
     PopoverMenu,
@@ -30,6 +30,9 @@ export interface Employee {
     subordinates: number;
     yearsOfPosition: string;
 }
+
+// Import teams service
+import { useTeamService, type TeamData } from "../../services/teams/list";
 
 // dummy data, remove later in integration
 const teamsData = [
@@ -325,15 +328,56 @@ const Teams = () => {
     const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
 
+    // Teams service
+    const teamService = useTeamService();
+    const [teams, setTeams] = useState<TeamData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Load teams on component mount
+    useEffect(() => {
+        const loadTeams = async () => {
+            try {
+                setIsLoading(true);
+                const response = await teamService.viewTeams({
+                    search: "",
+                    is_archived: 0,
+                    offset: 0,
+                    limit: 50
+                });
+
+                if (response.data?.data) {
+                    setTeams(response.data.data);
+                }
+            } catch (err) {
+                setError("Failed to load teams");
+                console.error("Error loading teams:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadTeams();
+    }, []);
+
+    // Transform API data to match TeamsList interface
+    const transformedTeams = useMemo(() => {
+        return teams.map((team) => ({
+            id: team.team_ID || "",
+            name: team.team_name,
+            employees: [] // TODO: Fetch team members when needed
+        }));
+    }, [teams]);
+
     // Calculate paginated teams
     const paginatedTeams = useMemo(() => {
         const startIndex = (currentPage - 1) * teamsPerPage;
         const endIndex = startIndex + teamsPerPage;
-        return teamsData.slice(startIndex, endIndex);
-    }, [currentPage]);
+        return transformedTeams.slice(startIndex, endIndex);
+    }, [currentPage, transformedTeams]);
 
     // Calculate total pages
-    const totalPages = Math.ceil(teamsData.length / teamsPerPage);
+    const totalPages = Math.ceil(teams.length / teamsPerPage);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);

@@ -61,6 +61,7 @@ export interface PositionData {
     position_ID?: string;
     position_code: string;
     position_name: string;
+    team_ID?: string;
     team_name?: string;
     team_code?: string;
     job_title?: string;

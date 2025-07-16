@@ -158,8 +158,8 @@ const EmploymentHistory = () => {
                         <div>
                             <h6 className="text-h6 text-szPrimary700">Company History</h6>
                         </div>
-                        {companyHistory.map((item) => (
-                            <div className="flex h-full">
+                        {companyHistory.map((item, index) => (
+                            <div key={index} className="flex h-full">
                                 <div className="flex flex-col h-full items-center w-[32px] gap-2">
                                     <div>
                                         <div className="h-[8px] w-[8px] rounded-full bg-szPrimary500"></div>
@@ -182,8 +182,8 @@ const EmploymentHistory = () => {
                             <h6 className="text-h6 text-szPrimary700">Other Employee History</h6>
                         </div>
                         <div className="flex flex-col gap-2 h-full w-full">
-                            {otherEmployeeHistory.map((item) => (
-                                <JobPositionHistory data={item} state="other" />
+                            {otherEmployeeHistory.map((item, index) => (
+                                <JobPositionHistory key={index} data={item} state="other" />
                             ))}
                         </div>
                     </div>

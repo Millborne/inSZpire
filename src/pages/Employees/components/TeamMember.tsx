@@ -1,28 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CardContainer, Chip, PopoverMenu, SnackbarAlert, Tab, TextContent } from "enterprisze-global-components";
 import { ArchiveBox, Data2, Edit2, Hierarchy2, People, Tag } from "iconsax-reactjs";
 import SpecificTeamCard from "../../Teams/components/SpecificTeamCard";
 import SpecificTeamModal, { ModalMode, SpecificTeamDataType } from "../../Teams/components/modals/SpecificTeamModal";
 import ConfirmSpecificTeamArchive from "../../Teams/components/modals/ConfirmSpecificTeamArchive";
 
-const SpecificTeamData = [
-    {
-        name: "Stephanie Germanotta",
-        jobTitle: "Web Dev",
-        // teamReference: "Office of the President and COO",
-        // tags: ["Tag1", "Tag2", "Tag3"],
-        // teamMembers: [
-        // ]
-    },
-    {
-        name: "Daryl Simene",
-        jobTitle: "UX Designer",
-    },
-    {
-        name: "John Doe",
-        jobTitle: "Web Developer",
-    },
-];
+// Import the team member service
+import { useTeamMemberService, type TeamData, type PositionData } from "../../../services/employee-profile/work/team-member";
 
 const TeamMember = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,6 +16,74 @@ const TeamMember = () => {
     const [viewType, setViewType] = useState<"team" | "underlings">("team");
     const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
+
+    // State for team data
+    const [teamData, setTeamData] = useState<TeamData | null>(null);
+    const [teamMembers, setTeamMembers] = useState<PositionData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Get team member service
+    const teamMemberService = useTeamMemberService();
+    const hasLoadedRef = useRef(false);
+
+    // Load team data on component mount
+    useEffect(() => {
+        // Prevent multiple calls
+        if (hasLoadedRef.current) return;
+        hasLoadedRef.current = true;
+
+        const loadTeamData = async () => {
+            try {
+                setIsLoading(true);
+                
+                // TODO: Get the current employee's team from context or props
+                // For now, we'll use a default team - this should be replaced with actual employee data
+                const currentEmployeeTeam = "business solutions and innovation"; // This should come from employee context
+                
+                // Get team details for the current employee's team
+                const teamResponse = await teamMemberService.getTeamDetails({
+                    search: currentEmployeeTeam,
+                    is_archived: 0,
+                    offset: 0,
+                    limit: 10
+                });
+
+                if (teamResponse.data?.data && Array.isArray(teamResponse.data.data) && teamResponse.data.data.length > 0) {
+                    const employeeTeam = teamResponse.data.data.find(
+                        (team: TeamData) => team.team_name.toLowerCase().includes(currentEmployeeTeam.toLowerCase())
+                    );
+                    
+                    if (employeeTeam) {
+                        setTeamData(employeeTeam);
+                        
+                        // Get team members for this team
+                        const membersResponse = await teamMemberService.getTeamMembers({
+                            team_ID: employeeTeam.team_ID,
+                            is_archived: 0,
+                            offset: 0,
+                            limit: 50
+                        });
+
+                        if (membersResponse.data?.positions) {
+                            setTeamMembers(membersResponse.data.positions);
+                        }
+                    } else {
+                        setError("Employee's team not found");
+                    }
+                } else {
+                    setError("No team data available");
+                }
+            } catch (err) {
+                setError("Failed to load team data");
+                console.error("Error loading team data:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadTeamData();
+    }, []); // Remove teamMemberService from dependency array
 
     const handleOpenModal = (team: SpecificTeamDataType, mode: ModalMode) => {
         setSelectedSpecificTeam(team);
@@ -54,13 +106,52 @@ const TeamMember = () => {
         setIsArchiveModalOpen(true);
     };
 
+    // Loading state
+    if (isLoading) {
+        return (
+            <CardContainer
+                content={
+                    <div className="flex items-center justify-center h-32">
+                        <div className="text-szPrimary700">Loading team data...</div>
+                    </div>
+                }
+            />
+        );
+    }
+
+    // Error state
+    if (error) {
+        return (
+            <CardContainer
+                content={
+                    <div className="flex items-center justify-center h-32">
+                        <div className="text-red-600">{error}</div>
+                    </div>
+                }
+            />
+        );
+    }
+
+    // No team data
+    if (!teamData) {
+        return (
+            <CardContainer
+                content={
+                    <div className="flex items-center justify-center h-32">
+                        <div className="text-szPrimary700">No team data found for this employee</div>
+                    </div>
+                }
+            />
+        );
+    }
+
     return (
         <>
             <CardContainer
                 content={
                     <div className="flex flex-col gap-[20px]">
                         <div className="flex items-center gap-[8px]">
-                            <h5 className="text-h5 text-szPrimary700">Business Solutions and Innovation</h5>
+                            <h5 className="text-h5 text-szPrimary700">{teamData.team_name}</h5>
                             <div className="flex-1">
                                 <PopoverMenu
                                     size="small"
@@ -81,10 +172,7 @@ const TeamMember = () => {
                         </div>
                         <div className="flex flex-col gap-[20px]">
                             <p className="text-body-small-strong text-szDarkGrey600">
-                                The Business Solutions and Innovations team is dedicated to developing cutting-edge system applications that
-                                enhance operational efficiency across the company. Comprising talented developers, this team ensures that
-                                all software solutions are user-friendly and tailored to meet the diverse needs of our employees. Their
-                                commitment to innovation drives continuous improvement, empowering teams to achieve their goals effectively.
+                                {teamData.team_description || "No description available"}
                             </p>
                             <div>
                                 <div className="flex flex-row justify-between">
@@ -92,7 +180,9 @@ const TeamMember = () => {
                                         <Hierarchy2 />
                                         <div className="flex flex-col lg:flex-row lg:gap-[75px]">
                                             <p className="text-caption-all-caps text-szGrey500">TEAM REFERENCE</p>
-                                            <p className="text-body-small-strong">Office of the President and COO</p>
+                                            <p className="text-body-small-strong">
+                                                {teamData.parent_team_ID ? "Parent Team" : "No parent team"}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-[8px]">
@@ -102,31 +192,15 @@ const TeamMember = () => {
                                         </div>
 
                                         <div className="flex flex-col lg:flex-row gap-[8px]">
-                                            {[
-                                                {
-                                                    label: "Tag1",
-                                                    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                                                },
-                                                {
-                                                    label: "Tag2",
-                                                    description: "Sed do eiusmod tempor incididunt ut labore.",
-                                                },
-                                                {
-                                                    label: "Tag 3",
-                                                    description: "Ut enim ad minim veniam, quis nostrud exercitation.",
-                                                },
-                                            ].map((tag, index) => (
-                                                <div key={index} className="relative group">
-                                                    {/* Chip base */}
-                                                    <Chip label={tag.label} />
-
-                                                    {/* Tooltip on hover */}
-                                                    <div className="absolute z-50 hidden group-hover:block top-full mt-2 w-[220px] bg-[#EBEFFF] rounded-lg shadow-md p-3 text-sm text-gray-700">
-                                                        <TextContent header="Tag Name" text={tag.label} />
-                                                        <TextContent header="Tag Description" text={tag.description} />
+                                            {teamData.tags ? (
+                                                teamData.tags.split(',').map((tag: string, index: number) => (
+                                                    <div key={index} className="relative group">
+                                                        <Chip label={tag.trim()} />
                                                     </div>
-                                                </div>
-                                            ))}
+                                                ))
+                                            ) : (
+                                                <div className="text-szGrey500 text-sm">No tags available</div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -149,7 +223,7 @@ const TeamMember = () => {
                                                             viewType === "team" ? "text-szSecondary500" : "text-szGrey500"
                                                         }`}
                                                     >
-                                                        15
+                                                        {teamMembers.length}
                                                     </p>
                                                 </div>
                                             }
@@ -175,9 +249,21 @@ const TeamMember = () => {
                                         />
                                     </div>
                                 </div>
-                                {SpecificTeamData.map((data) => (
-                                    <SpecificTeamCard name={data.name} jobTitle={data.jobTitle} />
-                                ))}
+                                
+                                {/* Team Members List */}
+                                {teamMembers.length > 0 ? (
+                                    teamMembers.map((member) => (
+                                        <SpecificTeamCard 
+                                            key={member.position_ID}
+                                            name={member.position_name || member.employee_name || "Unknown"}
+                                            jobTitle={member.job_title || "No title"}
+                                        />
+                                    ))
+                                ) : (
+                                    <div className="text-center py-8 text-szGrey500">
+                                        No team members found
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -200,7 +286,7 @@ const TeamMember = () => {
                 onClose={() => setIsArchiveModalOpen(false)}
                 onClick={async () => {
                     try {
-                        // TODO: Backend Integration - Call add API
+                        // TODO: Backend Integration - Call archive API
                         setIsArchiveModalOpen(false);
                     } catch (error) {
                         // TODO: Add error handling
@@ -209,7 +295,7 @@ const TeamMember = () => {
                     handleSpecificTeamSuccess("Successfully archived team");
                 }}
                 description="Are you sure to archive this Team?"
-                subDescription="All contents of the Business Solutions and Innovation team will be archived. Please ensure all employees are reassigned to new teams to maintain organizational structure."
+                subDescription={`All contents of the ${teamData.team_name} team will be archived. Please ensure all employees are reassigned to new teams to maintain organizational structure.`}
                 buttonLabel="Archive Team"
                 buttonFooterIcon={<ArchiveBox />}
             />
