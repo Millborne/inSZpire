@@ -1,8 +1,41 @@
 import {
+    useFetchTeamDetailsQuery,
     useFetchTeamMembersQuery,
-    useActionTeamMembersMutation,
+    useActionTeamsMutation,
+    useActionPositionsMutation,
 } from "./teamMemberAPI";
 
+// Team details hook
+export const useTeamDetails = ({
+    queryParameters,
+    method,
+    disableFetch = false,
+}: {
+    queryParameters?: string;
+    method?: string;
+    disableFetch?: boolean;
+}) => {
+    const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
+        useFetchTeamDetailsQuery(
+            {
+                queryParameters: queryParameters ?? "",
+                method: method,
+            },
+            { skip: disableFetch }
+        );
+
+    return {
+        data,
+        isSuccess,
+        isError,
+        isLoading,
+        isFetching,
+        error,
+        refetch,
+    };
+};
+
+// Team members hook
 export const useTeamMembers = ({
     queryParameters,
     method,
@@ -12,7 +45,6 @@ export const useTeamMembers = ({
     method?: string;
     disableFetch?: boolean;
 }) => {
-    // fetch
     const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
         useFetchTeamMembersQuery(
             {
@@ -22,21 +54,7 @@ export const useTeamMembers = ({
             { skip: disableFetch }
         );
 
-    // action
-    const [
-        generalAction,
-        {
-            data: actionData,
-            isError: actionIsError,
-            isLoading: actionIsLoading,
-            isSuccess: actionIsSuccess,
-            error: actionError,
-            reset: actionReset,
-        },
-    ] = useActionTeamMembersMutation();
-
     return {
-        // fetching
         data,
         isSuccess,
         isError,
@@ -44,178 +62,136 @@ export const useTeamMembers = ({
         isFetching,
         error,
         refetch,
-
-        // mutation
-        generalAction,
-        actionData,
-        actionIsError,
-        actionIsLoading,
-        actionIsSuccess,
-        actionError,
-        actionReset,
     };
 };
 
 // Team Member-specific interfaces based on API documentation
-export interface TeamMemberData {
-    tm_ID?: string;
-    emp_ID: string;
-    team_ID: string;
-    tm_role: string;
-    tm_status: "active" | "pending" | "inactive";
-    tm_start_date: string;
-    tm_end_date?: string;
-    tm_notes?: string;
-    is_archived?: number;
-    created_at?: string;
-    updated_at?: string;
-    // Related data
-    employee?: {
-        emp_ID: string;
-        emp_first_name: string;
-        emp_last_name: string;
-        emp_middle_name?: string;
-        emp_email: string;
-        emp_phone?: string;
-        emp_position?: string;
-        emp_department?: string;
-    };
-    team?: {
-        team_ID: string;
-        team_name: string;
-        team_description?: string;
-        team_leader_ID?: string;
-    };
+export interface TeamData {
+    team_ID: string;           // 32-char hex UUID
+    team_code: string;         // e.g., "bsi", "spt"
+    team_name: string;         // e.g., "Business Solutions and Innovation"
+    team_description: string;  // Team description
+    team_logo: string | null;  // filename or null
+    acc_ID: string | null;     // account ID or null
+    parent_team_ID: string | null; // parent team UUID or null
+    node: string;              // hierarchy path e.g., "1.4", "1.4.5"
+    node_reference: number;    // position in hierarchy
+    is_archived: number;       // 0 = active, 1 = archived
+    created_at: string;        // ISO date string
+    updated_at: string;        // ISO date string
+    tags?: string;             // Associated tags (comma-separated)
 }
 
-export interface CreateTeamMemberRequest {
-    emp_ID: string;
-    team_ID: string;
-    tm_role: string;
-    tm_status: "active" | "pending" | "inactive";
-    tm_start_date: string;
-    tm_end_date?: string;
-    tm_notes?: string;
-    is_archived?: number;
+export interface PositionData {
+    position_ID: string;       // 32-char hex UUID
+    position_code: string;     // Position code
+    position_name: string;     // Employee name (e.g., "Stephanie Germanotta")
+    team_ID: string;           // Links to the team
+    site_ID: string;           // Site ID
+    job_ID: string;            // Links to job title
+    job_title: string;         // Job title (e.g., "Web Dev", "UX Designer")
+    job_code: string;          // Job code
+    team_name: string;         // Team name
+    team_code: string;         // Team code
+    position_type: string;     // Position type
+    work_setup: string;        // Work setup
+    company_ID: string;        // Company ID
+    company_name: string;      // Company name
+    site_name: string;         // Site name
+    basic_salary: number;      // Basic salary
+    is_approved: number;       // Approval status
+    is_archived: number;       // Archive status
+    position_status: string;   // Position status
+    reports_to_position: string; // Reports to position
+    employee_number: string;   // Employee number
+    employee_name: string;     // Employee name
+    preferred_name: string;    // Preferred name
+    reports_to_employee_name: string; // Reports to employee name
+    reports_to_preferred_name: string; // Reports to preferred name
+    reports_to_employee_number: string; // Reports to employee number
+    created_at: string;        // ISO date string
+    updated_at: string;        // ISO date string
+    tags: string;              // Associated tags
 }
 
-export interface UpdateTeamMemberRequest {
-    tm_ID: string;
-    emp_ID?: string;
-    team_ID?: string;
-    tm_role?: string;
-    tm_status?: "active" | "pending" | "inactive";
-    tm_start_date?: string;
-    tm_end_date?: string;
-    tm_notes?: string;
-    is_archived?: number;
-}
-
-export interface ViewTeamMembersRequest {
-    emp_ID?: string;
-    team_ID?: string;
-    tm_status?: "active" | "pending" | "inactive";
+export interface ViewTeamRequest {
     search?: string;
+    is_archived?: number;
+    offset?: number;
+    limit?: number;
+    node_root?: string;
+}
+
+export interface ViewPositionsRequest {
+    team_ID: string;
     is_archived?: number;
     offset?: number;
     limit?: number;
 }
 
-export interface TeamMemberDetailsRequest {
-    tm_ID: string;
-}
-
-export interface GetTeamMemberRequest {
-    tm_ID: string;
-}
-
 // Specific team member service methods based on API documentation
 export const useTeamMemberService = () => {
     const [
-        generalAction,
+        teamAction,
         {
-            data: actionData,
-            isError: actionIsError,
-            isLoading: actionIsLoading,
-            isSuccess: actionIsSuccess,
-            error: actionError,
-            reset: actionReset,
+            data: teamActionData,
+            isError: teamActionIsError,
+            isLoading: teamActionIsLoading,
+            isSuccess: teamActionIsSuccess,
+            error: teamActionError,
+            reset: teamActionReset,
         },
-    ] = useActionTeamMembersMutation();
+    ] = useActionTeamsMutation();
 
-    const createTeamMember = async (
-        teamMemberData: CreateTeamMemberRequest
-    ) => {
-        return generalAction({
-            queryParameters: "/create",
-            method: "POST",
-            body: teamMemberData,
-        });
-    };
+    const [
+        positionAction,
+        {
+            data: positionActionData,
+            isError: positionActionIsError,
+            isLoading: positionActionIsLoading,
+            isSuccess: positionActionIsSuccess,
+            error: positionActionError,
+            reset: positionActionReset,
+        },
+    ] = useActionPositionsMutation();
 
-    const updateTeamMember = async (
-        teamMemberData: UpdateTeamMemberRequest
-    ) => {
-        return generalAction({
-            queryParameters: "/update",
-            method: "PUT",
-            body: teamMemberData,
-        });
-    };
-
-    const viewTeamMembers = async (filters: ViewTeamMembersRequest) => {
-        return generalAction({
-            queryParameters: "/list",
+    // Get team details
+    const getTeamDetails = async (filters: ViewTeamRequest) => {
+        return teamAction({
+            queryParameters: "/view",
             method: "POST",
             body: filters,
         });
     };
 
-    const viewTeamMemberDetails = async (request: TeamMemberDetailsRequest) => {
-        return generalAction({
-            queryParameters: `/details/${request.tm_ID}`,
-            method: "GET",
-        });
-    };
-
-    const viewTeamMembersByEmployee = async (emp_ID: string) => {
-        return generalAction({
-            queryParameters: `/employee/${emp_ID}`,
-            method: "GET",
-        });
-    };
-
-    const viewTeamMembersByTeam = async (team_ID: string) => {
-        return generalAction({
-            queryParameters: `/team/${team_ID}`,
-            method: "GET",
-        });
-    };
-
-    const getTeamMember = async (teamMemberData: GetTeamMemberRequest) => {
-        return generalAction({
-            queryParameters: `/list?tm_ID=${teamMemberData.tm_ID}`,
+    // Get team members (positions for a specific team)
+    const getTeamMembers = async (filters: ViewPositionsRequest) => {
+        return positionAction({
+            queryParameters: "/getPositions",
             method: "POST",
-            body: { tm_ID: teamMemberData.tm_ID },
+            body: filters,
         });
     };
 
     return {
-        // mutation
-        actionData,
-        actionIsError,
-        actionIsLoading,
-        actionIsSuccess,
-        actionError,
-        actionReset,
+        // team mutation
+        teamActionData,
+        teamActionIsError,
+        teamActionIsLoading,
+        teamActionIsSuccess,
+        teamActionError,
+        teamActionReset,
+
+        // position mutation
+        positionActionData,
+        positionActionIsError,
+        positionActionIsLoading,
+        positionActionIsSuccess,
+        positionActionError,
+        positionActionReset,
 
         // methods
-        createTeamMember,
-        updateTeamMember,
-        viewTeamMembers,
-        viewTeamMemberDetails,
-        viewTeamMembersByEmployee,
-        viewTeamMembersByTeam,
-        getTeamMember,
+        getTeamDetails,
+        getTeamMembers,
     };
 };

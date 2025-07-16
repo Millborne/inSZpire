@@ -1,8 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Cookies from "js-cookie";
 
-const { VITE_TEAM_AND_POSITION_SERVICE } = import.meta.env;
-
 interface generalProps {
     queryParameters: string;
     method?: string;
@@ -12,7 +10,7 @@ interface generalProps {
 export const teamMemberAPI = createApi({
     reducerPath: "teamMember",
     baseQuery: fetchBaseQuery({
-        baseUrl: VITE_TEAM_AND_POSITION_SERVICE,
+        baseUrl: "http://localhost:4172/api/v1",
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 
@@ -23,15 +21,33 @@ export const teamMemberAPI = createApi({
             return headers;
         },
     }),
-    tagTypes: ["teamMember"],
+    tagTypes: ["teamMember", "team"],
     endpoints: (builder) => ({
+        // Get team details
+        fetchTeamDetails: builder.query({
+            query: (data: generalProps) =>
+                `/teams${data.queryParameters}`,
+        }),
+        
+        // Get team members (positions for a specific team)
         fetchTeamMembers: builder.query({
             query: (data: generalProps) =>
-                `/api/v1/teams${data.queryParameters}`,
+                `/position${data.queryParameters}`,
         }),
-        actionTeamMembers: builder.mutation({
+        
+        // Team actions
+        actionTeams: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/api/v1/teams${data.queryParameters}`,
+                url: `/teams${data.queryParameters}`,
+                method: data.method,
+                body: data.body ?? undefined,
+            }),
+        }),
+        
+        // Position actions
+        actionPositions: builder.mutation({
+            query: (data: generalProps) => ({
+                url: `/position${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),
@@ -39,5 +55,9 @@ export const teamMemberAPI = createApi({
     }),
 });
 
-export const { useFetchTeamMembersQuery, useActionTeamMembersMutation } =
-    teamMemberAPI;
+export const {
+    useFetchTeamDetailsQuery,
+    useFetchTeamMembersQuery,
+    useActionTeamsMutation,
+    useActionPositionsMutation,
+} = teamMemberAPI;
