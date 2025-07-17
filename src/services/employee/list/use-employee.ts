@@ -56,115 +56,115 @@ export const useEmployees = ({
     };
 };
 
-// Employee-specific interfaces based on API documentation
+// Employee-specific interfaces based on vw_employee view
 export interface EmployeeData {
-    employee_ID?: string;
-    employee_code?: string;
-    first_name: string;
-    last_name: string;
-    middle_name?: string;
-    email: string;
-    phone_number?: string;
-    date_of_birth?: string;
-    gender?: "male" | "female" | "other";
-    address?: string;
-    city?: string;
-    state?: string;
-    zip_code?: string;
-    country?: string;
-    position_ID?: string;
-    position_name?: string;
-    department_ID?: string;
-    department_name?: string;
-    job_title_ID?: string;
-    job_title_name?: string;
-    hire_date?: string;
-    salary?: number;
-    employee_status:
-        | "active"
-        | "pending"
-        | "inactive"
-        | "suspended"
-        | "terminated";
-    profile_image?: string;
-    is_archived?: number;
-    created_at?: string;
-    updated_at?: string;
-}
-
-export interface CreateEmployeeRequest {
-    first_name: string;
-    last_name: string;
-    middle_name?: string;
-    email: string;
-    phone_number?: string;
-    date_of_birth?: string;
-    gender?: "male" | "female" | "other";
-    address?: string;
-    city?: string;
-    state?: string;
-    zip_code?: string;
-    country?: string;
-    position_ID?: string;
-    department_ID?: string;
-    job_title_ID?: string;
-    hire_date?: string;
-    salary?: number;
-    employee_status:
-        | "active"
-        | "pending"
-        | "inactive"
-        | "suspended"
-        | "terminated";
-    is_archived?: number;
-}
-
-export interface UpdateEmployeeRequest {
     employee_ID: string;
-    first_name?: string;
-    last_name?: string;
+    employee_number: string;
+    old_employee_number?: string;
+    profile_ID: string;
+    position_ID: string;
+    team_ID: string;
+    employment_status: string;
+    employee_status_ID: string;
+    employee_status: "Active" | "On Leave" | "Suspended" | "AWOL" | "Terminated";
+    first_name: string;
+    last_name: string;
     middle_name?: string;
-    email?: string;
-    phone_number?: string;
+    name_ext?: string;
+    preferred_name?: string;
+    profile_image?: string;
+    gender?: string;
+    pronoun?: string;
     date_of_birth?: string;
-    gender?: "male" | "female" | "other";
-    address?: string;
-    city?: string;
-    state?: string;
-    zip_code?: string;
-    country?: string;
-    position_ID?: string;
-    department_ID?: string;
-    job_title_ID?: string;
-    hire_date?: string;
-    salary?: number;
-    employee_status?:
-        | "active"
-        | "pending"
-        | "inactive"
-        | "suspended"
-        | "terminated";
-    is_archived?: number;
+    marital_status?: string;
+    birth_address?: string;
+    blood_type?: string;
+    mobile_number?: string;
+    personal_email?: string;
+    religion?: string;
+    religion_ID?: string;
+    educational_attainment?: string;
+    work_email: string;
+    sched_type?: string;
+    hire_date: string;
+    has_atm?: number;
+    salary_frequency?: string;
+    is_agency?: number;
+    is_confidential?: number;
+    is_leave_earned?: number;
+    e_sig_url?: string;
+    qr_code_url?: string;
+    separation_date?: string;
+    reason_for_leaving?: string;
+    not_for_rehire?: number;
+    is_archived: number;
+    created_at: string;
+    updated_at?: string;
+    permanent_address?: string;
+    present_address?: string;
+    position_code: string;
+    position_name: string;
+    team_code?: string;
+    team_name: string;
+    type_name?: string;
+    setup_name?: string;
+    job_code: string;
+    job_title: string;
 }
 
+// Request interfaces for vw_employee view
 export interface ViewEmployeesRequest {
     search?: string;
     is_archived?: number;
-    employee_status?:
-        | "active"
-        | "pending"
-        | "inactive"
-        | "suspended"
-        | "terminated";
-    department_ID?: string;
-    position_ID?: string;
-    job_title_ID?: string;
     offset?: number;
     limit?: number;
 }
 
-export interface GetEmployeeRequest {
+export interface CreateEmployeeRequest {
+    employee_number: string;
+    old_employee_number?: string;
+    profile_ID: string;
+    position_ID: string;
+    status_ID: string;
+    work_email: string;
+    employee_status_ID: string;
+    position_status_ID: string;
+    sched_type: string;
+    hire_date: string;
+    has_atm: number;
+    salary_frequency: string;
+    is_agency: number;
+    is_confidential: number;
+    is_leave_earned: number;
+    e_sig_url?: string;
+    qr_code_url?: string;
+    separation_date?: string;
+    reason_for_leaving?: string;
+    not_for_rehire: number;
+}
+
+export interface UpdateEmployeeRequest {
     employee_ID: string;
+    employee_number?: string;
+    old_employee_number?: string;
+    position_ID?: string;
+    status_ID?: string;
+    work_email?: string;
+    employee_status_ID?: string;
+    position_status_ID?: string;
+    sched_type?: string;
+    hire_date?: string;
+    has_atm?: number;
+    salary_frequency?: string;
+    is_agency?: number;
+    is_confidential?: number;
+    is_leave_earned?: number;
+    e_sig_url?: string;
+    qr_code_url?: string;
+    separation_date?: string;
+    reason_for_leaving?: string;
+    not_for_rehire?: number;
+    is_archived?: number;
 }
 
 export interface UploadProfileRequest {
@@ -173,16 +173,27 @@ export interface UploadProfileRequest {
 }
 
 export interface BatchUpdateStatusRequest {
-    req_IDs: string[];
-    employee_status:
-        | "active"
-        | "pending"
-        | "inactive"
-        | "suspended"
-        | "terminated";
+    employee_IDs: string[];
+    employee_status_ID: string;
+    position_status_ID: string;
 }
 
-// Specific employee service methods
+// Response interfaces
+export interface EmployeeListResponse {
+    success: boolean;
+    message: string;
+    data: {
+        employees: EmployeeData[];
+        pagination: {
+            total: number;
+            offset: number;
+            limit: number;
+            hasMore: boolean;
+        };
+    };
+}
+
+// Specific employee service methods based on vw_employee API
 export const useEmployeeService = () => {
     const [
         generalAction,
@@ -196,39 +207,48 @@ export const useEmployeeService = () => {
         },
     ] = useActionEmployeesMutation();
 
-    // List employees
+    // List employees using vw_employee view
     const listEmployees = async (filters: ViewEmployeesRequest) => {
         return generalAction({
-            queryParameters: "/list",
+            queryParameters: "/list-view",
             method: "POST",
             body: filters,
         });
     };
 
-    // Create employee
+    // Get single employee by ID using view
+    const getEmployeeById = async (employee_ID: string) => {
+        return generalAction({
+            queryParameters: "/get-by-id",
+            method: "POST",
+            body: { employee_ID },
+        });
+    };
+
+    // Create employee (still uses tbl_employee)
     const createEmployee = async (employeeData: CreateEmployeeRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/create",
             method: "POST",
             body: employeeData,
         });
     };
 
-    // Edit employee
+    // Update employee (still uses tbl_employee)
     const updateEmployee = async (employeeData: UpdateEmployeeRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/update",
             method: "PUT",
             body: employeeData,
         });
     };
 
-    // Get employee details
-    const getEmployee = async (employeeData: GetEmployeeRequest) => {
+    // Delete employee (still uses tbl_employee)
+    const deleteEmployee = async (employee_ID: string) => {
         return generalAction({
-            queryParameters: "/view",
-            method: "POST",
-            body: employeeData,
+            queryParameters: "/delete",
+            method: "DELETE",
+            body: { employee_ID },
         });
     };
 
@@ -245,12 +265,12 @@ export const useEmployeeService = () => {
         });
     };
 
-    // View employees with filters
-    const viewEmployees = async (filters: ViewEmployeesRequest) => {
+    // Batch update employee status
+    const batchUpdateStatus = async (batchData: BatchUpdateStatusRequest) => {
         return generalAction({
-            queryParameters: "/view",
-            method: "POST",
-            body: filters,
+            queryParameters: "/batch-update-status",
+            method: "PUT",
+            body: batchData,
         });
     };
 
@@ -265,10 +285,11 @@ export const useEmployeeService = () => {
 
         // methods
         listEmployees,
+        getEmployeeById,
         createEmployee,
         updateEmployee,
-        getEmployee,
+        deleteEmployee,
         uploadProfile,
-        viewEmployees,
+        batchUpdateStatus,
     };
 };

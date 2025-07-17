@@ -65,9 +65,10 @@ export const useTeamMembers = ({
     };
 };
 
-// Team Member-specific interfaces based on API documentation
+// Team-specific interfaces based on backend database schema
 export interface TeamData {
     team_ID: string;           // 32-char hex UUID
+    node_reference: number;    // Node reference number
     team_code: string;         // e.g., "bsi", "spt"
     team_name: string;         // e.g., "Business Solutions and Innovation"
     team_description: string;  // Team description
@@ -75,8 +76,9 @@ export interface TeamData {
     acc_ID: string | null;     // account ID or null
     parent_team_ID: string | null; // parent team UUID or null
     node: string;              // hierarchy path e.g., "1.4", "1.4.5"
-    node_reference: number;    // position in hierarchy
     is_archived: number;       // 0 = active, 1 = archived
+    created_by: string;        // Created by UUID
+    updated_by: string;        // Updated by UUID
     created_at: string;        // ISO date string
     updated_at: string;        // ISO date string
     tags?: string;             // Associated tags (comma-separated)
@@ -84,34 +86,44 @@ export interface TeamData {
 
 export interface PositionData {
     position_ID: string;       // 32-char hex UUID
+    node_reference: number;    // Node reference number
     position_code: string;     // Position code
-    position_name: string;     // Employee name (e.g., "Stephanie Germanotta")
+    position_name: string;     // Position name
     team_ID: string;           // Links to the team
-    site_ID: string;           // Site ID
+    site_ID: string | null;    // Site ID
     job_ID: string;            // Links to job title
-    job_title: string;         // Job title (e.g., "Web Dev", "UX Designer")
-    job_code: string;          // Job code
-    team_name: string;         // Team name
-    team_code: string;         // Team code
-    position_type: string;     // Position type
-    work_setup: string;        // Work setup
-    company_ID: string;        // Company ID
-    company_name: string;      // Company name
-    site_name: string;         // Site name
+    reports_to_position_ID: string | null; // Reports to position ID
+    reports_to_node: string | null; // Reports to node
+    team_level: string;        // Team level
+    position_type_ID: string;  // Position type ID
+    work_setup_ID: string;     // Work setup ID
     basic_salary: number;      // Basic salary
     is_approved: number;       // Approval status
     is_archived: number;       // Archive status
-    position_status: string;   // Position status
-    reports_to_position: string; // Reports to position
-    employee_number: string;   // Employee number
-    employee_name: string;     // Employee name
-    preferred_name: string;    // Preferred name
-    reports_to_employee_name: string; // Reports to employee name
-    reports_to_preferred_name: string; // Reports to preferred name
-    reports_to_employee_number: string; // Reports to employee number
+    created_by: string;        // Created by UUID
+    updated_by: string;        // Updated by UUID
     created_at: string;        // ISO date string
     updated_at: string;        // ISO date string
-    tags: string;              // Associated tags
+    
+    // Additional fields from view (vw_position_details)
+    job_title?: string;        // Job title (e.g., "Web Dev", "UX Designer")
+    job_code?: string;         // Job code
+    team_name?: string;        // Team name
+    team_code?: string;        // Team code
+    position_type?: string;    // Position type
+    work_setup?: string;       // Work setup
+    company_ID?: string;       // Company ID
+    company_name?: string;     // Company name
+    site_name?: string;        // Site name
+    position_status?: string;  // Position status
+    reports_to_position?: string; // Reports to position
+    employee_number?: string;  // Employee number
+    employee_name?: string;    // Employee name
+    preferred_name?: string;   // Preferred name
+    reports_to_employee_name?: string; // Reports to employee name
+    reports_to_preferred_name?: string; // Reports to preferred name
+    reports_to_employee_number?: string; // Reports to employee number
+    tags?: string;             // Associated tags
 }
 
 export interface ViewTeamRequest {
@@ -123,8 +135,10 @@ export interface ViewTeamRequest {
 }
 
 export interface ViewPositionsRequest {
-    team_ID: string;
+    search?: string;
     is_archived?: number;
+    position_ID?: string;
+    team_ID?: string;
     offset?: number;
     limit?: number;
 }
