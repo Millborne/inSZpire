@@ -1,12 +1,14 @@
-import {
-    Button,
-    CardContainer,
-    JobPositionHistory,
-    PurpleTaggedCard,
-    TextContent,
-} from "enterprisze-global-components";
+import { useState } from "react";
+import { Button, CardContainer, JobPositionHistory, PurpleTaggedCard, TextContent } from "enterprisze-global-components";
+import EmployeePositionModal from "./modals/EmployeePositionModal";
 
 const EmploymentHistory = () => {
+    const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] = useState(false);
+
+    const handleUpdatePosition = () => {
+        setIsUpdatePositionModalOpen(true);
+    };
+
     const companyHistory = [
         {
             position: "Senior Web Developer",
@@ -120,14 +122,8 @@ const EmploymentHistory = () => {
                     {/* Current Position */}
                     <div className="flex flex-col gap-4">
                         <div className="flex justify-between">
-                            <h6 className="text-h6 text-szPrimary700">
-                                Current Position
-                            </h6>
-                            <Button
-                                variant="secondary"
-                                size="medium"
-                                label="Update Position"
-                            />
+                            <h6 className="text-h6 text-szPrimary700">Current Position</h6>
+                            <Button variant="secondary" size="medium" label="Update Position" onClick={handleUpdatePosition} />
                         </div>
 
                         <div>
@@ -137,31 +133,19 @@ const EmploymentHistory = () => {
                                     <div className="flex flex-col gap-4">
                                         <div className="grid md:grid-cols-3 gap-4">
                                             <div>
-                                                <TextContent
-                                                    header="job code"
-                                                    text="AM_T"
-                                                />
+                                                <TextContent header="job code" text="AM_T" />
                                             </div>
 
                                             <div>
-                                                <TextContent
-                                                    header="Status"
-                                                    text="October 21, 1996"
-                                                />
+                                                <TextContent header="Status" text="October 21, 1996" />
                                             </div>
 
                                             <div>
-                                                <TextContent
-                                                    header="Status"
-                                                    text="Regular"
-                                                />
+                                                <TextContent header="Status" text="Regular" />
                                             </div>
                                         </div>
                                         <div>
-                                            <TextContent
-                                                header="start date"
-                                                text="Feb 21, 2023"
-                                            />
+                                            <TextContent header="start date" text="Feb 21, 2023" />
                                         </div>
                                     </div>
                                 }
@@ -172,9 +156,7 @@ const EmploymentHistory = () => {
                     {/* Company History*/}
                     <div className="flex flex-col gap-2">
                         <div>
-                            <h6 className="text-h6 text-szPrimary700">
-                                Company History
-                            </h6>
+                            <h6 className="text-h6 text-szPrimary700">Company History</h6>
                         </div>
                         {companyHistory.map((item) => (
                             <div className="flex h-full">
@@ -188,10 +170,7 @@ const EmploymentHistory = () => {
                                     </div>
                                 </div>
                                 <div className="w-full">
-                                    <JobPositionHistory
-                                        data={item}
-                                        state="closed"
-                                    />
+                                    <JobPositionHistory data={item} state="closed" />
                                 </div>
                             </div>
                         ))}
@@ -200,9 +179,7 @@ const EmploymentHistory = () => {
                     {/* Other Employee History*/}
                     <div className="flex flex-col gap-2">
                         <div>
-                            <h6 className="text-h6 text-szPrimary700">
-                                Other Employee History
-                            </h6>
+                            <h6 className="text-h6 text-szPrimary700">Other Employee History</h6>
                         </div>
                         <div className="flex flex-col gap-2 h-full w-full">
                             {otherEmployeeHistory.map((item) => (
@@ -210,6 +187,16 @@ const EmploymentHistory = () => {
                             ))}
                         </div>
                     </div>
+
+                    <EmployeePositionModal
+                        isOpen={isUpdatePositionModalOpen}
+                        onClose={() => setIsUpdatePositionModalOpen(false)}
+                        employeePositionData={{
+                            startDate: "",
+                            position: "",
+                            positionStatus: "",
+                        }}
+                    />
                 </div>
             }
         />
