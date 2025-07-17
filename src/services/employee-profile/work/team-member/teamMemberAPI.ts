@@ -21,7 +21,7 @@ export const teamMemberAPI = createApi({
             return headers;
         },
     }),
-    tagTypes: ["teamMember", "team"],
+    tagTypes: ["teamMember", "team", "position"],
     endpoints: (builder) => ({
         // Get team details
         fetchTeamDetails: builder.query({
@@ -55,9 +55,9 @@ export const teamMemberAPI = createApi({
     }),
 });
 
-export const {
-    useFetchTeamDetailsQuery,
-    useFetchTeamMembersQuery,
-    useActionTeamsMutation,
-    useActionPositionsMutation,
+export const { 
+    useFetchTeamDetailsQuery, 
+    useFetchTeamMembersQuery, 
+    useActionTeamsMutation, 
+    useActionPositionsMutation 
 } = teamMemberAPI;

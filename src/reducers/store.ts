@@ -8,7 +8,7 @@ import { accountsAPI } from "../services/settings/accounts/list/accountsAPI";
 import { tagsAPI } from "../services/settings/tags/list/tagsAPI";
 import { positionsAPI } from "../services/settings/positions/list/positionsAPI";
 import { jobTitleAPI } from "../services/settings/job-title/list/jobTitleAPI";
-// import { employeeAPI } from "../services/employee/list/employeeAPI";
+import { employeeAPI } from "../services/employee/list/employeeAPI";
 import { summaryAPI } from "../services/employee-profile/summary/summaryAPI";
 import { basicInfoAPI } from "../services/employee-profile/personal/basic-info/basicInfoAPI";
 import { educationAPI } from "../services/employee-profile/personal/education/educationAPI";
@@ -31,7 +31,7 @@ const rootReducer = combineReducers({
     [tagsAPI.reducerPath]: tagsAPI.reducer,
     [positionsAPI.reducerPath]: positionsAPI.reducer,
     [jobTitleAPI.reducerPath]: jobTitleAPI.reducer,
-    // [employeeAPI.reducerPath]: employeeAPI.reducer,
+    [employeeAPI.reducerPath]: employeeAPI.reducer,
     [summaryAPI.reducerPath]: summaryAPI.reducer,
     [basicInfoAPI.reducerPath]: basicInfoAPI.reducer,
     [educationAPI.reducerPath]: educationAPI.reducer,
@@ -55,7 +55,7 @@ const configStore = configureStore({
             tagsAPI.middleware,
             positionsAPI.middleware,
             jobTitleAPI.middleware,
-            // employeeAPI.middleware,
+            employeeAPI.middleware,
             summaryAPI.middleware,
             basicInfoAPI.middleware,
             educationAPI.middleware,
