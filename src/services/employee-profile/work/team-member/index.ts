@@ -13,3 +13,4 @@ export {
     type ViewTeamRequest,
     type ViewPositionsRequest,
 } from "./use-team-member";
+export { testTeamMemberAPI } from "./test-api";
