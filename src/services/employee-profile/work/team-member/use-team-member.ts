@@ -120,6 +120,9 @@ export interface PositionData {
     employee_number?: string;  // Employee number
     employee_name?: string;    // Employee name
     preferred_name?: string;   // Preferred name
+    first_name?: string;       // Employee first name
+    last_name?: string;        // Employee last name
+    middle_name?: string;      // Employee middle name
     reports_to_employee_name?: string; // Reports to employee name
     reports_to_preferred_name?: string; // Reports to preferred name
     reports_to_employee_number?: string; // Reports to employee number
@@ -128,6 +131,7 @@ export interface PositionData {
 
 export interface ViewTeamRequest {
     search?: string;
+    team_ID?: string;
     is_archived?: number;
     offset?: number;
     limit?: number;
@@ -171,20 +175,101 @@ export const useTeamMemberService = () => {
 
     // Get team details
     const getTeamDetails = async (filters: ViewTeamRequest) => {
-        return teamAction({
-            queryParameters: "/view",
-            method: "POST",
-            body: filters,
-        });
+        console.log("🔍 Calling getTeamDetails with filters:", filters);
+        console.log("🔍 API URL will be: http://localhost:4172/api/v1/teams/view");
+        
+        try {
+            const response = await teamAction({
+                queryParameters: "/view",
+                method: "POST",
+                body: filters,
+            });
+            
+            console.log("✅ getTeamDetails response:", response);
+            return response;
+        } catch (error) {
+            console.error("❌ getTeamDetails error:", error);
+            throw error;
+        }
     };
 
     // Get team members (positions for a specific team)
     const getTeamMembers = async (filters: ViewPositionsRequest) => {
-        return positionAction({
-            queryParameters: "/getPositions",
-            method: "POST",
-            body: filters,
-        });
+        console.log("🔍 Calling getTeamMembers with filters:", filters);
+        console.log("🔍 API URL will be: http://localhost:4172/api/v1/position/getPositions");
+        
+        try {
+            const response = await positionAction({
+                queryParameters: "/getPositions",
+                method: "POST",
+                body: filters,
+            });
+            
+            console.log("✅ getTeamMembers response:", response);
+            return response;
+        } catch (error) {
+            console.error("❌ getTeamMembers error:", error);
+            throw error;
+        }
+    };
+
+    // Get employee's position by employee ID
+    const getEmployeePosition = async (employee_ID: string) => {
+        console.log("🔍 Calling getEmployeePosition with employee_ID:", employee_ID);
+        console.log("🔍 API URL will be: http://localhost:4172/api/v1/position/getPositions");
+        
+        // Clean employee_ID - remove 0x prefix if present
+        const cleanEmployeeId = employee_ID?.replace(/^0x/, '');
+        console.log("🔍 Clean employee_ID for API call:", cleanEmployeeId);
+        
+        // The backend expects employee_ID as a parameter
+        const requestBody = {
+            employee_ID: cleanEmployeeId,
+            is_archived: 0,
+            offset: 0,
+            limit: 10
+        };
+        
+        console.log("🔍 Request body:", requestBody);
+        
+        try {
+            const response = await positionAction({
+                queryParameters: "/getPositions",
+                method: "POST",
+                body: requestBody,
+            });
+            
+            console.log("✅ getEmployeePosition response:", response);
+            return response;
+        } catch (error) {
+            console.error("❌ getEmployeePosition error:", error);
+            throw error;
+        }
+    };
+
+    // Get team by position ID
+    const getTeamByPosition = async (position_ID: string) => {
+        console.log("🔍 Calling getTeamByPosition with position_ID:", position_ID);
+        console.log("🔍 API URL will be: http://localhost:4172/api/v1/position/getPositions");
+        
+        try {
+            const response = await positionAction({
+                queryParameters: "/getPositions",
+                method: "POST",
+                body: {
+                    position_ID: position_ID,
+                    is_archived: 0,
+                    offset: 0,
+                    limit: 10
+                },
+            });
+            
+            console.log("✅ getTeamByPosition response:", response);
+            return response;
+        } catch (error) {
+            console.error("❌ getTeamByPosition error:", error);
+            throw error;
+        }
     };
 
     return {
@@ -207,5 +292,7 @@ export const useTeamMemberService = () => {
         // methods
         getTeamDetails,
         getTeamMembers,
+        getEmployeePosition,
+        getTeamByPosition,
     };
 };

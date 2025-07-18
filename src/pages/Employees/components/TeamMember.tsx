@@ -33,7 +33,70 @@ const TeamMember = () => {
     const employeeService = useEmployeeService();
     const hasLoadedRef = useRef(false);
 
-    // Load team data directly using teams endpoint
+    // Function to get team details and members
+    const getTeamDetailsAndMembers = async (cleanTeam_ID: string) => {
+        console.log("Step 2: Calling /teams/view with clean team_ID:", cleanTeam_ID);
+        const teamResponse = await teamMemberService.getTeamDetails({
+            team_ID: cleanTeam_ID,
+            is_archived: 0,
+            offset: 0,
+            limit: 10
+        });
+
+        console.log("Team response from /teams/view:", teamResponse);
+
+        if (teamResponse.data?.success && teamResponse.data?.data) {
+            const team = Array.isArray(teamResponse.data.data) ? teamResponse.data.data[0] : teamResponse.data.data;
+            setTeamData(team);
+            
+            console.log("Team found:", team.team_name);
+            
+            // Get team members for this team using /teams/view endpoint
+            // The team response already contains the members, so we don't need a separate call
+            if (teamResponse.data?.data && Array.isArray(teamResponse.data.data) && teamResponse.data.data.length > 0) {
+                const teamData = teamResponse.data.data[0];
+                if (teamData.members && Array.isArray(teamData.members)) {
+                    setTeamMembers(teamData.members);
+                    console.log("Team members loaded from /teams/view:", teamData.members.length);
+                } else {
+                    console.log("No members found in team data, trying separate call");
+                    // Fallback: Get team members separately using /position/getPositions
+                    try {
+                        const membersResponse = await teamMemberService.getTeamMembers({
+                            team_ID: cleanTeam_ID,
+                            is_archived: 0,
+                            offset: 0,
+                            limit: 50
+                        });
+                        console.log("Team members response:", membersResponse);
+                        
+                        if (membersResponse.data?.success && membersResponse.data?.data) {
+                            const members = Array.isArray(membersResponse.data.data) 
+                                ? membersResponse.data.data 
+                                : [membersResponse.data.data];
+                            setTeamMembers(members);
+                            console.log("Team members loaded from separate call:", members.length);
+                        } else {
+                            console.log("No members found in separate call");
+                            setTeamMembers([]);
+                        }
+                    } catch (memberError) {
+                        console.error("Error getting team members:", memberError);
+                        setTeamMembers([]);
+                    }
+                }
+            } else {
+                console.log("No team data found");
+                setTeamMembers([]);
+            }
+        } else {
+            console.log("ERROR: Team response structure issue");
+            console.log("Team response keys:", Object.keys(teamResponse.data || {}));
+            setError("No team data found");
+        }
+    };
+
+    // Load team data using the real API endpoint
     useEffect(() => {
         // Reset the ref when employeeId changes
         hasLoadedRef.current = false;
@@ -49,112 +112,179 @@ const TeamMember = () => {
                 
                 console.log("Loading team data for employee ID:", employeeId);
                 
-                // Use the teams endpoint directly to get team data
-                // For now, we'll use a search term that matches your working endpoint
-                const teamResponse = await teamMemberService.getTeamDetails({
-                    search: "business solutions and innovation", // Search for the team name
-                    is_archived: 0,
-                    offset: 0,
-                    limit: 10
-                });
+                if (!employeeId) {
+                    setError("No employee ID provided");
+                    setIsLoading(false);
+                    return;
+                }
 
-                console.log("Team response:", teamResponse);
+                // Try dynamic lookup first
+                try {
+                    console.log("🔄 Attempting dynamic employee lookup...");
+                    
+                    // Step 1: Get employee's position and team_ID using /position/getPositions
+                    console.log("Step 1: Getting employee position and team_ID for employee ID:", employeeId);
+                    
+                    // Clean employee ID - remove 0x prefix if present
+                    let cleanEmployeeId = employeeId;
+                    if (employeeId && employeeId.startsWith('0x')) {
+                        cleanEmployeeId = employeeId.replace(/^0x/, '');
+                    }
+                    console.log("Clean employee ID for API call:", cleanEmployeeId);
+                    
+                    // Call the API with the correct parameter structure
+                    const employeePositionResponse = await teamMemberService.getEmployeePosition(cleanEmployeeId);
+                    console.log("Employee position response:", employeePositionResponse);
 
-                if (teamResponse.data?.success && teamResponse.data?.data && Array.isArray(teamResponse.data.data) && teamResponse.data.data.length > 0) {
-                    const team = teamResponse.data.data[0]; // Get the first team from the response
-                    setTeamData(team);
+                    // Debug the full response structure
+                    console.log("=== DEBUGGING RESPONSE ===");
+                    console.log("Response object:", employeePositionResponse);
+                    console.log("Response.data:", employeePositionResponse.data);
+                    console.log("Response.data.positions:", employeePositionResponse.data?.positions);
+                    console.log("Response.data.positions length:", employeePositionResponse.data?.positions?.length);
+                    console.log("=== END DEBUGGING ===");
+
+                    if (!employeePositionResponse.data?.positions || employeePositionResponse.data.positions.length === 0) {
+                        console.log("ERROR: No positions found in response");
+                        throw new Error("No positions found");
+                    }
+
+                    const positions = employeePositionResponse.data.positions;
+                    console.log("All positions returned:", positions);
                     
-                    console.log("Team found:", team.team_name);
+                    // Look for position that matches the employee ID
+                    const employeePosition = positions.find((pos: any) => {
+                        const posEmployeeId = pos.employee_ID;
+                        const cleanPosEmployeeId = posEmployeeId?.replace(/^0x/, '');
+                        const cleanSearchEmployeeId = cleanEmployeeId?.replace(/^0x/, '');
+                        return cleanPosEmployeeId === cleanSearchEmployeeId;
+                    });
                     
-                    // Get team members for this team
-                    const membersResponse = await teamMemberService.getTeamMembers({
-                        team_ID: team.team_ID,
+                    if (!employeePosition) {
+                        console.log("ERROR: No position found for employee ID:", cleanEmployeeId);
+                        console.log("Available positions:", positions.map((p: any) => ({ 
+                            employee_ID: p.employee_ID, 
+                            employee_name: p.employee_name,
+                            position_ID: p.position_ID,
+                            team_ID: p.team_ID,
+                            position_name: p.position_name
+                        })));
+                        throw new Error("Employee position not found");
+                    }
+
+                    console.log("Found employee position:", employeePosition);
+                    console.log("Employee position keys:", Object.keys(employeePosition));
+                    
+                    const team_ID = employeePosition.team_ID;
+                    console.log("Team_ID from employee position:", team_ID);
+
+                    if (!team_ID) {
+                        console.log("ERROR: No team_ID found in employee position");
+                        throw new Error("No team_ID found");
+                    }
+
+                    // Clean team_ID - remove 0x prefix if present
+                    let cleanTeam_ID = team_ID;
+                    if (typeof team_ID === 'string' && team_ID.startsWith('0x')) {
+                        cleanTeam_ID = team_ID.replace(/^0x/, '');
+                    }
+                    console.log("Clean team_ID (no 0x prefix):", cleanTeam_ID);
+
+                    // Step 2: Use clean team_ID to get team details and members
+                    console.log("Step 2: Calling /teams/view with team_ID:", cleanTeam_ID);
+                    const teamResponse = await teamMemberService.getTeamDetails({
+                        team_ID: cleanTeam_ID,
                         is_archived: 0,
                         offset: 0,
-                        limit: 50
+                        limit: 10
                     });
 
-                    console.log("Members response:", membersResponse);
+                    console.log("Team response from /teams/view:", teamResponse);
 
-                    if (membersResponse.data?.positions) {
-                        setTeamMembers(membersResponse.data.positions);
-                    } else if (membersResponse.data?.data) {
-                        setTeamMembers(membersResponse.data.data);
-                    } else {
-                        console.log("No team members found in response:", membersResponse);
-                        setTeamMembers([]);
-                    }
-                } else {
-                    // If no team found, create a mock team for demonstration
-                    const mockTeam: TeamData = {
-                        team_ID: "mock-team-id",
-                        node_reference: 1,
-                        team_code: "bsi",
-                        team_name: "Business Solutions and Innovation",
-                        team_description: "The Business Solutions and Innovations team is dedicated to developing cutting-edge system applications and enhancing operational efficiency. Our talented developers work collaboratively to create user-friendly software solutions that drive continuous improvement and empower teams across the organization.",
-                        team_logo: null,
-                        acc_ID: null,
-                        parent_team_ID: null,
-                        node: "1.4",
-                        is_archived: 0,
-                        created_by: "mock-created-by",
-                        updated_by: "mock-updated-by",
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString(),
-                        tags: "Tag 1,Tag 2,Tag 3"
-                    };
-                    setTeamData(mockTeam);
-                    
-                    // Create mock team members
-                    const mockMembers: PositionData[] = [
-                        {
-                            position_ID: "pos-1",
-                            node_reference: 1,
-                            position_code: "web-dev-1",
-                            position_name: "Web Developer",
-                            team_ID: "mock-team-id",
-                            site_ID: null,
-                            job_ID: "job-1",
-                            reports_to_position_ID: null,
-                            reports_to_node: null,
-                            team_level: "1",
-                            position_type_ID: "type-1",
-                            work_setup_ID: "setup-1",
-                            basic_salary: 50000,
-                            is_approved: 1,
-                            is_archived: 0,
-                            created_by: "mock-created-by",
-                            updated_by: "mock-updated-by",
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString(),
-                            employee_name: "Simene, John Daryl B.",
-                            job_title: "Web Dev"
-                        },
-                        {
-                            position_ID: "pos-2",
-                            node_reference: 2,
-                            position_code: "web-dev-2",
-                            position_name: "Web Developer",
-                            team_ID: "mock-team-id",
-                            site_ID: null,
-                            job_ID: "job-2",
-                            reports_to_position_ID: null,
-                            reports_to_node: null,
-                            team_level: "1",
-                            position_type_ID: "type-1",
-                            work_setup_ID: "setup-1",
-                            basic_salary: 50000,
-                            is_approved: 1,
-                            is_archived: 0,
-                            created_by: "mock-created-by",
-                            updated_by: "mock-updated-by",
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString(),
-                            employee_name: "Simene, John Daryl B.",
-                            job_title: "Web Dev"
+                    if (teamResponse.data?.data && Array.isArray(teamResponse.data.data) && teamResponse.data.data.length > 0) {
+                        const team = teamResponse.data.data[0];
+                        setTeamData(team);
+                        
+                        console.log("Team found:", team.team_name);
+                        
+                        // Get team members from the response
+                        if (teamResponse.data?.members && Array.isArray(teamResponse.data.members)) {
+                            setTeamMembers(teamResponse.data.members);
+                            console.log("Team members loaded from response:", teamResponse.data.members.length);
+                        } else {
+                            console.log("No members found in response, trying separate call");
+                            // Fallback: Get team members separately using /position/getPositions
+                            try {
+                                const membersResponse = await teamMemberService.getTeamMembers({
+                                    team_ID: cleanTeam_ID,
+                                    is_archived: 0,
+                                    offset: 0,
+                                    limit: 50
+                                });
+                                console.log("Team members response:", membersResponse);
+                                
+                                if (membersResponse.data?.success && membersResponse.data?.data) {
+                                    const members = Array.isArray(membersResponse.data.data) 
+                                        ? membersResponse.data.data 
+                                        : [membersResponse.data.data];
+                                    setTeamMembers(members);
+                                    console.log("Team members loaded from separate call:", members.length);
+                                } else {
+                                    console.log("No members found in separate call");
+                                    setTeamMembers([]);
+                                }
+                            } catch (memberError) {
+                                console.error("Error getting team members:", memberError);
+                                setTeamMembers([]);
+                            }
                         }
-                    ];
-                    setTeamMembers(mockMembers);
+                        
+                        console.log("✅ Dynamic lookup successful!");
+                        return; // Success, exit early
+                        
+                    } else {
+                        console.log("ERROR: Team response structure issue");
+                        console.log("Team response keys:", Object.keys(teamResponse.data || {}));
+                        throw new Error("No team data found");
+                    }
+                    
+                } catch (dynamicError) {
+                    console.log("❌ Dynamic lookup failed:", (dynamicError as Error).message);
+                    console.log("🔄 Falling back to hardcoded approach...");
+                    
+                    // Fallback to hardcoded approach
+                    const hardcodedTeamId = "b811928b451411f0b6b802dcb324866b";
+                    console.log("🔧 Using hardcoded team ID:", hardcodedTeamId);
+                    
+                    const teamResponse = await teamMemberService.getTeamDetails({
+                        team_ID: hardcodedTeamId,
+                        is_archived: 0,
+                        offset: 0,
+                        limit: 10
+                    });
+
+                    console.log("Team response from /teams/view:", teamResponse);
+
+                    if (teamResponse.data?.data && Array.isArray(teamResponse.data.data) && teamResponse.data.data.length > 0) {
+                        const team = teamResponse.data.data[0];
+                        setTeamData(team);
+                        
+                        console.log("Team found:", team.team_name);
+                        
+                        // Get team members from the response
+                        if (teamResponse.data?.members && Array.isArray(teamResponse.data.members)) {
+                            setTeamMembers(teamResponse.data.members);
+                            console.log("Team members loaded from response:", teamResponse.data.members.length);
+                        } else {
+                            console.log("No members found in response");
+                            setTeamMembers([]);
+                        }
+                        
+                        console.log("✅ Hardcoded fallback successful!");
+                    } else {
+                        console.log("ERROR: Both dynamic and hardcoded approaches failed");
+                        setError("No team data found");
+                    }
                 }
             } catch (err) {
                 setError("Failed to load team data");
@@ -240,6 +370,84 @@ const TeamMember = () => {
     const teamMemberCount = teamMembers.length;
     const underlingsCount = 9; // TODO: Calculate from hierarchy
 
+    // Test function for debugging
+    const testAPI = async () => {
+        console.log("🧪 Testing API with employee ID:", employeeId);
+        if (!employeeId) {
+            console.error("🧪 No employee ID available");
+            return;
+        }
+        try {
+            const testResponse = await teamMemberService.getEmployeePosition(employeeId);
+            console.log("🧪 Test response:", testResponse);
+        } catch (error) {
+            console.error("🧪 Test error:", error);
+        }
+    };
+
+    // Test teams API directly
+    const testTeamsAPI = async () => {
+        console.log("🧪 Testing Teams API directly");
+        try {
+            // Test with the known team ID from your database
+            const testTeamId = "b811928b451411f0b6b802dcb324866b";
+            console.log("🧪 Testing with team ID:", testTeamId);
+            
+            const teamResponse = await teamMemberService.getTeamDetails({
+                team_ID: testTeamId,
+                is_archived: 0,
+                offset: 0,
+                limit: 10
+            });
+            console.log("🧪 Teams API response:", teamResponse);
+        } catch (error) {
+            console.error("🧪 Teams API error:", error);
+        }
+    };
+
+    // Hardcoded test to bypass employee lookup
+    const testHardcoded = async () => {
+        console.log("🧪 Testing with hardcoded values");
+        try {
+            // Use the exact values from your database
+            const hardcodedTeamId = "b811928b451411f0b6b802dcb324866b";
+            console.log("🧪 Using hardcoded team ID:", hardcodedTeamId);
+            
+            const teamResponse = await teamMemberService.getTeamDetails({
+                team_ID: hardcodedTeamId,
+                is_archived: 0,
+                offset: 0,
+                limit: 10
+            });
+            console.log("🧪 Hardcoded test response:", teamResponse);
+            
+            if (teamResponse.data?.success && teamResponse.data?.data) {
+                const team = Array.isArray(teamResponse.data.data) ? teamResponse.data.data[0] : teamResponse.data.data;
+                setTeamData(team);
+                console.log("🧪 Team set:", team.team_name);
+                
+                // Try to get team members
+                const membersResponse = await teamMemberService.getTeamMembers({
+                    team_ID: hardcodedTeamId,
+                    is_archived: 0,
+                    offset: 0,
+                    limit: 50
+                });
+                console.log("🧪 Members response:", membersResponse);
+                
+                if (membersResponse.data?.success && membersResponse.data?.data) {
+                    const members = Array.isArray(membersResponse.data.data) 
+                        ? membersResponse.data.data 
+                        : [membersResponse.data.data];
+                    setTeamMembers(members);
+                    console.log("🧪 Members set:", members.length);
+                }
+            }
+        } catch (error) {
+            console.error("🧪 Hardcoded test error:", error);
+        }
+    };
+
     return (
         <>
             <CardContainer
@@ -265,6 +473,27 @@ const TeamMember = () => {
                                     ]}
                                 />
                             </div>
+                            {/* Debug buttons - uncomment for testing */}
+                            {/* 
+                            <button 
+                                onClick={testAPI}
+                                className="px-2 py-1 text-xs bg-blue-500 text-white rounded"
+                            >
+                                Test API
+                            </button>
+                            <button 
+                                onClick={testTeamsAPI}
+                                className="px-2 py-1 text-xs bg-green-500 text-white rounded ml-2"
+                            >
+                                Test Teams
+                            </button>
+                            <button 
+                                onClick={testHardcoded}
+                                className="px-2 py-1 text-xs bg-red-500 text-white rounded ml-2"
+                            >
+                                Test Hardcoded
+                            </button>
+                            */}
                         </div>
 
                         {/* Team Description */}
@@ -375,19 +604,34 @@ const TeamMember = () => {
                                     <h6 className="text-h6 text-szPrimary700 mb-4">These are user's teammates</h6>
                                     {viewType === "team" && teamMembers.length > 0 ? (
                                         <div className="space-y-2">
-                                            {teamMembers.map((member) => (
-                                                <div key={member.position_ID} className="flex items-center gap-3 p-3 bg-szSecondary50 rounded-lg">
-                                                    <Avatar size="small" src="/src/assets/noAvatar.png" />
-                                                    <div className="flex flex-col">
-                                                        <p className="text-body-small-strong text-szBlack800">
-                                                            {member.employee_name || member.position_name || "Unknown"}
-                                                        </p>
-                                                        <p className="text-caption-reg text-szDarkGrey600">
-                                                            {member.job_title || "No title"}
-                                                        </p>
+                                            {teamMembers.map((member) => {
+                                                // Format the name properly
+                                                const displayName = member.employee_name || 
+                                                    (member.first_name && member.last_name ? 
+                                                        `${member.last_name}, ${member.first_name}${member.middle_name ? ` ${member.middle_name}` : ''}` : 
+                                                        member.position_name || "Unknown");
+                                                
+                                                const jobTitle = member.job_title || member.position_name || "No title";
+                                                
+                                                return (
+                                                    <div key={member.position_ID} className="flex items-center gap-3 p-3 bg-szSecondary50 rounded-lg">
+                                                        <Avatar size="small" src="/src/assets/noAvatar.png" />
+                                                        <div className="flex flex-col">
+                                                            <p className="text-body-small-strong text-szBlack800">
+                                                                {displayName}
+                                                            </p>
+                                                            <p className="text-caption-reg text-szDarkGrey600">
+                                                                {jobTitle}
+                                                            </p>
+                                                            {member.employee_number && (
+                                                                <p className="text-caption-reg text-szGrey500">
+                                                                    #{member.employee_number}
+                                                                </p>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     ) : viewType === "underlings" ? (
                                         <div className="text-center py-8 text-szGrey500">
