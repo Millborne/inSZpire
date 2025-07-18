@@ -56,59 +56,65 @@ export const useSummary = ({
 // Summary-specific interfaces based on API documentation
 export interface ProfileSummaryData {
     employee_ID?: string;
-    employee_code?: string;
+    employee_number?: string;
+    old_employee_number?: string;
+    profile_ID?: string;
+    position_ID?: string;
+    team_ID?: string;
+    employment_status?: string;
+    employee_status_ID?: string;
+    employee_status?: string;
     first_name: string;
     last_name: string;
     middle_name?: string;
-    email: string;
-    phone_number?: string;
-    date_of_birth?: string;
-    gender?: "male" | "female" | "other";
-    address?: string;
-    city?: string;
-    state?: string;
-    zip_code?: string;
-    country?: string;
-    position_ID?: string;
-    position_name?: string;
-    department_ID?: string;
-    department_name?: string;
-    job_title_ID?: string;
-    job_title_name?: string;
-    hire_date?: string;
-    salary?: number;
-    employee_status:
-        | "active"
-        | "pending"
-        | "inactive"
-        | "suspended"
-        | "terminated";
+    name_ext?: string;
+    preferred_name?: string;
     profile_image?: string;
-    total_work_days?: number;
-    total_leave_days?: number;
-    total_overtime_hours?: number;
-    current_month_attendance?: number;
-    current_month_leave?: number;
-    current_month_overtime?: number;
-    performance_rating?: number;
-    last_evaluation_date?: string;
-    next_evaluation_date?: string;
-    emergency_contact?: {
-        name?: string;
-        relationship?: string;
-        phone?: string;
-        email?: string;
-    };
-    documents_count?: number;
-    certifications_count?: number;
-    training_completed?: number;
+    gender?: "male" | "female" | "other";
+    pronoun?: string;
+    date_of_birth?: string;
+    marital_status?: string;
+    birth_address?: string;
+    blood_type?: string;
+    mobile_number?: string;
+    personal_email?: string;
+    religion?: string;
+    religion_ID?: string;
+    educational_attainment?: string;
+    work_email?: string;
+    sched_type?: string;
+    hire_date?: string;
+    has_atm?: number;
+    salary_frequency?: string;
+    is_agency?: number;
+    is_confidential?: number;
+    is_leave_earned?: number;
+    e_sig_url?: string;
+    qr_code_url?: string;
+    separation_date?: string;
+    reason_for_leaving?: string;
+    not_for_rehire?: number;
     is_archived?: number;
     created_at?: string;
     updated_at?: string;
+    permanent_address?: string | null;
+    present_address?: string | null;
+    position_code?: string;
+    position_name?: string;
+    team_code?: string;
+    team_name?: string;
+    type_name?: string;
+    setup_name?: string;
+    job_code?: string;
+    job_title?: string;
 }
 
 export interface ViewProfileSummaryRequest {
     employee_ID: string;
+}
+
+export interface GetByIdViewRequest {
+    employeeId: string;
 }
 
 export interface SummaryFiltersRequest {
@@ -223,6 +229,15 @@ export const useSummaryService = () => {
         });
     };
 
+    // Get comprehensive employee data using view
+    const getByIdView = async (requestData: GetByIdViewRequest) => {
+        return generalAction({
+            queryParameters: "/get-by-id-view",
+            method: "POST",
+            body: requestData,
+        });
+    };
+
     return {
         // mutation
         actionData,
@@ -239,5 +254,6 @@ export const useSummaryService = () => {
         getOverallSummary,
         getEmployeePerformanceSummary,
         getAttendanceSummary,
+        getByIdView,
     };
 };

@@ -2,6 +2,7 @@ export {
     basicInfoAPI,
     useFetchBasicInfoQuery,
     useActionBasicInfoMutation,
+    useGetBasicInfoByIdViewMutation,
 } from "./basicInfoAPI";
 export {
     useBasicInfo,

@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Cookies from "js-cookie";
 
-const { VITE_APP_CLIENT_ENDPOINT } = import.meta.env;
+const { VITE_EMPLOYMENT_SERVICE } = import.meta.env;
 
 interface generalProps {
     queryParameters: string;
@@ -12,7 +12,7 @@ interface generalProps {
 export const basicInfoAPI = createApi({
     reducerPath: "basicInfo",
     baseQuery: fetchBaseQuery({
-        baseUrl: VITE_APP_CLIENT_ENDPOINT,
+        baseUrl: VITE_EMPLOYMENT_SERVICE,
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 
@@ -27,11 +27,11 @@ export const basicInfoAPI = createApi({
     endpoints: (builder) => ({
         fetchBasicInfo: builder.query({
             query: (data: generalProps) =>
-                `api/personal/basic-info${data.queryParameters}`,
+                `/api/v1/employee${data.queryParameters}`,
         }),
         actionBasicInfo: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/api/personal/basic-info${data.queryParameters}`,
+                url: `/api/v1/employee${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),
