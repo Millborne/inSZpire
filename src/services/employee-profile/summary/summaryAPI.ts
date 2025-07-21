@@ -26,7 +26,8 @@ export const summaryAPI = createApi({
     tagTypes: ["summary"],
     endpoints: (builder) => ({
         fetchSummary: builder.query({
-            query: (data: generalProps) => `/api/v1/employee${data.queryParameters}`,
+            query: (data: generalProps) =>
+                `/api/v1/employee${data.queryParameters}`,
         }),
         actionSummary: builder.mutation({
             query: (data: generalProps) => ({
