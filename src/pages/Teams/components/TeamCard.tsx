@@ -5,16 +5,17 @@ import TeamModal, { TeamDataType } from "./modals/TeamModal";
 import { useNavigate } from "react-router-dom";
 
 interface Employee {
-  id: number;
+  id: string | number;
   name: string;
   position: string;
   avatar: string;
 }
 
 interface TeamCardProps {
-  id: number;
+  id: string | number;
   teamName: string;
   employees: Employee[];
+  onSelect?: (teamId: string) => void;
   onSave?: (data: any) => void;
 }
 
@@ -22,6 +23,7 @@ const TeamCard: React.FC<TeamCardProps> = ({
   id,
   teamName,
   employees,
+  onSelect,
   onSave,
 }) => {
   const navigate = useNavigate();
@@ -50,11 +52,19 @@ const TeamCard: React.FC<TeamCardProps> = ({
     }
   };
 
+  const handleTeamClick = () => {
+    if (onSelect) {
+      onSelect(String(id));
+    } else {
+      navigate(`/home/teams/${id}/specificteam`);
+    }
+  };
+
   return (
     <>
       <div
         className="flex flex-col gap-[12px] p-[16px] border border-szPrimary200 rounded-lg cursor-pointer"
-        onClick={() => navigate(`/home/teams/${id}/specificteam`)}
+        onClick={handleTeamClick}
       >
         <p className="text-body-base-strong">{teamName}</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[12px]">

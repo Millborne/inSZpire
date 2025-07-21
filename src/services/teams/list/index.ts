@@ -10,5 +10,4 @@ export {
     type CreateTeamRequest,
     type UpdateTeamRequest,
     type ViewTeamsRequest,
-    type BatchUpdateStatusRequest,
 } from "./use-teams";

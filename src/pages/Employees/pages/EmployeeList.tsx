@@ -1,311 +1,337 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, ButtonsIcon, CardContainer, Inputs, Pagination, PopoverMenu, SnackbarAlert, Table } from "enterprisze-global-components";
-import { Add, Briefcase, Edit2, ExportCurve, Filter, InfoCircle, SearchNormal } from "iconsax-reactjs";
+import { 
+    CardContainer, 
+    Button, 
+    Inputs, 
+    Pagination, 
+    PopoverMenu, 
+    SnackbarAlert
+} from "enterprisze-global-components";
+import { 
+    SearchNormal, 
+    Edit2, 
+    Trash, 
+    Eye,
+} from "iconsax-reactjs";
 
-// Components
-import EmployeeFilterModal from "../components/modals/EmployeeFilterModal";
-import EmployeeModal from "../components/modals/EmployeeModal";
-import EmployeePositionModal from "../components/modals/EmployeePositionModal";
+// Import employee service
+import { 
+    useEmployeeService, 
+    type EmployeeData, 
+    type ViewEmployeesRequest,
+} from "../../../services/employee/list/use-employee";
 
 const EmployeeList = () => {
     const navigate = useNavigate();
+    const employeeService = useEmployeeService();
+    
+    // State management
+    const [employees, setEmployees] = useState<EmployeeData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalMode, setModalMode] = useState<"add" | "edit">("add");
-    const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] = useState(false);
-    const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
-    const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
-    const [snackbarAction, setSnackbarAction] = useState<"add" | "edit" | "update" | null>(null);
-    const [openFilter, setOpenFilter] = useState(false);
+    // Search and filter state
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filters, setFilters] = useState<ViewEmployeesRequest>({
+        is_archived: 0,
+        offset: 0,
+        limit: 10
+    });
 
-    const handleRowClick = (index: number) => {
-        console.log("Row clicked:", index);
-        navigate(`${data[index]?.id}/summary`);
+    // Pagination state
+    const [pagination, setPagination] = useState({
+        total: 0,
+        offset: 0,
+        limit: 10,
+        hasMore: false
+    });
+
+    // Load employees on component mount
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
+
+                // Load employees using vw_employee view
+                console.log("Sending request with filters:", filters);
+                const employeesResponse = await employeeService.listEmployees(filters);
+                console.log("Employees response:", employeesResponse);
+
+                // Handle different response structures
+                if (employeesResponse.data?.success && employeesResponse.data?.data?.employees) {
+                    // Response structure: { success: true, data: { employees: [...], pagination: {...} } }
+                    const responseData = employeesResponse.data.data;
+                    setEmployees(responseData.employees || []);
+                    setPagination(responseData.pagination || {
+                        total: 0,
+                        offset: 0,
+                        limit: 10,
+                        hasMore: false
+                    });
+                } else if (employeesResponse.data?.success && employeesResponse.data?.employees) {
+                    // Direct response structure: { success: true, employees: [...], pagination: {...} }
+                    const responseData = employeesResponse.data;
+                    setEmployees(responseData.employees || []);
+                    setPagination(responseData.pagination || {
+                        total: 0,
+                        offset: 0,
+                        limit: 10,
+                        hasMore: false
+                    });
+                } else {
+                    console.error("No employee data received - response structure:", employeesResponse.data);
+                    setEmployees([]);
+                    setPagination({
+                        total: 0,
+                        offset: 0,
+                        limit: 10,
+                        hasMore: false
+                    });
+                }
+
+            } catch (err) {
+                console.error("Error loading data:", err);
+                
+                // Check if it's a CORS error
+                if (err && typeof err === 'object' && 'status' in err) {
+                    const error = err as any;
+                    if (error.status === 'FETCH_ERROR' || error.status === 'CORS_ERROR') {
+                        setError("CORS Error: Backend needs to allow requests from frontend. Please check backend CORS configuration.");
+                    } else {
+                        setError(`Failed to load employees. Status: ${error.status}`);
+                    }
+                } else {
+                    setError("Failed to load employees. Please try again.");
+                }
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadData();
+    }, [filters]);
+
+    // Handle search
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setFilters(prev => ({
+                ...prev,
+                search: searchTerm,
+                offset: 0
+            }));
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm]);
+
+    // Handle page change
+    const handlePageChange = (page: number) => {
+        const newOffset = (page - 1) * pagination.limit;
+        setFilters(prev => ({
+            ...prev,
+            offset: newOffset
+        }));
     };
 
-    const handleSubmitSuccess = (action: "add" | "edit" | "update") => {
-        setSnackbarAction(action);
-        setIsSnackbarOpen(true);
+    // Get employee full name
+    const getEmployeeFullName = (employee: EmployeeData) => {
+        const parts = [
+            employee.first_name,
+            employee.middle_name,
+            employee.last_name,
+            employee.name_ext
+        ].filter(Boolean);
+        return parts.join(" ");
     };
 
-    const openAddEmployee = () => {
-        setModalMode("add");
-        setSelectedEmployee(null);
-        setIsModalOpen(true);
+    // Get status color
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "Active":
+                return "bg-green-500";
+            case "On Leave":
+                return "bg-gray-500";
+            case "Suspended":
+                return "bg-blue-500";
+            case "AWOL":
+                return "bg-orange-500";
+            case "Terminated":
+                return "bg-red-500";
+            default:
+                return "bg-gray-400";
+        }
     };
 
-    const openEditEmployee = (employee: any) => {
-        setModalMode("edit");
-        setSelectedEmployee(employee);
-        setIsModalOpen(true);
-    };
+    // Transform data for table
+    const tableData = employees.map(employee => ({
+        name: (
+            <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${getStatusColor(employee.employee_status)}`}></div>
+                <span className="font-medium">{getEmployeeFullName(employee)}</span>
+            </div>
+        ),
+        id: employee.employee_number,
+        team: employee.team_name,
+        jobTitle: employee.position_name,
+        jobCode: employee.position_code,
+        directHead: "N/A" // This field is not available in vw_employee view
+    }));
 
-    // For larger screen
-    const headers: Array<
-        | {
-              type: "string";
-              header: string;
-              accessor: string;
-              icon?: React.ReactNode;
-          }
-        | { type: "more"; header: React.ReactNode; accessor: "more" }
-        | { type: "checkbox"; header: React.ReactNode; accessor: "checkbox" }
-    > = [
-        { type: "checkbox", header: <></>, accessor: "checkbox" },
-        {
-            type: "string",
-            header: "Name",
-            accessor: "name",
-            icon: (
-                <div className="relative group">
-                    <InfoCircle className="w-4 h-4 text-szBlack700 hover:text-szPrimary700 transition-colors duration-200 cursor-help" />
-                    <div className="absolute z-10 invisible group-hover:visible bg-white shadow-lg rounded-lg p-2 w-[97px] -left-20 top-6">
-                        <div className="flex flex-col gap-2 w-full items-start">
-                            <span className="text-body-small-reg text-szBlack800">Legends:</span>
-                            <div className="flex items-center gap-[10px]">
-                                <div className="w-[14px] h-[14px] bg-success700 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Active</span>
-                            </div>
-                            <div className="flex items-center gap-[10px]">
-                                <div className="w-[14px] h-[14px] bg-szGrey300 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Inactive</span>
-                            </div>
-                            <div className="flex items-center gap-[10px]">
-                                <div className="w-[14px] h-[14px] bg-info500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Floating</span>
-                            </div>
-                            <div className="flex items-center gap-[10px]">
-                                <div className="w-[14px] h-[14px] bg-warning500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Clearance</span>
-                            </div>
-                        </div>
+    // Loading state
+    if (isLoading) {
+        return (
+            <CardContainer
+                content={
+                    <div className="flex items-center justify-center h-64">
+                        <div className="text-szPrimary700">Loading employees...</div>
                     </div>
-                </div>
-            ),
-        },
-        { type: "string", header: "ID", accessor: "id" },
-        { type: "string", header: "Team", accessor: "team" },
-        { type: "string", header: "Job Title", accessor: "jobTitle" },
-        { type: "string", header: "Job Code", accessor: "jobCode" },
-        { type: "string", header: "Direct Head", accessor: "directHead" },
-        { type: "more", header: <></>, accessor: "more" },
-    ];
+                }
+            />
+        );
+    }
 
-    // For smaller screen
-    const headersSmall: Array<
-        | {
-              type: "string";
-              header: string;
-              accessor: string;
-              icon?: React.ReactNode;
-          }
-        | { type: "more"; header: React.ReactNode; accessor: "more" }
-        | { type: "checkbox"; header: React.ReactNode; accessor: "checkbox" }
-    > = [
-        {
-            type: "string",
-            header: "Name",
-            accessor: "name",
-            icon: (
-                <div className="relative group">
-                    <InfoCircle className="w-4 h-4 text-szBlack700 hover:text-szPrimary700 transition-colors duration-200 cursor-help" />
-                    <div className="absolute z-10 invisible group-hover:visible bg-white shadow-lg rounded-lg p-2 w-[97px] -left-20 top-6">
-                        <div className="flex flex-col gap-2 w-full items-start">
-                            <span className="text-body-small-reg text-szBlack800">Legends:</span>
-                            <div className="flex items-center gap-[10px]">
-                                <div className="w-[14px] h-[14px] bg-success700 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Active</span>
-                            </div>
-                            <div className="flex items-center gap-[10px]">
-                                <div className="w-[14px] h-[14px] bg-szGrey300 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Inactive</span>
-                            </div>
-                            <div className="flex items-center gap-[10px]">
-                                <div className="w-[14px] h-[14px] bg-info500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Floating</span>
-                            </div>
-                            <div className="flex items-center gap-[10px]">
-                                <div className="w-[14px] h-[14px] bg-warning500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Clearance</span>
-                            </div>
-                        </div>
+    // Error state
+    if (error) {
+        return (
+            <CardContainer
+                content={
+                    <div className="flex items-center justify-center h-64">
+                        <div className="text-red-600">{error}</div>
                     </div>
-                </div>
-            ),
-        },
-        { type: "string", header: "ID", accessor: "id" },
-        { type: "string", header: "Team", accessor: "team" },
-        { type: "string", header: "Job Title", accessor: "jobTitle" },
-        { type: "string", header: "Job Code", accessor: "jobCode" },
-        { type: "string", header: "Direct Head", accessor: "directHead" },
-        { type: "more", header: <></>, accessor: "more" },
-    ];
-
-    const data = [
-        {
-            name: (
-                <div className="md:flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Germanotta, Stephanie Luke A.</span>
-                </div>
-            ),
-            id: "1234567890",
-            team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">BSI</span>,
-            jobTitle: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Junior Web Developer</span>,
-            jobCode: "1234567890",
-            directHead: "John Doe",
-        },
-        {
-            name: (
-                <div className="md:flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Smith, John William B.</span>
-                </div>
-            ),
-            id: "2345678901",
-            team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Shoopee</span>,
-            jobTitle: (
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Customer Service Representative</span>
-            ),
-            jobCode: "2345678901",
-            directHead: "Jane Smith",
-        },
-        {
-            name: (
-                <div className="md:flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-info500"></div>
-                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Johnson, Emily Rose C.</span>
-                </div>
-            ),
-            id: "3456789012",
-            team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Shoopee</span>,
-            jobTitle: (
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Customer Service Representative</span>
-            ),
-            jobCode: "3456789012",
-            directHead: "Michael Brown",
-        },
-        {
-            name: (
-                <div className="md:flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-warning500"></div>
-                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Davis, Robert James D.</span>
-                </div>
-            ),
-            id: "4567890123",
-            team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Shoopee</span>,
-            jobTitle: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Manager</span>,
-            jobCode: "4567890123",
-            directHead: "Sarah Wilson",
-        },
-    ];
-
-    const moreOptions = [
-        // {
-        //     label: "View",
-        //     onClick: (index: number) => navigate(`${data[index]?.id}/summary`),
-        // },
-        {
-            label: "Edit Employee",
-            icon: <Edit2 />,
-            onClick: (index: number) => openEditEmployee(data[index]),
-        },
-        {
-            label: "Update Position",
-            icon: <Briefcase />,
-            onClick: (index: number) => {
-                setSelectedEmployee(data[index]);
-                setIsUpdatePositionModalOpen(true);
-            },
-        },
-    ];
+                }
+            />
+        );
+    }
 
     return (
-        <CardContainer
-            content={
-                // <div className="h-full p-4 bg-szWhite100 rounded-md shadow-boxShadow flex flex-col gap-5 overflow-auto">
-                <div className="grid grid-cols-1 gap-[20px]">
-                    <div className="flex items-center gap-3">
-                        <h3 className="text-h3 font-montserrat">Employees</h3>
-                        <PopoverMenu
-                            size="small"
-                            items={[
-                                { label: "Add Employee", icon: <Add />, onClick: openAddEmployee },
-                                { label: "Export", icon: <ExportCurve />, onClick: () => {} },
-                            ]}
-                        />
-                    </div>
-
-                    <div className="flex gap-4">
-                        <div className="w-full max-w-[355px]">
-                            <Inputs placeholder="Search by Name, ID, Job Title, or Team" icon={SearchNormal} />
-                        </div>
-                        <ButtonsIcon icon={<Filter />} variant="ghost" size="large" onClick={() => setOpenFilter(true)} />
-                        {/* <Button leftIcon={<Filter />} variant="ghost" size="large" onClick={() => setOpenFilter(true)} label={""} /> */}
-                    </div>
-
-                    <div className="h-full">
-                        <div className="hidden lg:block">
-                            <Table
-                                headers={headers}
-                                data={data}
-                                moreOptions={moreOptions}
-                                tableHeight="h-[400px]"
-                                onRowClick={handleRowClick}
+        <>
+            <CardContainer
+                content={
+                    <div className="flex flex-col gap-6">
+                        {/* Header */}
+                        <div className="flex items-center justify-between">
+                            <h1 className="text-2xl font-bold text-szPrimary700">Employees</h1>
+                            <Button
+                                label="Add Employee"
+                                variant="primary"
+                                size="medium"
+                                onClick={() => {
+                                    setSnackbarMessage("Add employee functionality coming soon");
+                                    setShowSuccessSnackbar(true);
+                                }}
                             />
                         </div>
-                        <div className="block lg:hidden">
-                            <Table
-                                headers={headersSmall}
-                                data={data}
-                                moreOptions={moreOptions}
-                                tableHeight="h-[400px]"
-                                onRowClick={handleRowClick}
+
+                        {/* Search and Filter Bar */}
+                        <div className="flex items-center gap-4">
+                            <div className="flex-1">
+                                <Inputs 
+                                    placeholder="Search by Name, ID, Job Title, or Team" 
+                                    icon={SearchNormal}
+                                    value={searchTerm}
+                                    onChange={(e: any) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                            <Button
+                                label="Filter"
+                                variant="secondary"
+                                size="medium"
+                                onClick={() => {
+                                    setSnackbarMessage("Filter functionality coming soon");
+                                    setShowSuccessSnackbar(true);
+                                }}
                             />
                         </div>
-                        <div className="flex justify-end">
-                            <Pagination currentPage={1} totalPages={10} visiblePages={5} onChange={() => {}} />
+
+                        {/* Employee Table */}
+                        <div className="overflow-x-auto">
+                            <table className="w-full border-collapse">
+                                <thead>
+                                    <tr className="border-b border-szGrey200">
+                                        <th className="text-left p-3 font-medium text-szGrey700">Name</th>
+                                        <th className="text-left p-3 font-medium text-szGrey700">ID</th>
+                                        <th className="text-left p-3 font-medium text-szGrey700">Team</th>
+                                        <th className="text-left p-3 font-medium text-szGrey700">Job Title</th>
+                                        <th className="text-left p-3 font-medium text-szGrey700">Job Code</th>
+                                        <th className="text-left p-3 font-medium text-szGrey700">Direct Head</th>
+                                        <th className="text-left p-3 font-medium text-szGrey700">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {tableData.map((row, index) => (
+                                        <tr 
+                                            key={index} 
+                                            className="border-b border-szGrey100 hover:bg-szSecondary50 cursor-pointer"
+                                            onClick={() => navigate(`/home/employees/${employees[index].employee_ID}`)}
+                                        >
+                                            <td className="p-3">{row.name}</td>
+                                            <td className="p-3">{row.id}</td>
+                                            <td className="p-3">{row.team}</td>
+                                            <td className="p-3">{row.jobTitle}</td>
+                                            <td className="p-3">{row.jobCode}</td>
+                                            <td className="p-3">{row.directHead}</td>
+                                            <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                                                <PopoverMenu
+                                                    size="small"
+                                                    items={[
+                                                        {
+                                                            label: "View Details",
+                                                            icon: <Eye size={16} />,
+                                                            onClick: () => navigate(`/home/employees/${employees[index].employee_ID}`),
+                                                        },
+                                                        {
+                                                            label: "Edit Employee",
+                                                            icon: <Edit2 size={16} />,
+                                                            onClick: () => {
+                                                                setSnackbarMessage("Edit functionality coming soon");
+                                                                setShowSuccessSnackbar(true);
+                                                            },
+                                                        },
+                                                        {
+                                                            label: "Delete Employee",
+                                                            icon: <Trash size={16} />,
+                                                            onClick: () => {
+                                                                setSnackbarMessage("Delete functionality coming soon");
+                                                                setShowSuccessSnackbar(true);
+                                                            },
+                                                        },
+                                                    ]}
+                                                />
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="flex items-center justify-between">
+                            <div className="text-sm text-szGrey600">
+                                Displaying {pagination.offset + 1}-{Math.min(pagination.offset + pagination.limit, pagination.total)} of {pagination.total} records
+                            </div>
+                            <Pagination 
+                                currentPage={Math.floor(pagination.offset / pagination.limit) + 1}
+                                totalPages={Math.ceil(pagination.total / pagination.limit)}
+                                onChange={handlePageChange}
+                            />
                         </div>
                     </div>
+                }
+            />
 
-                    <EmployeeFilterModal isOpen={openFilter} onClose={() => setOpenFilter(false)} />
-
-                    <EmployeeModal
-                        isOpen={isModalOpen}
-                        onClose={() => {
-                            setIsModalOpen(false);
-                            setSelectedEmployee(null);
-                        }}
-                        mode={modalMode}
-                        addEmployeeData={modalMode === "edit" ? selectedEmployee : undefined}
-                        onSubmitSuccess={() => handleSubmitSuccess(modalMode)}
-                    />
-
-                    <EmployeePositionModal
-                        isOpen={isUpdatePositionModalOpen}
-                        onClose={() => setIsUpdatePositionModalOpen(false)}
-                        employeePositionData={selectedEmployee}
-                        onSubmitSuccess={() => handleSubmitSuccess("update")}
-                    />
-
-                    <SnackbarAlert
-                        isOpen={isSnackbarOpen}
-                        onClose={() => setIsSnackbarOpen(false)}
-                        showCloseButton={true}
-                        type="success"
-                        title={
-                            snackbarAction === "edit"
-                                ? "Successfully edited employee"
-                                : snackbarAction === "update"
-                                ? "Successfully updated position"
-                                : "Successfully added employee"
-                        }
-                        animation="slide-up"
-                    />
-                </div>
-            }
-        />
+            <SnackbarAlert
+                isOpen={showSuccessSnackbar}
+                onClose={() => setShowSuccessSnackbar(false)}
+                showCloseButton={true}
+                type="success"
+                title={snackbarMessage}
+                animation="slide-up"
+            />
+        </>
     );
 };
 

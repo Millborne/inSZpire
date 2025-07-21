@@ -1,12 +1,16 @@
 export {
     teamMemberAPI,
+    useFetchTeamDetailsQuery,
     useFetchTeamMembersQuery,
-    useActionTeamMembersMutation,
+    useActionTeamsMutation,
 } from "./teamMemberAPI";
 export {
+    useTeamDetails,
     useTeamMembers,
     useTeamMemberService,
-    type TeamMemberData,
-    type ViewTeamMembersRequest,
-    type TeamMemberDetailsRequest,
+    type TeamData,
+    type PositionData,
+    type ViewTeamRequest,
+    type ViewPositionsRequest,
 } from "./use-team-member";
+

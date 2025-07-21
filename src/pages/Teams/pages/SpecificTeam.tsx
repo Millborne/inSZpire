@@ -1,28 +1,51 @@
 import { useState } from "react";
-import { CardContainer, Chip, PopoverMenu, SnackbarAlert, Tab, TextContent } from "enterprisze-global-components";
-import { ArchiveBox, ArrowLeft, Data2, Edit2, Hierarchy2, People, Tag } from "iconsax-reactjs";
-import SpecificTeamCard from "../components/SpecificTeamCard";
+import { CardContainer, Chip, PopoverMenu, SnackbarAlert, Tab, TextContent, Avatar } from "enterprisze-global-components";
+import { ArchiveBox, ArrowLeft, Data2, Edit2, Hierarchy2, People, Tag, Information } from "iconsax-reactjs";
 import SpecificTeamModal, { ModalMode, SpecificTeamDataType } from "../components/modals/SpecificTeamModal";
 import ConfirmSpecificTeamArchive from "../components/modals/ConfirmSpecificTeamArchive";
 import { useNavigate } from "react-router-dom";
 
+// Hardcoded team data to match the design exactly
+const teamData = {
+    team_name: "Business Solutions and Innovation",
+    team_description: "The Business Solutions and Innovations team is dedicated to developing cutting-edge system applications and enhancing operational efficiency. Our talented developers work collaboratively to create user-friendly software solutions that drive continuous improvement and empower teams across the organization.",
+    team_reference: "Office of the President and COO",
+    tags: ["Tag 1", "Tag 2", "Tag 3"],
+    team_member_count: 15,
+    underlings_count: 9
+};
+
 const SpecificTeamData = [
     {
-        name: "Stephanie Germanotta",
+        name: "Simene, John Daryl B.",
         jobTitle: "Web Dev",
-        // teamReference: "Office of the President and COO",
-        // tags: ["Tag1", "Tag2", "Tag3"],
-        // teamMembers: [
-        // ]
+        employee_number: "EMP001"
     },
     {
-        name: "Daryl Simene",
-        jobTitle: "UX Designer",
+        name: "Simene, John Daryl B.",
+        jobTitle: "Web Dev",
+        employee_number: "EMP002"
     },
     {
-        name: "John Doe",
-        jobTitle: "Web Developer",
+        name: "Simene, John Daryl B.",
+        jobTitle: "Web Dev",
+        employee_number: "EMP003"
     },
+    {
+        name: "Simene, John Daryl B.",
+        jobTitle: "Web Dev",
+        employee_number: "EMP004"
+    },
+    {
+        name: "Simene, John Daryl B.",
+        jobTitle: "Web Dev",
+        employee_number: "EMP005"
+    },
+    {
+        name: "Simene, John Daryl B.",
+        jobTitle: "Web Dev",
+        employee_number: "EMP006"
+    }
 ];
 
 const SpecificTeam = () => {
@@ -61,9 +84,10 @@ const SpecificTeam = () => {
             <CardContainer
                 content={
                     <div className="flex flex-col gap-[20px]">
-                        <div className="flex flex-col lg:flex-row items-start gap-[8px]">
+                        {/* Team Header */}
+                        <div className="flex items-center gap-[8px]">
                             <ArrowLeft className="text-szPrimary700 cursor-pointer" onClick={() => navigate("/home/teams")} />
-                            <h5 className="text-h5 text-szPrimary700">Business Solutions and Innovation</h5>
+                            <h5 className="text-h5 text-szPrimary700">{teamData.team_name}</h5>
                             <div className="flex-1">
                                 <PopoverMenu
                                     size="small"
@@ -82,59 +106,58 @@ const SpecificTeam = () => {
                                 />
                             </div>
                         </div>
+
+                        {/* Team Description */}
                         <div className="flex flex-col gap-[20px]">
                             <p className="text-body-small-strong text-szDarkGrey600">
-                                The Business Solutions and Innovations team is dedicated to developing cutting-edge system applications that
-                                enhance operational efficiency across the company. Comprising talented developers, this team ensures that
-                                all software solutions are user-friendly and tailored to meet the diverse needs of our employees. Their
-                                commitment to innovation drives continuous improvement, empowering teams to achieve their goals effectively.
+                                {teamData.team_description}
                             </p>
+
+                            {/* Team Reference and Tags Section */}
                             <div>
-                                <div className="flex flex-col lg:flex-row justify-between">
+                                <div className="flex flex-row justify-between">
+                                    {/* Team Reference */}
                                     <div className="flex flex-row gap-[8px]">
-                                        <Hierarchy2 />
+                                        <Hierarchy2 className="text-szPrimary700" />
                                         <div className="flex flex-col lg:flex-row lg:gap-[75px]">
                                             <p className="text-caption-all-caps text-szGrey500">TEAM REFERENCE</p>
-                                            <p className="text-body-small-strong">Office of the President and COO</p>
+                                            <p className="text-body-small-strong">
+                                                {teamData.team_reference}
+                                            </p>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col gap-[8px] items-start">
-                                        <div className="flex flex-row gap-[8px] w-full justify-end">
+
+                                    {/* Tags Section */}
+                                    <div className="flex flex-col gap-[8px]">
+                                        <div className="flex flex-row justify-end gap-[8px]">
                                             <p className="text-caption-all-caps text-szGrey500">TAGS</p>
-                                            <Tag className="text-szPrimary700" />
+                                            <Information className="text-szPrimary700" />
                                         </div>
 
                                         <div className="flex flex-col lg:flex-row gap-[8px]">
-                                            {[
-                                                {
-                                                    label: "Tag1",
-                                                    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                                                },
-                                                {
-                                                    label: "Tag2",
-                                                    description: "Sed do eiusmod tempor incididunt ut labore.",
-                                                },
-                                                {
-                                                    label: "Tag 3",
-                                                    description: "Ut enim ad minim veniam, quis nostrud exercitation.",
-                                                },
-                                            ].map((tag, index) => (
+                                            {teamData.tags.map((tag, index) => (
                                                 <div key={index} className="relative group">
-                                                    {/* Chip base */}
-                                                    <Chip label={tag.label} />
-
-                                                    {/* Tooltip on hover */}
-                                                    <div className="absolute z-50 hidden group-hover:block top-full mt-2 w-[220px] bg-[#EBEFFF] rounded-lg shadow-md p-3 text-sm text-gray-700">
-                                                        <TextContent header="Tag Name" text={tag.label} />
-                                                        <TextContent header="Tag Description" text={tag.description} />
-                                                    </div>
+                                                    <Chip label={tag} />
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="relative flex w-full justify-center items-center">
+                                {/* Team Member Counts */}
+                                <div className="flex gap-4 mt-4">
+                                    <div className="flex items-center gap-2">
+                                        <People className="text-szPrimary700" />
+                                        <span className="text-body-small-strong">{teamData.team_member_count}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Data2 className="text-szPrimary700" />
+                                        <span className="text-body-small-strong">{teamData.underlings_count}</span>
+                                    </div>
+                                </div>
+
+                                {/* Tab Navigation */}
+                                <div className="relative flex w-full justify-center items-center mt-6">
                                     {/* center line */}
                                     <div className="absolute top-1/2 left-0 w-full h-[1px] bg-szGrey300 z-0" />
 
@@ -152,7 +175,7 @@ const SpecificTeam = () => {
                                                             viewType === "team" ? "text-szSecondary500" : "text-szGrey500"
                                                         }`}
                                                     >
-                                                        15
+                                                        {teamData.team_member_count}
                                                     </p>
                                                 </div>
                                             }
@@ -170,7 +193,7 @@ const SpecificTeam = () => {
                                                             viewType === "underlings" ? "text-szSecondary500" : "text-szGrey500"
                                                         }`}
                                                     >
-                                                        9
+                                                        {teamData.underlings_count}
                                                     </p>
                                                 </div>
                                             }
@@ -178,9 +201,41 @@ const SpecificTeam = () => {
                                         />
                                     </div>
                                 </div>
-                                {SpecificTeamData.map((data) => (
-                                    <SpecificTeamCard name={data.name} jobTitle={data.jobTitle} />
-                                ))}
+                                
+                                {/* Team Members List */}
+                                <div className="mt-6">
+                                    <h6 className="text-h6 text-szPrimary700 mb-4">These are user's teammates</h6>
+                                    {viewType === "team" && SpecificTeamData.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {SpecificTeamData.map((member, index) => (
+                                                <div key={index} className="flex items-center gap-3 p-3 bg-szSecondary50 rounded-lg">
+                                                    <Avatar size="small" src="/src/assets/noAvatar.png" />
+                                                    <div className="flex flex-col">
+                                                        <p className="text-body-small-strong text-szBlack800">
+                                                            {member.name}
+                                                        </p>
+                                                        <p className="text-caption-reg text-szDarkGrey600">
+                                                            {member.jobTitle}
+                                                        </p>
+                                                        {member.employee_number && (
+                                                            <p className="text-caption-reg text-szGrey500">
+                                                                #{member.employee_number}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : viewType === "underlings" ? (
+                                        <div className="text-center py-8 text-szGrey500">
+                                            Underlings view - TODO: Implement hierarchy view
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8 text-szGrey500">
+                                            No team members found
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -212,7 +267,7 @@ const SpecificTeam = () => {
                     handleSpecificTeamSuccess("Successfully archived team");
                 }}
                 description="Are you sure to archive this Team?"
-                subDescription="All contents of the Business Solutions and Innovation team will be archived. Please ensure all employees are reassigned to new teams to maintain organizational structure."
+                subDescription={`All contents of the ${teamData.team_name} team will be archived. Please ensure all employees are reassigned to new teams to maintain organizational structure.`}
                 buttonLabel="Archive Team"
                 buttonFooterIcon={<ArchiveBox />}
             />
