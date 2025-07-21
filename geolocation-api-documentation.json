@@ -1,0 +1,752 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Geolocation Service API",
+        "description": "A RESTful API for managing geographical data including countries, regions/states, provinces, municipalities, and barangays",
+        "version": "1.0.0",
+        "contact": {
+            "name": "API Support",
+            "email": "support@geolocation-service.com"
+        },
+        "license": {
+            "name": "ISC",
+            "url": "https://opensource.org/licenses/ISC"
+        }
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000",
+            "description": "Development server"
+        },
+        {
+            "url": "https://api.geolocation-service.com",
+            "description": "Production server"
+        }
+    ],
+    "paths": {
+        "/api/countries/view": {
+            "post": {
+                "summary": "Get list of countries",
+                "description": "Retrieve a paginated list of countries with optional search and sorting capabilities",
+                "tags": ["Countries"],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "search": {
+                                        "type": "string",
+                                        "description": "Search term to filter countries by name or code",
+                                        "example": "Philippines"
+                                    },
+                                    "page": {
+                                        "type": "integer",
+                                        "description": "Page number for pagination",
+                                        "minimum": 1,
+                                        "default": 1,
+                                        "example": 1
+                                    },
+                                    "limit": {
+                                        "type": "integer",
+                                        "description": "Number of items per page",
+                                        "minimum": 1,
+                                        "maximum": 100,
+                                        "default": 10,
+                                        "example": 10
+                                    },
+                                    "is_archived": {
+                                        "type": "boolean",
+                                        "description": "Filter by archived status",
+                                        "example": false
+                                    },
+                                    "sortBy": {
+                                        "type": "string",
+                                        "description": "Field to sort by",
+                                        "enum": [
+                                            "country_name",
+                                            "country_code"
+                                        ],
+                                        "default": "country_name",
+                                        "example": "country_name"
+                                    },
+                                    "sortOrder": {
+                                        "type": "string",
+                                        "description": "Sort order",
+                                        "enum": ["ASC", "DESC"],
+                                        "default": "ASC",
+                                        "example": "ASC"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Countries retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Countries retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Country"
+                                            }
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "description": "Total number of countries matching the criteria",
+                                            "example": 195
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal Server Error"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/region-states/view": {
+            "post": {
+                "summary": "Get list of region states",
+                "description": "Retrieve a paginated list of region states with optional search and sorting capabilities",
+                "tags": ["Region States"],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "search": {
+                                        "type": "string",
+                                        "description": "Search term to filter region states by name",
+                                        "example": "Luzon"
+                                    },
+                                    "page": {
+                                        "type": "integer",
+                                        "description": "Page number for pagination",
+                                        "minimum": 1,
+                                        "default": 1,
+                                        "example": 1
+                                    },
+                                    "limit": {
+                                        "type": "integer",
+                                        "description": "Number of items per page",
+                                        "minimum": 1,
+                                        "maximum": 100,
+                                        "default": 10,
+                                        "example": 10
+                                    },
+                                    "sortBy": {
+                                        "type": "string",
+                                        "description": "Field to sort by",
+                                        "enum": ["region_name", "country_ID"],
+                                        "default": "region_name",
+                                        "example": "region_name"
+                                    },
+                                    "sortOrder": {
+                                        "type": "string",
+                                        "description": "Sort order",
+                                        "enum": ["ASC", "DESC"],
+                                        "default": "ASC",
+                                        "example": "ASC"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Region states retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Region states retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RegionState"
+                                            }
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "description": "Total number of region states matching the criteria",
+                                            "example": 17
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal Server Error"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/provinces/list": {
+            "post": {
+                "summary": "Get list of provinces",
+                "description": "Retrieve a paginated list of provinces with optional filtering and search capabilities",
+                "tags": ["Provinces"],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "region_ID": {
+                                        "type": "integer",
+                                        "description": "Filter by region ID",
+                                        "example": 1
+                                    },
+                                    "province_ID": {
+                                        "type": "integer",
+                                        "description": "Filter by specific province ID",
+                                        "example": 1
+                                    },
+                                    "search": {
+                                        "type": "string",
+                                        "description": "Search term to filter provinces by name",
+                                        "example": "Cebu"
+                                    },
+                                    "offset": {
+                                        "type": "integer",
+                                        "description": "Number of items to skip",
+                                        "minimum": 0,
+                                        "default": 0,
+                                        "example": 0
+                                    },
+                                    "limit": {
+                                        "type": "integer",
+                                        "description": "Number of items per page",
+                                        "minimum": 1,
+                                        "maximum": 100,
+                                        "default": 10,
+                                        "example": 10
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Provinces retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Province"
+                                            }
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "description": "Total number of provinces matching the criteria",
+                                            "example": 81
+                                        },
+                                        "offset": {
+                                            "type": "integer",
+                                            "example": 0
+                                        },
+                                        "limit": {
+                                            "type": "integer",
+                                            "example": 10
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal Server Error"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/municipalities/list": {
+            "post": {
+                "summary": "Get list of municipalities",
+                "description": "Retrieve a paginated list of municipalities with optional filtering and search capabilities",
+                "tags": ["Municipalities"],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "province_ID": {
+                                        "type": "integer",
+                                        "description": "Filter by province ID",
+                                        "example": 1
+                                    },
+                                    "city_municipality_ID": {
+                                        "type": "integer",
+                                        "description": "Filter by specific municipality ID",
+                                        "example": 1
+                                    },
+                                    "region_ID": {
+                                        "type": "integer",
+                                        "description": "Filter by region ID",
+                                        "example": 1
+                                    },
+                                    "search": {
+                                        "type": "string",
+                                        "description": "Search term to filter municipalities by name",
+                                        "example": "Manila"
+                                    },
+                                    "offset": {
+                                        "type": "integer",
+                                        "description": "Number of items to skip",
+                                        "minimum": 0,
+                                        "default": 0,
+                                        "example": 0
+                                    },
+                                    "limit": {
+                                        "type": "integer",
+                                        "description": "Number of items per page",
+                                        "minimum": 1,
+                                        "maximum": 100,
+                                        "default": 10,
+                                        "example": 10
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Municipalities retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Municipality"
+                                            }
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "description": "Total number of municipalities matching the criteria",
+                                            "example": 1444
+                                        },
+                                        "offset": {
+                                            "type": "integer",
+                                            "example": 0
+                                        },
+                                        "limit": {
+                                            "type": "integer",
+                                            "example": 10
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal Server Error"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/barangays/list": {
+            "post": {
+                "summary": "Get list of barangays",
+                "description": "Retrieve a paginated list of barangays with optional filtering and search capabilities",
+                "tags": ["Barangays"],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "city_municipality_ID": {
+                                        "type": "integer",
+                                        "description": "Filter by city/municipality ID",
+                                        "example": 1
+                                    },
+                                    "barangay_ID": {
+                                        "type": "integer",
+                                        "description": "Filter by specific barangay ID",
+                                        "example": 1
+                                    },
+                                    "search": {
+                                        "type": "string",
+                                        "description": "Search term to filter barangays by name",
+                                        "example": "San Antonio"
+                                    },
+                                    "offset": {
+                                        "type": "integer",
+                                        "description": "Number of items to skip",
+                                        "minimum": 0,
+                                        "default": 0,
+                                        "example": 0
+                                    },
+                                    "limit": {
+                                        "type": "integer",
+                                        "description": "Number of items per page",
+                                        "minimum": 1,
+                                        "maximum": 100,
+                                        "default": 10,
+                                        "example": 10
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Barangays retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Barangay"
+                                            }
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "description": "Total number of barangays matching the criteria",
+                                            "example": 42029
+                                        },
+                                        "offset": {
+                                            "type": "integer",
+                                            "example": 0
+                                        },
+                                        "limit": {
+                                            "type": "integer",
+                                            "example": 10
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal Server Error"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Country": {
+                "type": "object",
+                "properties": {
+                    "country_ID": {
+                        "type": "integer",
+                        "description": "Unique identifier for the country",
+                        "example": 1
+                    },
+                    "country_code": {
+                        "type": "string",
+                        "description": "ISO country code",
+                        "example": "PH"
+                    },
+                    "country_name": {
+                        "type": "string",
+                        "description": "Name of the country",
+                        "example": "Philippines"
+                    }
+                },
+                "required": ["country_ID", "country_code", "country_name"]
+            },
+            "RegionState": {
+                "type": "object",
+                "properties": {
+                    "region_state_ID": {
+                        "type": "integer",
+                        "description": "Unique identifier for the region/state",
+                        "example": 1
+                    },
+                    "region_name": {
+                        "type": "string",
+                        "description": "Name of the region/state",
+                        "example": "National Capital Region"
+                    },
+                    "country_ID": {
+                        "type": "integer",
+                        "description": "ID of the country this region belongs to",
+                        "example": 1
+                    }
+                },
+                "required": ["region_state_ID", "region_name", "country_ID"]
+            },
+            "Province": {
+                "type": "object",
+                "properties": {
+                    "province_ID": {
+                        "type": "integer",
+                        "description": "Unique identifier for the province",
+                        "example": 1
+                    },
+                    "province_name": {
+                        "type": "string",
+                        "description": "Name of the province",
+                        "example": "Cebu"
+                    },
+                    "region_ID": {
+                        "type": "integer",
+                        "description": "ID of the region this province belongs to",
+                        "example": 7
+                    }
+                },
+                "required": ["province_ID", "province_name", "region_ID"]
+            },
+            "Municipality": {
+                "type": "object",
+                "properties": {
+                    "city_municipality_ID": {
+                        "type": "integer",
+                        "description": "Unique identifier for the municipality",
+                        "example": 1
+                    },
+                    "city_municipality_name": {
+                        "type": "string",
+                        "description": "Name of the municipality",
+                        "example": "Cebu City"
+                    },
+                    "province_ID": {
+                        "type": "integer",
+                        "description": "ID of the province this municipality belongs to",
+                        "example": 1
+                    },
+                    "region_ID": {
+                        "type": "integer",
+                        "description": "ID of the region this municipality belongs to",
+                        "example": 7
+                    }
+                },
+                "required": [
+                    "city_municipality_ID",
+                    "city_municipality_name",
+                    "province_ID",
+                    "region_ID"
+                ]
+            },
+            "Barangay": {
+                "type": "object",
+                "properties": {
+                    "barangay_ID": {
+                        "type": "integer",
+                        "description": "Unique identifier for the barangay",
+                        "example": 1
+                    },
+                    "barangay_name": {
+                        "type": "string",
+                        "description": "Name of the barangay",
+                        "example": "San Antonio"
+                    },
+                    "city_municipality_ID": {
+                        "type": "integer",
+                        "description": "ID of the city/municipality this barangay belongs to",
+                        "example": 1
+                    }
+                },
+                "required": [
+                    "barangay_ID",
+                    "barangay_name",
+                    "city_municipality_ID"
+                ]
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Error message",
+                        "example": "Internal Server Error"
+                    }
+                },
+                "required": ["success", "message"]
+            }
+        },
+        "parameters": {
+            "PageParam": {
+                "name": "page",
+                "in": "query",
+                "description": "Page number for pagination",
+                "required": false,
+                "schema": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 1
+                }
+            },
+            "LimitParam": {
+                "name": "limit",
+                "in": "query",
+                "description": "Number of items per page",
+                "required": false,
+                "schema": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "default": 10
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Countries",
+            "description": "Operations related to countries"
+        },
+        {
+            "name": "Region States",
+            "description": "Operations related to regions and states"
+        },
+        {
+            "name": "Provinces",
+            "description": "Operations related to provinces"
+        },
+        {
+            "name": "Municipalities",
+            "description": "Operations related to municipalities and cities"
+        },
+        {
+            "name": "Barangays",
+            "description": "Operations related to barangays"
+        }
+    ],
+    "externalDocs": {
+        "description": "Find more info about the Geolocation Service API",
+        "url": "https://github.com/your-repo/sz-geolocation"
+    }
+}
