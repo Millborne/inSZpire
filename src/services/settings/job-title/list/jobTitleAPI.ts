@@ -1,6 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Cookies from "js-cookie";
 
+const { VITE_TEAM_AND_POSITION_SERVICE } = import.meta.env;
+
 interface generalProps {
     queryParameters: string;
     method?: string;
@@ -10,7 +12,7 @@ interface generalProps {
 export const jobTitleAPI = createApi({
     reducerPath: "jobTitle",
     baseQuery: fetchBaseQuery({
-        baseUrl: "http://localhost:4172/api/v1",
+        baseUrl: VITE_TEAM_AND_POSITION_SERVICE,
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 
@@ -25,11 +27,11 @@ export const jobTitleAPI = createApi({
     endpoints: (builder) => ({
         fetchJobTitles: builder.query({
             query: (data: generalProps) =>
-                `/job-title${data.queryParameters}`,
+                `/api/v1/job-title${data.queryParameters}`,
         }),
         actionJobTitles: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/job-title${data.queryParameters}`,
+                url: `/api/v1/job-title${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),

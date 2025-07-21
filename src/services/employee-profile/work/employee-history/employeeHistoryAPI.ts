@@ -1,8 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Cookies from "js-cookie";
 
-// Use the correct backend URL - your backend is running on localhost:4172
-const baseURL = import.meta.env.VITE_EMPLOYMENT_SERVICE || "http://localhost:4172/api/v1";
+const { VITE_EMPLOYMENT_SERVICE } = import.meta.env;
 
 interface generalProps {
     queryParameters: string;
@@ -13,7 +12,7 @@ interface generalProps {
 export const employeeHistoryAPI = createApi({
     reducerPath: "employeeHistory",
     baseQuery: fetchBaseQuery({
-        baseUrl: baseURL,
+        baseUrl: VITE_EMPLOYMENT_SERVICE,
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 
@@ -28,11 +27,11 @@ export const employeeHistoryAPI = createApi({
     endpoints: (builder) => ({
         fetchEmployeeHistory: builder.query({
             query: (data: generalProps) =>
-                `/employee-history${data.queryParameters}`,
+                `api/employee-history${data.queryParameters}`,
         }),
         actionEmployeeHistory: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/employee-history${data.queryParameters}`,
+                url: `/api/employee-history${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),

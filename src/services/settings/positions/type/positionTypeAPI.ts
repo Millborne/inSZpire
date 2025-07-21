@@ -1,6 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Cookies from "js-cookie";
 
+const { VITE_TEAM_AND_POSITION_SERVICE } = import.meta.env;
+
 interface generalProps {
     queryParameters: string;
     method?: string;
@@ -10,7 +12,7 @@ interface generalProps {
 export const positionTypeAPI = createApi({
     reducerPath: "positionType",
     baseQuery: fetchBaseQuery({
-        baseUrl: "http://localhost:4172/api/v1",
+        baseUrl: VITE_TEAM_AND_POSITION_SERVICE,
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 
@@ -25,11 +27,11 @@ export const positionTypeAPI = createApi({
     endpoints: (builder) => ({
         fetchPositionTypes: builder.query({
             query: (data: generalProps) =>
-                `/position-type${data.queryParameters}`,
+                `/api/v1/position-type${data.queryParameters}`,
         }),
         actionPositionTypes: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/position-type${data.queryParameters}`,
+                url: `/api/v1/position-type${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),
