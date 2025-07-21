@@ -18,7 +18,7 @@ import {
 
 // Import RTK state
 import { useSelector, useDispatch } from "react-redux";
-import { type EmployeeData } from "../../../reducers/employeeSlice";
+import { clearSelectedEmployee, type EmployeeData } from "../../../reducers/employeeSlice";
 import { setSelectedEmployee } from "../../../reducers/employeeSlice";
 import { RootState } from "../../../reducers/store";
 
@@ -51,6 +51,7 @@ const EmployeeList = () => {
     // Load employees on component mount
     useEffect(() => {
         const loadData = async () => {
+            dispatch(clearSelectedEmployee());
             try {
                 setIsLoading(true);
                 setError(null);
