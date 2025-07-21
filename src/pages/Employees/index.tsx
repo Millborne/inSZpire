@@ -2,10 +2,15 @@ import { SideMenuWithProfile } from "enterprisze-global-components";
 import { Briefcase, Calendar, Clipboard, DocumentCopy, Personalcard, ReceiptText, Wallet1 } from "iconsax-reactjs";
 import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useSummaryService } from "../../services/employee-profile/summary/use-summary";
 
 const Employees = () => {
     const navigate = useNavigate();
     const location = useLocation();
+
+    const { getByIdView } =
+        useSummaryService();
+
     const menuItems: {
         id: string;
         icon: React.ReactNode;
@@ -55,11 +60,17 @@ const Employees = () => {
 
     const [selected, setSelected] = useState("summary");
 
-    const user = {
-        name: "John Smith B. Fernandez",
-        role: "Junior Developer",
-        department: "Business Innovations & Solutions",
-    };
+    // const user = {
+    //     name: "John Smith B. Fernandez",
+    //     role: "Junior Developer",
+    //     department: "Business Innovations & Solutions",
+    // };
+
+    const [user, setUser] = useState<{
+        name: string;
+        role: string;
+        department: string;
+    } | null>(null);
 
     const handleMenuSelect = (id: string) => {
         setSelected(id);
@@ -98,9 +109,39 @@ const Employees = () => {
         // }
     }, [location.pathname, navigate]);
 
+     // Get employee ID from URL params or props - you may need to adjust this based on your routing setup
+     const employeeId = "6dd74bcf8f9946739abaaed997aaef71"; // This should come from your route params or props
+
+     useEffect(() => {
+         const fetchEmployeeData = async () => {
+             try {
+                 const result = await getByIdView({ employeeId: employeeId });
+ 
+                 if (result.data) {
+                    let userData = {
+                        name: `${result.data.data.first_name} ${result.data.data.middle_name[0]}. ${result.data.data.last_name}`,
+                        role: result.data.data.position_name,
+                        department: result.data.data.team_name,
+                    };
+                    setUser(userData);
+                 }
+             } catch (error) {
+                 console.error("Error fetching employee data:", error);
+             }
+         };
+ 
+         if (employeeId) {
+             fetchEmployeeData();
+         }
+     }, [employeeId]); // Removed getByIdView from dependencies to prevent infinite loop
+
     return (
         <SideMenuWithProfile
-            user={user}
+            user={user || {
+                name: "John Smith B. Fernandez",
+                role: "Junior Developer",
+                department: "Business Innovations & Solutions",
+            }}
             menuItems={menuItems}
             selected={selected}
             setSelected={handleMenuSelect}

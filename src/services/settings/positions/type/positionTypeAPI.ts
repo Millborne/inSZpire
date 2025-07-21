@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Cookies from "js-cookie";
 
-const { VITE_EMPLOYMENT_SERVICE } = import.meta.env;
+const { VITE_TEAM_AND_POSITION_SERVICE } = import.meta.env;
 
 interface generalProps {
     queryParameters: string;
@@ -9,10 +9,10 @@ interface generalProps {
     body?: any;
 }
 
-export const basicInfoAPI = createApi({
-    reducerPath: "basicInfo",
+export const positionTypeAPI = createApi({
+    reducerPath: "positionType",
     baseQuery: fetchBaseQuery({
-        baseUrl: VITE_EMPLOYMENT_SERVICE,
+        baseUrl: VITE_TEAM_AND_POSITION_SERVICE,
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 
@@ -23,15 +23,15 @@ export const basicInfoAPI = createApi({
             return headers;
         },
     }),
-    tagTypes: ["basicInfo"],
+    tagTypes: ["positionType"],
     endpoints: (builder) => ({
-        fetchBasicInfo: builder.query({
+        fetchPositionTypes: builder.query({
             query: (data: generalProps) =>
-                `/api/v1/employee${data.queryParameters}`,
+                `/api/v1/position-type${data.queryParameters}`,
         }),
-        actionBasicInfo: builder.mutation({
+        actionPositionTypes: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/api/v1/employee${data.queryParameters}`,
+                url: `/api/v1/position-type${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),
@@ -39,5 +39,5 @@ export const basicInfoAPI = createApi({
     }),
 });
 
-export const { useFetchBasicInfoQuery, useActionBasicInfoMutation } =
-    basicInfoAPI;
+export const { useFetchPositionTypesQuery, useActionPositionTypesMutation } =
+    positionTypeAPI;
