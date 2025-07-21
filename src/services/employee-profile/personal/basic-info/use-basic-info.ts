@@ -59,7 +59,7 @@ export const useBasicInfo = ({
 // Basic Info-specific interfaces based on API documentation
 export interface BasicInfoData {
     employee_ID?: string;
-    employee_number?: string; 
+    employee_number?: string;
     old_employee_number?: string;
     profile_ID?: string;
     position_ID?: string;
@@ -159,49 +159,83 @@ export interface CreateBasicInfoRequest {
 }
 
 export interface UpdateBasicInfoRequest {
-    basic_info_ID: string;
-    first_name?: string;
-    last_name?: string;
-    middle_name?: string;
-    maiden_name?: string;
-    nickname?: string;
-    date_of_birth?: string;
-    place_of_birth?: string;
-    gender?: "male" | "female" | "other";
-    civil_status?: "single" | "married" | "divorced" | "widowed" | "separated";
-    nationality?: string;
-    religion?: string;
-    blood_type?: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
-    height?: number;
-    weight?: number;
-    email?: string;
-    phone_number?: string;
-    mobile_number?: string;
-    emergency_contact?: {
-        name: string;
-        relationship: string;
-        phone: string;
-        email?: string;
-        address?: string;
+    employee_ID?: string;
+    employee?: {
+        employee_ID: string;
+        employee_number: string;
+        old_employee_number: string | null;
+        profile_ID: string;
+        current_position_ID: string;
+        status_ID: string;
+        work_email: string;
+        employee_status_ID: string;
+        position_status_ID: string;
+        sched_type: "flexible" | "fixed" | string;
+        hire_date?: string; // ISO 8601 date
+        has_atm: 0 | 1;
+        salary_frequency: "monthly" | "bi-weekly" | string;
+        is_agency: 0 | 1;
+        is_confidential: 0 | 1;
+        is_leave_earned: 0 | 1;
+        e_sig_url: string;
+        qr_code_url: string;
+        separation_date: string | null;
+        reason_for_leaving: string | null;
+        not_for_rehire: 0 | 1;
+        is_archived: 0 | 1;
+        created_at: string;
+        updated_at: string;
     };
-    address?: {
-        present_address: string;
-        permanent_address?: string;
-        city: string;
-        state: string;
-        zip_code: string;
-        country: string;
+    profile?: {
+        profile_ID?: string;
+        user_ID?: string;
+        first_name: string;
+        last_name: string;
+        middle_name?: string | null;
+        name_ext?: string | null;
+        preferred_name?: string | null;
+        profile_image?: string;
+        gender?: "male" | "female" | "other" | string;
+        pronoun?: string;
+        date_of_birth?: string;
+        birth_address?: string;
+        marital_status?: "single" | "married" | "divorced" | string;
+        religion_ID?: string;
+        blood_type?:
+            | "a+"
+            | "a-"
+            | "b+"
+            | "b-"
+            | "ab+"
+            | "ab-"
+            | "o+"
+            | "o-"
+            | string;
+        telephone_number?: string;
+        mobile_number?: string;
+        personal_email?: string;
+        educational_attainment_ID?: string;
+        created_at?: string;
+        updated_at?: string;
     };
-    government_ids?: {
-        sss_number?: string;
-        tin_number?: string;
-        philhealth_number?: string;
-        pagibig_number?: string;
-        passport_number?: string;
-        driver_license_number?: string;
-    };
-    basic_info_status?: "active" | "pending" | "inactive" | "suspended";
-    is_archived?: number;
+    addresses: {
+        address_ID?: string;
+        address_line_1?: string;
+        address_line_2?: string | null;
+        country_ID?: number;
+        region_state_ID?: number;
+        province_ID?: number;
+        city_municipality_ID?: number;
+        barangay_ID?: number;
+        postal_code?: string;
+        service_identifier?: "home" | "work" | string;
+        address_type_ID?: number;
+        record_ID?: string;
+        entity?: "profile" | "employee" | string;
+        is_archived?: 0 | 1;
+        created_at?: string;
+        updated_at?: string;
+    }[];
 }
 
 export interface ViewBasicInfoRequest {
@@ -252,7 +286,7 @@ export const useBasicInfoService = () => {
     // Edit Basic Info
     const updateBasicInfo = async (basicInfoData: UpdateBasicInfoRequest) => {
         return generalAction({
-            queryParameters: "/",
+            queryParameters: "/update",
             method: "PUT",
             body: basicInfoData,
         });
@@ -285,6 +319,15 @@ export const useBasicInfoService = () => {
         });
     };
 
+    // Get employee data
+    const getById = async (requestData: GetByIdViewRequest) => {
+        return generalAction({
+            queryParameters: "/get-by-id",
+            method: "POST",
+            body: requestData,
+        });
+    };
+
     return {
         // mutation
         actionData,
@@ -300,6 +343,7 @@ export const useBasicInfoService = () => {
         updateBasicInfo,
         getBasicInfo,
         batchUpdateStatus,
-        getByIdView
+        getByIdView,
+        getById,
     };
 };

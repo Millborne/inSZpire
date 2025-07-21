@@ -107,6 +107,12 @@ export interface ProfileSummaryData {
     setup_name?: string;
     job_code?: string;
     job_title?: string;
+    supervisor_first_name?: string;
+    supervisor_last_name?: string;
+    emergency_contact_first_name?: string;
+    emergency_contact_last_name?: string;
+    emergency_contact_number?: string;
+    work_location?: string;
 }
 
 export interface ViewProfileSummaryRequest {

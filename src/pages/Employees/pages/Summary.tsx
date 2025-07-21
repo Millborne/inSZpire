@@ -28,6 +28,11 @@ const Summary = () => {
         null
     );
 
+    const [employeeAllData, setEmployeeAllData] = useState<any | null>(
+        null
+    );
+
+
     // Get employee ID from URL params or props - you may need to adjust this based on your routing setup
     const employeeId = "6dd74bcf8f9946739abaaed997aaef71"; // This should come from your route params or props
 
@@ -43,10 +48,12 @@ const Summary = () => {
                     },
                 });
 
-                console.log(result2);
-
                 if (result.data) {
                     setEmployeeData(result.data.data);
+                }
+
+                if(result2.data) {
+                    setEmployeeAllData(result2.data.data);
                 }
             } catch (error) {
                 console.error("Error fetching employee data:", error);
@@ -87,13 +94,14 @@ const Summary = () => {
         );
     }
 
+    
     return (
         <div className="flex flex-col gap-4">
             <CardContainer
                 content={
                     <div className="flex flex-wrap flex-row md:flex-row gap-[24px]">
                         <img
-                            src={employeeData.qr_code_url || ""}
+                            src={employeeAllData.employee.qr_code_url || ""}
                             className="w-full max-w-[250px] md:max-w-[150px]"
                         />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-auto">
@@ -123,7 +131,7 @@ const Summary = () => {
                                     />
                                 }
                                 header="Direct Head"
-                                text="to be followed"
+                                text={employeeData.supervisor_first_name ? `${employeeData.supervisor_first_name} ${employeeData.supervisor_last_name}` : "N/A"}
                             />
                             <TextContent
                                 icon={<NotificationStatus />}
@@ -133,7 +141,7 @@ const Summary = () => {
                             <TextContent
                                 icon={<Location />}
                                 header="Location"
-                                text={"to be followed"}
+                                text={employeeData.work_location || "N/A"}
                             />
 
                             <TextContent
@@ -152,7 +160,7 @@ const Summary = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-auto">
                         <TextContent
                             header="Company Email"
-                            text={employeeData.work_email || "N/A"}
+                            text={employeeAllData.employee.work_email || "N/A"}
                         />
                         <TextContent
                             header="Personal Email "
@@ -161,7 +169,7 @@ const Summary = () => {
 
                         <TextContent
                             header="Work Address"
-                            text="to be followed"
+                            text={employeeData.work_location || "N/A"}
                         />
                         <TextContent
                             header="Current Address "
@@ -177,11 +185,11 @@ const Summary = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-auto">
                         <TextContent
                             header="Emergency Contact Name"
-                            text={"to be followed"}
+                            text={employeeData.emergency_contact_first_name ? `${employeeData.emergency_contact_first_name} ${employeeData.emergency_contact_last_name}` : "N/A"}
                         />
                         <TextContent
                             header="Emergency Contact Number"
-                            text={"to be followed"}
+                            text={employeeData.emergency_contact_number || "N/A"}
                         />
 
                         <TextContent
