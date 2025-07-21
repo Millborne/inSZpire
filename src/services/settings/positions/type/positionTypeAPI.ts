@@ -7,8 +7,8 @@ interface generalProps {
     body?: any;
 }
 
-export const workSetupAPI = createApi({
-    reducerPath: "workSetup",
+export const positionTypeAPI = createApi({
+    reducerPath: "positionType",
     baseQuery: fetchBaseQuery({
         baseUrl: "http://localhost:4172/api/v1",
         prepareHeaders: (headers) => {
@@ -21,15 +21,15 @@ export const workSetupAPI = createApi({
             return headers;
         },
     }),
-    tagTypes: ["workSetup"],
+    tagTypes: ["positionType"],
     endpoints: (builder) => ({
-        fetchWorkSetups: builder.query({
+        fetchPositionTypes: builder.query({
             query: (data: generalProps) =>
-                `/work-setup${data.queryParameters}`,
+                `/position-type${data.queryParameters}`,
         }),
-        actionWorkSetups: builder.mutation({
+        actionPositionTypes: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/work-setup${data.queryParameters}`,
+                url: `/position-type${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),
@@ -37,5 +37,5 @@ export const workSetupAPI = createApi({
     }),
 });
 
-export const { useFetchWorkSetupsQuery, useActionWorkSetupsMutation } =
-    workSetupAPI;
+export const { useFetchPositionTypesQuery, useActionPositionTypesMutation } =
+    positionTypeAPI; 
