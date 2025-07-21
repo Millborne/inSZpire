@@ -1,11 +1,12 @@
 export { idsAPI, useFetchIdsQuery, useActionIdsMutation } from "./idsAPI";
 export {
-    useIds,
-    useIdsService,
-    type IdsData,
-    type CreateIdsRequest,
-    type UpdateIdsRequest,
-    type ViewIdsRequest,
-    type GetIdsRequest,
-    type BatchUpdateStatusRequest,
+  useIds,
+  useIdsService,
+  useEmployeeIdentifiers,
+  useIdentifiers,
+  type EmployeeIdentifier,
+  type Identifier,
+  type CreateEmployeeIdentifier,
+  type UpdateEmployeeIdentifier,
+  type ViewEmployeeIdentifiersRequest,
 } from "./use-ids";

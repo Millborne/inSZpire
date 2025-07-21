@@ -1,276 +1,264 @@
-import { useFetchIdsQuery, useActionIdsMutation } from "./idsAPI";
+import {
+  useFetchIdsQuery,
+  useFetchEmployeeIdentifiersQuery,
+  useFetchIdentifiersQuery,
+  useActionIdsMutation,
+} from "./idsAPI";
 
 export const useIds = ({
-    queryParameters,
-    method,
-    disableFetch = false,
+  queryParameters,
+  method,
+  disableFetch = false,
 }: {
-    queryParameters?: string;
-    method?: string;
-    disableFetch?: boolean;
+  queryParameters?: string;
+  method?: string;
+  disableFetch?: boolean;
 }) => {
-    // fetch
-    const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
-        useFetchIdsQuery(
-            {
-                queryParameters: queryParameters ?? "",
-                method: method,
-            },
-            { skip: disableFetch }
-        );
+  // fetch
+  const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
+    useFetchIdsQuery(
+      {
+        queryParameters: queryParameters ?? "",
+        method: method,
+      },
+      { skip: disableFetch }
+    );
 
-    // action
-    const [
-        generalAction,
-        {
-            data: actionData,
-            isError: actionIsError,
-            isLoading: actionIsLoading,
-            isSuccess: actionIsSuccess,
-            error: actionError,
-            reset: actionReset,
-        },
-    ] = useActionIdsMutation();
+  // action
+  const [
+    generalAction,
+    {
+      data: actionData,
+      isError: actionIsError,
+      isLoading: actionIsLoading,
+      isSuccess: actionIsSuccess,
+      error: actionError,
+      reset: actionReset,
+    },
+  ] = useActionIdsMutation();
 
-    return {
-        // fetching
-        data,
-        isSuccess,
-        isError,
-        isLoading,
-        isFetching,
-        error,
-        refetch,
+  return {
+    // fetching
+    data,
+    isSuccess,
+    isError,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
 
-        // mutation
-        generalAction,
-        actionData,
-        actionIsError,
-        actionIsLoading,
-        actionIsSuccess,
-        actionError,
-        actionReset,
-    };
+    // mutation
+    generalAction,
+    actionData,
+    actionIsError,
+    actionIsLoading,
+    actionIsSuccess,
+    actionError,
+    actionReset,
+  };
 };
 
-// IDs-specific interfaces based on API documentation
-export interface IdsData {
-    id_ID?: string;
-    employee_ID?: string;
-    id_type:
-        | "sss"
-        | "tin"
-        | "philhealth"
-        | "pagibig"
-        | "passport"
-        | "driver_license"
-        | "national_id"
-        | "voter_id"
-        | "postal_id"
-        | "other";
-    id_number: string;
-    id_name?: string;
-    issuing_authority?: string;
-    issuing_country?: string;
-    issuing_state?: string;
-    issuing_city?: string;
-    issue_date?: string;
-    expiry_date?: string;
-    is_expired: boolean;
-    is_primary: boolean;
-    is_verified: boolean;
-    verification_date?: string;
-    verification_status?: "pending" | "verified" | "rejected" | "expired";
-    verification_notes?: string;
-    document_image?: string;
-    document_back_image?: string;
-    id_status: "active" | "pending" | "inactive" | "suspended" | "expired";
-    is_archived?: number;
-    created_at?: string;
-    updated_at?: string;
+// Employee Identifier interfaces based on API documentation
+export interface EmployeeIdentifier {
+  employee_identifier_ID: string;
+  card_number: string;
+  account_number: string;
+  employee_ID: string;
+  identifier_ID: string;
+  issued_date: string;
+  validity_date: string;
+  is_archived: number;
+  created_by?: string;
+  updated_by?: string;
+  identifier_name?: string;
+  identifier_type?: string;
+  old_employee_number?: string;
 }
 
-export interface CreateIdsRequest {
-    employee_ID: string;
-    id_type:
-        | "sss"
-        | "tin"
-        | "philhealth"
-        | "pagibig"
-        | "passport"
-        | "driver_license"
-        | "national_id"
-        | "voter_id"
-        | "postal_id"
-        | "other";
-    id_number: string;
-    id_name?: string;
-    issuing_authority?: string;
-    issuing_country?: string;
-    issuing_state?: string;
-    issuing_city?: string;
-    issue_date?: string;
-    expiry_date?: string;
-    is_expired: boolean;
-    is_primary: boolean;
-    is_verified: boolean;
-    verification_date?: string;
-    verification_status?: "pending" | "verified" | "rejected" | "expired";
-    verification_notes?: string;
-    document_image?: string;
-    document_back_image?: string;
-    id_status: "active" | "pending" | "inactive" | "suspended" | "expired";
-    is_archived?: number;
+// Identifier interface for dropdown options
+export interface Identifier {
+  identifier_ID: string;
+  name: string;
+  type?: string;
+  is_archived?: number;
 }
 
-export interface UpdateIdsRequest {
-    id_ID: string;
-    id_type?:
-        | "sss"
-        | "tin"
-        | "philhealth"
-        | "pagibig"
-        | "passport"
-        | "driver_license"
-        | "national_id"
-        | "voter_id"
-        | "postal_id"
-        | "other";
-    id_number?: string;
-    id_name?: string;
-    issuing_authority?: string;
-    issuing_country?: string;
-    issuing_state?: string;
-    issuing_city?: string;
-    issue_date?: string;
-    expiry_date?: string;
-    is_expired?: boolean;
-    is_primary?: boolean;
-    is_verified?: boolean;
-    verification_date?: string;
-    verification_status?: "pending" | "verified" | "rejected" | "expired";
-    verification_notes?: string;
-    document_image?: string;
-    document_back_image?: string;
-    id_status?: "active" | "pending" | "inactive" | "suspended" | "expired";
-    is_archived?: number;
+export interface CreateEmployeeIdentifier {
+  card_number: string;
+  account_number: string;
+  employee_ID: string;
+  identifier_ID: string;
+  issued_date: string;
+  validity_date: string;
+  is_archived?: number;
+  created_by?: string;
+  updated_by?: string;
 }
 
-export interface ViewIdsRequest {
-    employee_ID: string;
-    id_type?:
-        | "sss"
-        | "tin"
-        | "philhealth"
-        | "pagibig"
-        | "passport"
-        | "driver_license"
-        | "national_id"
-        | "voter_id"
-        | "postal_id"
-        | "other";
-    is_expired?: boolean;
-    is_primary?: boolean;
-    is_verified?: boolean;
-    verification_status?: "pending" | "verified" | "rejected" | "expired";
-    id_status?: "active" | "pending" | "inactive" | "suspended" | "expired";
-    is_archived?: number;
-    offset?: number;
-    limit?: number;
+export interface UpdateEmployeeIdentifier {
+  employee_identifier_ID: string;
+  card_number?: string;
+  account_number?: string;
+  employee_ID?: string;
+  identifier_ID?: string;
+  issued_date?: string;
+  validity_date?: string;
+  is_archived?: number;
+  created_by?: string;
+  updated_by?: string;
 }
 
-export interface GetIdsRequest {
-    id_ID: string;
+export interface ViewEmployeeIdentifiersRequest {
+  search?: string;
+  is_archived?: number;
+  limit?: number;
+  offset?: number;
 }
 
-export interface BatchUpdateStatusRequest {
-    req_IDs: string[];
-    id_status: "active" | "pending" | "inactive" | "suspended" | "expired";
-}
-
-// Specific IDs service methods
+// Specific Employee Identifier service methods
 export const useIdsService = () => {
-    const [
-        generalAction,
-        {
-            data: actionData,
-            isError: actionIsError,
-            isLoading: actionIsLoading,
-            isSuccess: actionIsSuccess,
-            error: actionError,
-            reset: actionReset,
-        },
-    ] = useActionIdsMutation();
+  const [
+    generalAction,
+    {
+      data: actionData,
+      isError: actionIsError,
+      isLoading: actionIsLoading,
+      isSuccess: actionIsSuccess,
+      error: actionError,
+      reset: actionReset,
+    },
+  ] = useActionIdsMutation();
 
-    // List IDs
-    const listIds = async (filters: ViewIdsRequest) => {
-        return generalAction({
-            queryParameters: "/list",
-            method: "POST",
-            body: filters,
-        });
-    };
+  // Create Employee Identifier
+  const createEmployeeIdentifier = async (
+    identifierData: CreateEmployeeIdentifier
+  ) => {
+    return generalAction({
+      queryParameters: "",
+      method: "POST",
+      body: identifierData,
+    });
+  };
 
-    // Create ID
-    const createIds = async (idsData: CreateIdsRequest) => {
-        return generalAction({
-            queryParameters: "/",
-            method: "POST",
-            body: idsData,
-        });
-    };
+  // Update Employee Identifier
+  const updateEmployeeIdentifier = async (
+    identifierData: UpdateEmployeeIdentifier
+  ) => {
+    return generalAction({
+      queryParameters: "",
+      method: "PUT",
+      body: identifierData,
+    });
+  };
 
-    // Edit ID
-    const updateIds = async (idsData: UpdateIdsRequest) => {
-        return generalAction({
-            queryParameters: "/",
-            method: "PUT",
-            body: idsData,
-        });
-    };
+  // View Employee Identifiers
+  const viewEmployeeIdentifiers = async (
+    filters: ViewEmployeeIdentifiersRequest
+  ) => {
+    return generalAction({
+      queryParameters: "/view",
+      method: "POST",
+      body: filters,
+    });
+  };
 
-    // Get specific ID
-    const getIds = async (idsData: GetIdsRequest) => {
-        return generalAction({
-            queryParameters: "/get",
-            method: "POST",
-            body: idsData,
-        });
-    };
+  return {
+    // mutation
+    actionData,
+    actionIsError,
+    actionIsLoading,
+    actionIsSuccess,
+    actionError,
+    actionReset,
 
-    // View IDs with filters
-    const viewIds = async (filters: ViewIdsRequest) => {
-        return generalAction({
-            queryParameters: "/view",
-            method: "POST",
-            body: filters,
-        });
-    };
+    // methods
+    createEmployeeIdentifier,
+    updateEmployeeIdentifier,
+    viewEmployeeIdentifiers,
+  };
+};
 
-    // Batch update status
-    const batchUpdateStatus = async (batchData: BatchUpdateStatusRequest) => {
-        return generalAction({
-            queryParameters: "/batch-update-status",
-            method: "POST",
-            body: batchData,
-        });
-    };
+// Hook for fetching employee identifiers by employee ID with RTK Query caching
+export const useEmployeeIdentifiers = (employeeId: string) => {
+  // Use RTK Query hook for automatic caching and deduplication
+  const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
+    useFetchEmployeeIdentifiersQuery(
+      {
+        search: employeeId, // Try to search by employee ID
+        is_archived: 0,
+        limit: 100,
+        offset: 0,
+      },
+      {
+        // Skip if no employee ID provided
+        skip: !employeeId,
+        // Refetch on window focus (optional)
+        refetchOnFocus: false,
+        // Refetch on reconnect (optional)
+        refetchOnReconnect: false,
+      }
+    );
 
-    return {
-        // mutation
-        actionData,
-        actionIsError,
-        actionIsLoading,
-        actionIsSuccess,
-        actionError,
-        actionReset,
+  // Filter results by employee ID on frontend if backend doesn't support it
+  const filterByEmployeeId = (
+    identifiers: EmployeeIdentifier[]
+  ): EmployeeIdentifier[] => {
+    return identifiers.filter(
+      (identifier) => identifier.employee_ID === employeeId
+    );
+  };
 
-        // methods
-        listIds,
-        createIds,
-        updateIds,
-        getIds,
-        viewIds,
-        batchUpdateStatus,
-    };
+  // Get filtered data
+  const filteredData = data?.data ? filterByEmployeeId(data.data) : [];
+
+  return {
+    // RTK Query state
+    data: filteredData,
+    isSuccess,
+    isError,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+
+    // Helper methods
+    filterByEmployeeId,
+  };
+};
+
+// Hook for fetching all identifiers for dropdown options
+export const useIdentifiers = () => {
+  const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
+    useFetchIdentifiersQuery(undefined, {
+      // Refetch on window focus (optional)
+      refetchOnFocus: false,
+      // Refetch on reconnect (optional)
+      refetchOnReconnect: false,
+    });
+
+  // Transform identifiers to dropdown options format
+  const getDropdownOptions = () => {
+    if (!data?.data) return [];
+
+    return data.data
+      .filter((identifier: Identifier) => !identifier.is_archived)
+      .map((identifier: Identifier) => ({
+        label: identifier.name,
+        value: identifier.identifier_ID,
+      }));
+  };
+
+  return {
+    // RTK Query state
+    data: data?.data || [],
+    isSuccess,
+    isError,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+
+    // Helper methods
+    getDropdownOptions,
+  };
 };
