@@ -47,6 +47,8 @@ const Summary = () => {
 
     useEffect(() => {
         const fetchEmployeeData = async () => {
+            console.log("test");
+            
             try {
                 const result = await getByIdView({
                     employeeId: selectedEmployee?.employee_ID || "",
