@@ -109,8 +109,10 @@ const Employees = () => {
         // }
     }, [location.pathname, navigate]);
 
-     // Get employee ID from URL params or props - you may need to adjust this based on your routing setup
-     const employeeId = "6dd74bcf8f9946739abaaed997aaef71"; // This should come from your route params or props
+     // Get employee ID from URL params
+     const pathSegments = location.pathname.split("/").filter(Boolean);
+     const employeeIdIndex = pathSegments.findIndex((segment) => segment === "employees") + 1;
+     const employeeId = pathSegments[employeeIdIndex];
 
      useEffect(() => {
          const fetchEmployeeData = async () => {
@@ -133,7 +135,7 @@ const Employees = () => {
          if (employeeId) {
              fetchEmployeeData();
          }
-     }, [employeeId]); // Removed getByIdView from dependencies to prevent infinite loop
+     }, [employeeId, getByIdView]); // Added getByIdView back to dependencies
 
     return (
         <SideMenuWithProfile

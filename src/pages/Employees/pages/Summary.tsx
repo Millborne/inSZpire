@@ -13,6 +13,7 @@ import {
     Rank,
 } from "iconsax-react";
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
     useSummary,
     useSummaryService,
@@ -20,6 +21,7 @@ import {
 import { ProfileSummaryData } from "../../../services/employee-profile/summary/use-summary";
 
 const Summary = () => {
+    const location = useLocation();
     const { getByIdView, actionIsLoading, actionIsError, actionError } =
         useSummaryService();
 
@@ -32,9 +34,10 @@ const Summary = () => {
         null
     );
 
-
-    // Get employee ID from URL params or props - you may need to adjust this based on your routing setup
-    const employeeId = "6dd74bcf8f9946739abaaed997aaef71"; // This should come from your route params or props
+    // Get employee ID from URL params
+    const pathSegments = location.pathname.split("/").filter(Boolean);
+    const employeeIdIndex = pathSegments.findIndex((segment) => segment === "employees") + 1;
+    const employeeId = pathSegments[employeeIdIndex];
 
     useEffect(() => {
         const fetchEmployeeData = async () => {
@@ -63,7 +66,7 @@ const Summary = () => {
         if (employeeId) {
             fetchEmployeeData();
         }
-    }, [employeeId]); // Removed getByIdView from dependencies to prevent infinite loop
+    }, [employeeId, getByIdView, useSummaryData.generalAction]);
 
     if (actionIsLoading) {
         return (
