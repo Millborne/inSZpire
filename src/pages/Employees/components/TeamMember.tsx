@@ -2,14 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { CardContainer, Chip, PopoverMenu, SnackbarAlert, Tab, TextContent, Avatar } from "enterprisze-global-components";
 import { ArchiveBox, Data2, Edit2, Hierarchy2, People, Tag, Information } from "iconsax-reactjs";
-import SpecificTeamCard from "../../Teams/components/SpecificTeamCard";
+
 import SpecificTeamModal, { ModalMode, SpecificTeamDataType } from "../../Teams/components/modals/SpecificTeamModal";
 import ConfirmSpecificTeamArchive from "../../Teams/components/modals/ConfirmSpecificTeamArchive";
 
 // Import the team member service
 import { useTeamMemberService, type TeamData, type PositionData } from "../../../services/employee-profile/work/team-member";
-// Import the employee service to get employee data
-import { useEmployeeService, type EmployeeData } from "../../../services/employee/list/use-employee";
+
 
 const TeamMember = () => {
     const { id: employeeId } = useParams(); // Get employee ID from URL
@@ -22,7 +21,7 @@ const TeamMember = () => {
     const [snackbarMessage, setSnackbarMessage] = useState("");
 
     // State for employee and team data
-    const [employeeData, setEmployeeData] = useState<EmployeeData | null>(null);
+   
     const [teamData, setTeamData] = useState<TeamData | null>(null);
     const [teamMembers, setTeamMembers] = useState<PositionData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -30,71 +29,11 @@ const TeamMember = () => {
 
     // Get services
     const teamMemberService = useTeamMemberService();
-    const employeeService = useEmployeeService();
+  
     const hasLoadedRef = useRef(false);
 
     // Function to get team details and members
-    const getTeamDetailsAndMembers = async (cleanTeam_ID: string) => {
-        console.log("Step 2: Calling /teams/view with clean team_ID:", cleanTeam_ID);
-        const teamResponse = await teamMemberService.getTeamDetails({
-            team_ID: cleanTeam_ID,
-            is_archived: 0,
-            offset: 0,
-            limit: 10
-        });
-
-        console.log("Team response from /teams/view:", teamResponse);
-
-        if (teamResponse.data?.success && teamResponse.data?.data) {
-            const team = Array.isArray(teamResponse.data.data) ? teamResponse.data.data[0] : teamResponse.data.data;
-            setTeamData(team);
-            
-            console.log("Team found:", team.team_name);
-            
-            // Get team members for this team using /teams/view endpoint
-            // The team response already contains the members, so we don't need a separate call
-            if (teamResponse.data?.data && Array.isArray(teamResponse.data.data) && teamResponse.data.data.length > 0) {
-                const teamData = teamResponse.data.data[0];
-                if (teamData.members && Array.isArray(teamData.members)) {
-                    setTeamMembers(teamData.members);
-                    console.log("Team members loaded from /teams/view:", teamData.members.length);
-                } else {
-                    console.log("No members found in team data, trying separate call");
-                    // Fallback: Get team members separately using /position/getPositions
-                    try {
-                        const membersResponse = await teamMemberService.getTeamMembers({
-                            team_ID: cleanTeam_ID,
-                            is_archived: 0,
-                            offset: 0,
-                            limit: 50
-                        });
-                        console.log("Team members response:", membersResponse);
-                        
-                        if (membersResponse.data?.success && membersResponse.data?.data) {
-                            const members = Array.isArray(membersResponse.data.data) 
-                                ? membersResponse.data.data 
-                                : [membersResponse.data.data];
-                            setTeamMembers(members);
-                            console.log("Team members loaded from separate call:", members.length);
-                        } else {
-                            console.log("No members found in separate call");
-                            setTeamMembers([]);
-                        }
-                    } catch (memberError) {
-                        console.error("Error getting team members:", memberError);
-                        setTeamMembers([]);
-                    }
-                }
-            } else {
-                console.log("No team data found");
-                setTeamMembers([]);
-            }
-        } else {
-            console.log("ERROR: Team response structure issue");
-            console.log("Team response keys:", Object.keys(teamResponse.data || {}));
-            setError("No team data found");
-        }
-    };
+    
 
     // Load team data using the real API endpoint
     useEffect(() => {
@@ -253,7 +192,7 @@ const TeamMember = () => {
                     console.log("🔄 Falling back to hardcoded approach...");
                     
                     // Fallback to hardcoded approach
-                    const hardcodedTeamId = "b811928b451411f0b6b802dcb324866b";
+                    const hardcodedTeamId = "14fbd3bf20744699bce2df89633e1e70";
                     console.log("🔧 Using hardcoded team ID:", hardcodedTeamId);
                     
                     const teamResponse = await teamMemberService.getTeamDetails({
@@ -370,83 +309,6 @@ const TeamMember = () => {
     const teamMemberCount = teamMembers.length;
     const underlingsCount = 9; // TODO: Calculate from hierarchy
 
-    // Test function for debugging
-    const testAPI = async () => {
-        console.log("🧪 Testing API with employee ID:", employeeId);
-        if (!employeeId) {
-            console.error("🧪 No employee ID available");
-            return;
-        }
-        try {
-            const testResponse = await teamMemberService.getEmployeePosition(employeeId);
-            console.log("🧪 Test response:", testResponse);
-        } catch (error) {
-            console.error("🧪 Test error:", error);
-        }
-    };
-
-    // Test teams API directly
-    const testTeamsAPI = async () => {
-        console.log("🧪 Testing Teams API directly");
-        try {
-            // Test with the known team ID from your database
-            const testTeamId = "b811928b451411f0b6b802dcb324866b";
-            console.log("🧪 Testing with team ID:", testTeamId);
-            
-            const teamResponse = await teamMemberService.getTeamDetails({
-                team_ID: testTeamId,
-                is_archived: 0,
-                offset: 0,
-                limit: 10
-            });
-            console.log("🧪 Teams API response:", teamResponse);
-        } catch (error) {
-            console.error("🧪 Teams API error:", error);
-        }
-    };
-
-    // Hardcoded test to bypass employee lookup
-    const testHardcoded = async () => {
-        console.log("🧪 Testing with hardcoded values");
-        try {
-            // Use the exact values from your database
-            const hardcodedTeamId = "b811928b451411f0b6b802dcb324866b";
-            console.log("🧪 Using hardcoded team ID:", hardcodedTeamId);
-            
-            const teamResponse = await teamMemberService.getTeamDetails({
-                team_ID: hardcodedTeamId,
-                is_archived: 0,
-                offset: 0,
-                limit: 10
-            });
-            console.log("🧪 Hardcoded test response:", teamResponse);
-            
-            if (teamResponse.data?.success && teamResponse.data?.data) {
-                const team = Array.isArray(teamResponse.data.data) ? teamResponse.data.data[0] : teamResponse.data.data;
-                setTeamData(team);
-                console.log("🧪 Team set:", team.team_name);
-                
-                // Try to get team members
-                const membersResponse = await teamMemberService.getTeamMembers({
-                    team_ID: hardcodedTeamId,
-                    is_archived: 0,
-                    offset: 0,
-                    limit: 50
-                });
-                console.log("🧪 Members response:", membersResponse);
-                
-                if (membersResponse.data?.success && membersResponse.data?.data) {
-                    const members = Array.isArray(membersResponse.data.data) 
-                        ? membersResponse.data.data 
-                        : [membersResponse.data.data];
-                    setTeamMembers(members);
-                    console.log("🧪 Members set:", members.length);
-                }
-            }
-        } catch (error) {
-            console.error("🧪 Hardcoded test error:", error);
-        }
-    };
 
     return (
         <>
@@ -603,8 +465,8 @@ const TeamMember = () => {
                                 <div className="mt-6">
                                     <h6 className="text-h6 text-szPrimary700 mb-4">These are user's teammates</h6>
                                     {viewType === "team" && teamMembers.length > 0 ? (
-                                        <div className="space-y-2">
-                                            {teamMembers.map((member) => {
+                                        <div className="space-y-0">
+                                            {teamMembers.map((member, index) => {
                                                 // Format the name properly
                                                 const displayName = member.employee_name || 
                                                     (member.first_name && member.last_name ? 
@@ -614,21 +476,27 @@ const TeamMember = () => {
                                                 const jobTitle = member.job_title || member.position_name || "No title";
                                                 
                                                 return (
-                                                    <div key={member.position_ID} className="flex items-center gap-3 p-3 bg-szSecondary50 rounded-lg">
-                                                        <Avatar size="small" src="/src/assets/noAvatar.png" />
-                                                        <div className="flex flex-col">
-                                                            <p className="text-body-small-strong text-szBlack800">
-                                                                {displayName}
-                                                            </p>
-                                                            <p className="text-caption-reg text-szDarkGrey600">
-                                                                {jobTitle}
-                                                            </p>
-                                                            {member.employee_number && (
-                                                                <p className="text-caption-reg text-szGrey500">
-                                                                    #{member.employee_number}
+                                                    <div key={member.position_ID}>
+                                                        <div className="flex items-center gap-3 p-3">
+                                                            <Avatar size="small" src="/src/assets/noAvatar.png" />
+                                                            <div className="flex flex-col">
+                                                                <p className="text-body-small-strong text-szBlack800">
+                                                                    {displayName}
                                                                 </p>
-                                                            )}
+                                                                <p className="text-caption-reg text-szDarkGrey600">
+                                                                    {jobTitle}
+                                                                </p>
+                                                                {member.employee_number && (
+                                                                    <p className="text-caption-reg text-szGrey500">
+                                                                        #{member.employee_number}
+                                                                    </p>
+                                                                )}
+                                                            </div>
                                                         </div>
+                                                        {/* Add separator line after each member except the last one */}
+                                                        {index < teamMembers.length - 1 && (
+                                                            <div className="border-b border-szGrey200"></div>
+                                                        )}
                                                     </div>
                                                 );
                                             })}
