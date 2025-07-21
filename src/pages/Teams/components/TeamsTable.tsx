@@ -6,7 +6,7 @@ import TeamModal, { TeamDataType } from "./modals/TeamModal";
 import { useNavigate } from "react-router-dom";
 
 interface TeamsTableProps {
-  id: number;
+  id: string | number;
   teamName: string;
   employees: Employee[];
   isSelected?: boolean;
