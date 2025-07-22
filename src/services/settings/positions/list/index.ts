@@ -10,6 +10,7 @@ export {
     type CreatePositionRequest,
     type UpdatePositionRequest,
     type ViewPositionsRequest,
+    type BatchUpdateStatusRequest,
 } from "./use-positions";
 
 // Position Type exports
