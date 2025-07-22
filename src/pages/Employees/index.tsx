@@ -22,7 +22,7 @@ const Employees = () => {
     const selectedEmployee = useSelector(
         (state: RootState) => state.employeeState.selectedEmployee
     );
-    
+
     const { getByIdView } = useSummaryService();
 
     const menuItems: {
@@ -124,34 +124,35 @@ const Employees = () => {
         // }
     }, [location.pathname, navigate]);
 
-     // Get employee ID from URL params
-     const pathSegments = location.pathname.split("/").filter(Boolean);
-     const employeeIdIndex = pathSegments.findIndex((segment) => segment === "employees") + 1;
-     const employeeId = pathSegments[employeeIdIndex];
+    // Get employee ID from URL params
+    const pathSegments = location.pathname.split("/").filter(Boolean);
+    const employeeIdIndex =
+        pathSegments.findIndex((segment) => segment === "employees") + 1;
+    const employeeId = pathSegments[employeeIdIndex];
 
-     // Removed employee data fetching - using fallback data instead
-     // useEffect(() => {
-     //     const fetchEmployeeData = async () => {
-     //         try {
-     //             const result = await getByIdView({ employeeId: employeeId });
- 
-     //             if (result.data) {
-     //                let userData = {
-     //                    name: `${result.data.data.first_name} ${result.data.data.middle_name[0]}. ${result.data.data.last_name}`,
-     //                    role: result.data.data.position_name,
-     //                    department: result.data.data.team_name,
-     //                };
-     //                setUser(userData);
-     //             }
-     //         } catch (error) {
-     //             console.error("Error fetching employee data:", error);
-     //         }
-     //     };
- 
-     //     if (employeeId) {
-     //         fetchEmployeeData();
-     //     }
-     // }, [employeeId, getByIdView]);
+    // Removed employee data fetching - using fallback data instead
+    // useEffect(() => {
+    //     const fetchEmployeeData = async () => {
+    //         try {
+    //             const result = await getByIdView({ employeeId: employeeId });
+
+    //             if (result.data) {
+    //                let userData = {
+    //                    name: `${result.data.data.first_name} ${result.data.data.middle_name[0]}. ${result.data.data.last_name}`,
+    //                    role: result.data.data.position_name,
+    //                    department: result.data.data.team_name,
+    //                };
+    //                setUser(userData);
+    //             }
+    //         } catch (error) {
+    //             console.error("Error fetching employee data:", error);
+    //         }
+    //     };
+
+    //     if (employeeId) {
+    //         fetchEmployeeData();
+    //     }
+    // }, [employeeId, getByIdView]);
     useEffect(() => {
         const fetchEmployeeData = async () => {
             try {
@@ -161,8 +162,6 @@ const Employees = () => {
                 });
 
                 if (result.data) {
-                    console.log(selectedEmployee);
-
                     let userData = {
                         name: `${result.data.data.first_name} ${result.data.data.middle_name[0]}. ${result.data.data.last_name}`,
                         role: result.data.data.position_name,
