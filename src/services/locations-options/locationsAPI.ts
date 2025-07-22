@@ -12,7 +12,7 @@ interface generalProps {
 export const locationsAPI = createApi({
     reducerPath: "locations",
     baseQuery: fetchBaseQuery({
-        baseUrl: VITE_GEOLOCATION_SERVICE || "http://localhost:3000",
+        baseUrl: VITE_GEOLOCATION_SERVICE || "http://localhost:4175",
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 

@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Cookies from "js-cookie";
 
 // Use the correct backend URL - your backend is running on localhost:4172
-const baseURL = import.meta.env.VITE_EMPLOYMENT_SERVICE || "http://localhost:4172/api/v1";
+const baseURL = import.meta.env.VITE_EMPLOYMENT_SERVICE || "http://localhost:3000/api/v1";
 
 interface generalProps {
     queryParameters: string;

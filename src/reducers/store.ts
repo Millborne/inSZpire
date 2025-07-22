@@ -22,12 +22,16 @@ import { personalDocumentsAPI } from "../services/employee-profile/work/document
 import { positionTypeAPI } from "../services/settings/positions/type/positionTypeAPI";
 import { workSetupAPI } from "../services/settings/work-setup/list/workSetupAPI";
 import { locationsAPI } from "../services/locations-options/locationsAPI";
-import { employeeCreateAPI } from "../services/employee/create/employeeCreateAPI";
+import { religionAPI } from "../services/employee-profile/personal/basic-info/religionAPI"; 
 
 // Slices
-// here
+import employeeReducer from "./employeeSlice";
 
 const rootReducer = combineReducers({
+    // Slices
+    employeeState: employeeReducer,
+
+    // API Reducers
     [teamsAPI.reducerPath]: teamsAPI.reducer,
     [accountsAPI.reducerPath]: accountsAPI.reducer,
     [tagsAPI.reducerPath]: tagsAPI.reducer,
@@ -47,7 +51,7 @@ const rootReducer = combineReducers({
     [positionTypeAPI.reducerPath]: positionTypeAPI.reducer,
     [workSetupAPI.reducerPath]: workSetupAPI.reducer,
     [locationsAPI.reducerPath]: locationsAPI.reducer,
-    [employeeCreateAPI.reducerPath]: employeeCreateAPI.reducer,
+    [religionAPI.reducerPath]: religionAPI.reducer,
 });
 
 const configStore = configureStore({
@@ -73,7 +77,7 @@ const configStore = configureStore({
             positionTypeAPI.middleware,
             workSetupAPI.middleware,
             locationsAPI.middleware,
-            employeeCreateAPI.middleware
+            religionAPI.middleware
         ),
 });
 

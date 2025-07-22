@@ -9,10 +9,10 @@ interface generalProps {
     body?: any;
 }
 
-export const employeeHistoryAPI = createApi({
-    reducerPath: "employeeHistory",
+export const religionAPI = createApi({
+    reducerPath: "religion",
     baseQuery: fetchBaseQuery({
-        baseUrl: VITE_EMPLOYMENT_SERVICE,
+        baseUrl: VITE_EMPLOYMENT_SERVICE || "http://localhost:8000",
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 
@@ -23,15 +23,15 @@ export const employeeHistoryAPI = createApi({
             return headers;
         },
     }),
-    tagTypes: ["employeeHistory"],
+    tagTypes: ["religion"],
     endpoints: (builder) => ({
-        fetchEmployeeHistory: builder.query({
+        fetchReligion: builder.query({
             query: (data: generalProps) =>
-                `api/employee-history${data.queryParameters}`,
+                `/api/v1/religion${data.queryParameters}`,
         }),
-        actionEmployeeHistory: builder.mutation({
+        actionReligion: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/api/employee-history${data.queryParameters}`,
+                url: `/api/v1/religion${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),
@@ -39,7 +39,4 @@ export const employeeHistoryAPI = createApi({
     }),
 });
 
-export const {
-    useFetchEmployeeHistoryQuery,
-    useActionEmployeeHistoryMutation,
-} = employeeHistoryAPI;
+export const { useFetchReligionQuery, useActionReligionMutation } = religionAPI;
