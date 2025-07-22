@@ -1,8 +1,8 @@
 import { Avatar, ConfirmationContent, Modal, TextContent } from "enterprisze-global-components";
 import { InfoCircle } from "iconsax-reactjs";
 import { useState } from "react";
-import BasicInfoPendingModal from "./BasicInfoPendingModal";
 import { addEmployeeData } from "./EmployeeModal";
+import { useCreateEmployeeMutation } from "../../../../services/employee/create";
 import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
 import { useCreateEmployeeMutation } from "../../../../services/employee/create/employeeCreateAPI";
 import { getReligionId } from "../../../../utils/employeeTransformers";
@@ -225,10 +225,11 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                         size: "medium",
                     },
                     {
-                        label: "Proceed",
+                        label: isLoading ? "Creating..." : "Proceed",
                         variant: "primary",
-                        onClick: handlePendingCheck,
+                        onClick: handleProceed,
                         size: "medium",
+                        disabled: isLoading,
                     },
                 ]}
                 content={
@@ -251,12 +252,6 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                         </div>
                     </div>
                 }
-            />
-            <BasicInfoPendingModal
-                isOpen={isBasicInfoPendingModalOpen}
-                onClose={() => setIsBasicInfoPendingModalOpen(false)}
-                onCloseConfirmation={onClose}
-                onSubmitSuccess={onSubmitSuccess}
             />
         </>
     );
