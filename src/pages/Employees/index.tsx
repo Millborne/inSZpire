@@ -83,6 +83,7 @@ const Employees = () => {
         name: string;
         role: string;
         department: string;
+        avatar: string;
     } | null>(null);
 
     const handleMenuSelect = (id: string) => {
@@ -160,11 +161,14 @@ const Employees = () => {
                     employeeId: selectedEmployee.employee_ID,
                 });
 
+                console.log(result.data);
+                
                 if (result.data) {
                     let userData = {
                         name: `${result.data.data.first_name} ${result.data.data.middle_name[0]}. ${result.data.data.last_name}`,
                         role: result.data.data.position_name,
                         department: result.data.data.team_name,
+                        avatar: result.data.data.profile_image,
                     };
                     setUser(userData);
                 }

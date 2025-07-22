@@ -8,11 +8,13 @@ import {
     Dropdown,
     Inputs,
     Modal,
+    SnackbarAlert,
 } from "enterprisze-global-components";
 import {
     useBasicInfoService,
     UpdateBasicInfoRequest,
     BasicInfoData,
+    useReligionService,
 } from "../../../../services/employee-profile/personal/basic-info/use-basic-info";
 import { useLocationsService } from "../../../../services/locations-options/use-locations";
 // import BasicInfoConfirmationModal from "./BasicInfoConfirmationModal";
@@ -67,7 +69,11 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
     employeeId,
     currentData,
 }) => {
-    const [_showSnackbar, setShowSnackbar] = useState(false);
+    const [showSnackbar, setShowSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [snackbarType, setSnackbarType] = useState<"success" | "error">(
+        "success"
+    );
     const {
         updateBasicInfo,
         getById,
@@ -78,6 +84,8 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
         actionError,
         actionReset,
     } = useBasicInfoService();
+
+    const { getReligionData } = useReligionService();
 
     const { getRegionStates, getProvinces, getMunicipalities, getBarangays } =
         useLocationsService();
@@ -92,6 +100,12 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
         presentMunicipalities: [] as Array<{ value: string; label: string }>,
         presentBarangays: [] as Array<{ value: string; label: string }>,
     });
+
+    // Religion data state
+    const [religionData, setReligionData] = useState<
+        Array<{ value: string; label: string }>
+    >([]);
+    const [religionLoading, setReligionLoading] = useState(false);
 
     // Loading states for location data
     const [locationLoading, setLocationLoading] = useState({
@@ -113,6 +127,7 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
         contactNumber: "",
         placeOfBirth: "",
         religion: "",
+        religion_ID: "",
         sex: "",
         civilStatus: "",
         gender: "",
@@ -167,6 +182,23 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
         return options.find((option) => option.value === value);
     };
 
+    // Fetch religion data
+    const fetchReligionData = async () => {
+        setReligionLoading(true);
+        try {
+            setReligionData(
+                getReligionData.religions.map((religion: any) => ({
+                    value: religion.religion_ID,
+                    label: religion.name,
+                }))
+            );
+        } catch (error) {
+            console.error("Error fetching religion data:", error);
+        } finally {
+            setReligionLoading(false);
+        }
+    };
+
     // Fetch current data when modal opens
     useEffect(() => {
         const fetchCurrentData = async () => {
@@ -176,7 +208,10 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
                     const result = await getById({ employeeId });
                     const result2 = await getByIdView({ employeeId });
                     if (result.data && result2.data) {
-                        setFetchedData({...result.data.data, getByIdView: result2.data.data});
+                        setFetchedData({
+                            ...result.data.data,
+                            getByIdView: result2.data.data,
+                        });
                         // Initialize form data with fetched data
                         const data = result.data.data;
                         const profile = data.profile || {};
@@ -200,6 +235,7 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
                             contactNumber: profile.mobile_number || "",
                             placeOfBirth: profile.birth_address || "",
                             religion: result2.data.data.religion || "",
+                            religion_ID: profile.religion_ID || "",
                             sex: profile.gender || "",
                             civilStatus: profile.marital_status || "",
                             gender: profile.gender || "",
@@ -281,7 +317,8 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
         };
 
         fetchCurrentData();
-    }, [isOpen, employeeId]);
+        fetchReligionData();
+    }, [isOpen, employeeId, getReligionData]);
 
     // Initialize form data when modal opens or currentData changes (fallback)
     useEffect(() => {
@@ -294,6 +331,7 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
                 contactNumber: currentData.mobile_number || "",
                 placeOfBirth: currentData.birth_address || "",
                 religion: currentData.religion || "",
+                religion_ID: currentData.religion_ID || "",
                 sex: currentData.gender || "",
                 civilStatus: currentData.marital_status || "",
                 gender: currentData.gender || "",
@@ -633,8 +671,6 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
         }
     };
 
-    console.log(formData);
-
     const handleSubmit = async () => {
         if (!employeeId) {
             console.error("Employee ID is required");
@@ -642,6 +678,14 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
         }
 
         try {
+            // Find permanent and present addresses from fetched data
+            const permanentAddress = fetchedData?.addresses?.find(
+                (addr) => addr.address_type_ID === 1
+            );
+            const presentAddress = fetchedData?.addresses?.find(
+                (addr) => addr.address_type_ID !== 1
+            );
+
             const updateData: any = {
                 employee_ID: employeeId,
                 profile: {
@@ -658,62 +702,63 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
                     marital_status: formData.civilStatus,
                     blood_type: formData.bloodType,
                     mobile_number: formData.contactNumber,
+                    religion_ID: formData.religion_ID,
                 },
-                addresses:
-                    fetchedData?.addresses?.map((addr) => {
-                        const baseAddress = {
-                            ...addr,
-                            address_line_2: addr.address_line_2 || null, // Convert undefined to null
-                            is_archived: addr.is_archived as 0 | 1, // Ensure correct type
-                        };
-
-                        if (addr.address_type_ID === 1) {
-                            // Permanent address
-                            return {
-                                ...baseAddress,
-                                address_line_1: formData.permanentStreet,
-                                postal_code: formData.permanentPostalCode,
-                                region_state_ID: formData.permanentRegion
-                                    ? parseInt(formData.permanentRegion)
-                                    : null,
-                                province_ID: formData.permanentProvince
-                                    ? parseInt(formData.permanentProvince)
-                                    : null,
-                                city_municipality_ID: formData.permanentCity
-                                    ? parseInt(formData.permanentCity)
-                                    : null,
-                                barangay_ID: formData.permanentBarangay
-                                    ? parseInt(formData.permanentBarangay)
-                                    : null,
-                            };
-                        } else if (addr.address_type_ID !== 1) {
-                            // Present address (using the updated logic from your changes)
-                            return {
-                                ...baseAddress,
-                                address_line_1: formData.presentStreet,
-                                postal_code: formData.presentPostalCode,
-                                region_state_ID: formData.presentRegion
-                                    ? parseInt(formData.presentRegion)
-                                    : null,
-                                province_ID: formData.presentProvince
-                                    ? parseInt(formData.presentProvince)
-                                    : null,
-                                city_municipality_ID: formData.presentCity
-                                    ? parseInt(formData.presentCity)
-                                    : null,
-                                barangay_ID: formData.presentBarangay
-                                    ? parseInt(formData.presentBarangay)
-                                    : null,
-                            };
-                        }
-                        return baseAddress;
-                    }) || [],
+                permanent_address: permanentAddress
+                    ? {
+                          address_ID: permanentAddress.address_ID,
+                          address_line_1: formData.permanentStreet,
+                          address_line_2:
+                              permanentAddress.address_line_2 || null,
+                          country_ID: permanentAddress.country_ID,
+                          region_state_ID: formData.permanentRegion
+                              ? parseInt(formData.permanentRegion)
+                              : null,
+                          province_ID: formData.permanentProvince
+                              ? parseInt(formData.permanentProvince)
+                              : null,
+                          city_municipality_ID: formData.permanentCity
+                              ? parseInt(formData.permanentCity)
+                              : null,
+                          barangay_ID: formData.permanentBarangay
+                              ? parseInt(formData.permanentBarangay)
+                              : null,
+                          postal_code: formData.permanentPostalCode,
+                          service_identifier:
+                              permanentAddress.service_identifier,
+                          address_type_ID: permanentAddress.address_type_ID,
+                          record_ID: permanentAddress.record_ID,
+                          entity: permanentAddress.entity,
+                          is_archived: permanentAddress.is_archived as 0 | 1,
+                      }
+                    : null,
+                present_address: presentAddress
+                    ? {
+                          address_ID: presentAddress.address_ID,
+                          address_line_1: formData.presentStreet,
+                          address_line_2: presentAddress.address_line_2 || null,
+                          country_ID: presentAddress.country_ID,
+                          region_state_ID: formData.presentRegion
+                              ? parseInt(formData.presentRegion)
+                              : null,
+                          province_ID: formData.presentProvince
+                              ? parseInt(formData.presentProvince)
+                              : null,
+                          city_municipality_ID: formData.presentCity
+                              ? parseInt(formData.presentCity)
+                              : null,
+                          barangay_ID: formData.presentBarangay
+                              ? parseInt(formData.presentBarangay)
+                              : null,
+                          postal_code: formData.presentPostalCode,
+                          service_identifier: presentAddress.service_identifier,
+                          address_type_ID: presentAddress.address_type_ID,
+                          record_ID: presentAddress.record_ID,
+                          entity: presentAddress.entity,
+                          is_archived: presentAddress.is_archived as 0 | 1,
+                      }
+                    : null,
             };
-
-            console.log({
-                employee_ID: employeeId,
-                ...updateData,
-            });
 
             const result = await updateBasicInfo({
                 employee_ID: employeeId,
@@ -729,6 +774,19 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
                     onSubmitSuccess();
                 }
 
+                // Hide snackbar after 3 seconds
+                setTimeout(() => {
+                    setShowSnackbar(false);
+                }, 3000);
+            } else {
+                setSnackbarMessage(
+                    "error" in result
+                        ? (result.error as any).data?.error ||
+                              "An error occurred"
+                        : "An error occurred"
+                );
+                setShowSnackbar(true);
+                setSnackbarType("error");
                 // Hide snackbar after 3 seconds
                 setTimeout(() => {
                     setShowSnackbar(false);
@@ -883,17 +941,25 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
                                 </h6>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-                                <Inputs
+                                <Dropdown
                                     label="RELIGION"
-                                    placeholder="Roman Catholic"
-                                    value={formData.religion}
-                                    onChange={(e) =>
-                                        handleInputChange(
-                                            "religion",
-                                            e.target.value
+                                    placeholder={
+                                        religionLoading
+                                            ? "Loading..."
+                                            : "Select Religion"
+                                    }
+                                    options={religionData}
+                                    value={findOptionByValue(
+                                        religionData,
+                                        formData.religion_ID
+                                    )}
+                                    onSelectionChange={(value) =>
+                                        handleDropdownChange(
+                                            "religion_ID",
+                                            value
                                         )
                                     }
-                                    disabled={isLoadingData}
+                                    disabled={isLoadingData || religionLoading}
                                 />
                                 <Inputs
                                     label="SEX"
@@ -1245,6 +1311,13 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
                         </div>
                     </div>
                 }
+            />
+
+            <SnackbarAlert
+                isOpen={showSnackbar}
+                onClose={() => setShowSnackbar(false)}
+                message={snackbarMessage}
+                type={snackbarType}
             />
         </>
     );
