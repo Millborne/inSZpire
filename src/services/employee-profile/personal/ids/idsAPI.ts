@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Cookies from "js-cookie";
 
-const { VITE_EMPLOYMENT_SERVICE } = import.meta.env;
+const baseURL =
+  import.meta.env.VITE_EMPLOYMENT_SERVICE || "http://localhost:4172/api/v1";
 
 interface generalProps {
   queryParameters: string;
@@ -19,10 +20,9 @@ interface EmployeeIdentifiersRequest {
 export const idsAPI = createApi({
   reducerPath: "ids",
   baseQuery: fetchBaseQuery({
-    baseUrl: VITE_EMPLOYMENT_SERVICE,
+    baseUrl: baseURL,
     prepareHeaders: (headers) => {
       const token = Cookies.get("token");
-
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }

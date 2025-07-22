@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../reducers/store";
 import {
   Table,
   HeaderType,
@@ -27,10 +30,8 @@ const headers: HeaderType[] = [
   { type: "string", header: "Validity", accessor: "validity" },
 ];
 
-// Temporary employee ID as specified
-const TEMP_EMPLOYEE_ID = "c966375f379749e19dff326f97dbc9a2";
-
 const ID = () => {
+  const { id: employeeId } = useParams(); // Get employee ID from URL parameters
   const idsService = useIdsService();
   const {
     data: ids,
@@ -38,7 +39,7 @@ const ID = () => {
     isError,
     error,
     refetch,
-  } = useEmployeeIdentifiers(TEMP_EMPLOYEE_ID);
+  } = useEmployeeIdentifiers(employeeId || "");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "view" | "edit">("add");
@@ -48,19 +49,11 @@ const ID = () => {
     "success" | "error" | "warning" | "info"
   >("success");
 
-  // Extract old_employee_number from the first identifier (since each employee has only one)
-  const getEmployeeIDData = () => {
-    if (!ids || ids.length === 0) {
-      return [{ employeeId: "No data available" }];
-    }
-
-    // Get the old_employee_number from the first identifier
-    const firstIdentifier = ids[0];
-    const oldEmployeeNumber =
-      firstIdentifier.old_employee_number || "Not available";
-
-    return [{ employeeId: oldEmployeeNumber }];
-  };
+  // Get selected employee from Redux store
+  const selectedEmployee = useSelector(
+    (state: RootState) => state.employeeState.selectedEmployee
+  );
+  console.log("selectedEmployee", selectedEmployee);
 
   // Transform API data to table format
   const transformIdsToTableData = (ids: EmployeeIdentifier[]) => {
@@ -116,6 +109,42 @@ const ID = () => {
     }
   }, [isError, error]);
 
+  // Get employee ID data with fallback logic
+  const getEmployeeIDData = () => {
+    if (!selectedEmployee) {
+      return [{ employeeId: "No employee data available" }];
+    }
+
+    // Use employee_number if available, otherwise fall back to old_employee_number
+    const employeeNumber =
+      selectedEmployee.employee_number ||
+      selectedEmployee.old_employee_number ||
+      "Not available";
+
+    return [{ employeeId: employeeNumber }];
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg">Loading ID data...</div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg text-red-600">
+          Error loading ID data:{" "}
+          {error && "message" in error ? error.message : "Unknown error"}
+        </div>
+      </div>
+    );
+  }
+
   const tableData = transformIdsToTableData(ids || []);
   const employeeIDData = getEmployeeIDData();
 
@@ -162,7 +191,7 @@ const ID = () => {
         onSubmitSuccess={handleSubmitSuccess}
         mode={modalMode}
         selectedID={selectedID}
-        employeeId={TEMP_EMPLOYEE_ID}
+        employeeId={employeeId || ""}
       />
 
       <SnackbarAlert
