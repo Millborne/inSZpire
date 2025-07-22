@@ -19,4 +19,4 @@ export {
     usePositionTypes,
     usePositionTypeService,
     type PositionTypeData,
-} from "../type/use-position-type";
+} from "./use-position-type";
