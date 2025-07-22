@@ -8,6 +8,7 @@ import {
     PopoverMenu, 
     SnackbarAlert
 } from "enterprisze-global-components";
+import EmployeeModal from "../components/modals/EmployeeModal";
 import { 
     SearchNormal, 
     Edit2, 
@@ -32,6 +33,7 @@ const EmployeeList = () => {
     const [error, setError] = useState<string | null>(null);
     const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState(false);
 
     // Search and filter state
     const [searchTerm, setSearchTerm] = useState("");
@@ -40,6 +42,8 @@ const EmployeeList = () => {
         offset: 0,
         limit: 10
     });
+    
+
 
     // Pagination state
     const [pagination, setPagination] = useState({
@@ -49,69 +53,70 @@ const EmployeeList = () => {
         hasMore: false
     });
 
+    // Load employees function
+    const loadData = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+
+            // Load employees using vw_employee view
+            console.log("Sending request with filters:", filters);
+            const employeesResponse = await employeeService.listEmployees(filters);
+            console.log("Employees response:", employeesResponse);
+
+            // Handle different response structures
+            if (employeesResponse.data?.success && employeesResponse.data?.data?.employees) {
+                // Response structure: { success: true, data: { employees: [...], pagination: {...} } }
+                const responseData = employeesResponse.data.data;
+                setEmployees(responseData.employees || []);
+                setPagination(responseData.pagination || {
+                    total: 0,
+                    offset: 0,
+                    limit: 10,
+                    hasMore: false
+                });
+            } else if (employeesResponse.data?.success && employeesResponse.data?.employees) {
+                // Direct response structure: { success: true, employees: [...], pagination: {...} }
+                const responseData = employeesResponse.data;
+                setEmployees(responseData.employees || []);
+                setPagination(responseData.pagination || {
+                    total: 0,
+                    offset: 0,
+                    limit: 10,
+                    hasMore: false
+                });
+            } else {
+                console.error("No employee data received - response structure:", employeesResponse.data);
+                setEmployees([]);
+                setPagination({
+                    total: 0,
+                    offset: 0,
+                    limit: 10,
+                    hasMore: false
+                });
+            }
+
+        } catch (err) {
+            console.error("Error loading data:", err);
+            
+            // Check if it's a CORS error
+            if (err && typeof err === 'object' && 'status' in err) {
+                const error = err as any;
+                if (error.status === 'FETCH_ERROR' || error.status === 'CORS_ERROR') {
+                    setError("CORS Error: Backend needs to allow requests from frontend. Please check backend CORS configuration.");
+                } else {
+                    setError(`Failed to load employees. Status: ${error.status}`);
+                }
+            } else {
+                setError("Failed to load employees. Please try again.");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     // Load employees on component mount
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                setIsLoading(true);
-                setError(null);
-
-                // Load employees using vw_employee view
-                console.log("Sending request with filters:", filters);
-                const employeesResponse = await employeeService.listEmployees(filters);
-                console.log("Employees response:", employeesResponse);
-
-                // Handle different response structures
-                if (employeesResponse.data?.success && employeesResponse.data?.data?.employees) {
-                    // Response structure: { success: true, data: { employees: [...], pagination: {...} } }
-                    const responseData = employeesResponse.data.data;
-                    setEmployees(responseData.employees || []);
-                    setPagination(responseData.pagination || {
-                        total: 0,
-                        offset: 0,
-                        limit: 10,
-                        hasMore: false
-                    });
-                } else if (employeesResponse.data?.success && employeesResponse.data?.employees) {
-                    // Direct response structure: { success: true, employees: [...], pagination: {...} }
-                    const responseData = employeesResponse.data;
-                    setEmployees(responseData.employees || []);
-                    setPagination(responseData.pagination || {
-                        total: 0,
-                        offset: 0,
-                        limit: 10,
-                        hasMore: false
-                    });
-                } else {
-                    console.error("No employee data received - response structure:", employeesResponse.data);
-                    setEmployees([]);
-                    setPagination({
-                        total: 0,
-                        offset: 0,
-                        limit: 10,
-                        hasMore: false
-                    });
-                }
-
-            } catch (err) {
-                console.error("Error loading data:", err);
-                
-                // Check if it's a CORS error
-                if (err && typeof err === 'object' && 'status' in err) {
-                    const error = err as any;
-                    if (error.status === 'FETCH_ERROR' || error.status === 'CORS_ERROR') {
-                        setError("CORS Error: Backend needs to allow requests from frontend. Please check backend CORS configuration.");
-                    } else {
-                        setError(`Failed to load employees. Status: ${error.status}`);
-                    }
-                } else {
-                    setError("Failed to load employees. Please try again.");
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         loadData();
     }, [filters]);
 
@@ -137,6 +142,8 @@ const EmployeeList = () => {
         }));
     };
 
+
+
     // Get employee full name
     const getEmployeeFullName = (employee: EmployeeData) => {
         const parts = [
@@ -154,11 +161,11 @@ const EmployeeList = () => {
             case "Active":
                 return "bg-green-500";
             case "On Leave":
-                return "bg-gray-500";
-            case "Suspended":
                 return "bg-blue-500";
-            case "AWOL":
+            case "Suspended":
                 return "bg-orange-500";
+            case "AWOL":
+                return "bg-yellow-500";
             case "Terminated":
                 return "bg-red-500";
             default:
@@ -219,10 +226,7 @@ const EmployeeList = () => {
                                 label="Add Employee"
                                 variant="primary"
                                 size="medium"
-                                onClick={() => {
-                                    setSnackbarMessage("Add employee functionality coming soon");
-                                    setShowSuccessSnackbar(true);
-                                }}
+                                onClick={() => setIsAddEmployeeModalOpen(true)}
                             />
                         </div>
 
@@ -330,6 +334,20 @@ const EmployeeList = () => {
                 type="success"
                 title={snackbarMessage}
                 animation="slide-up"
+            />
+
+            {/* Add Employee Modal */}
+            <EmployeeModal
+                isOpen={isAddEmployeeModalOpen}
+                onClose={() => setIsAddEmployeeModalOpen(false)}
+                mode="add"
+                onSubmitSuccess={() => {
+                    setIsAddEmployeeModalOpen(false);
+                    setSnackbarMessage("Employee added successfully!");
+                    setShowSuccessSnackbar(true);
+                    // Refresh the employee list
+                    loadData();
+                }}
             />
         </>
     );
