@@ -160,8 +160,6 @@ const Employees = () => {
                 const result = await getByIdView({
                     employeeId: selectedEmployee.employee_ID,
                 });
-
-                console.log(result.data);
                 
                 if (result.data) {
                     let userData = {
