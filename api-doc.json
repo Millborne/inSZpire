@@ -1,0 +1,94 @@
+{
+    "basePath": "/family",
+    "endpoints": [
+      {
+        "path": "/create",
+        "method": "POST",
+        "description": "Create a new family or emergency contact.",
+        "requestBody": {
+          "profile_ID": "string (required)",
+          "first_name": "string (required)",
+          "last_name": "string (required)",
+          "middle_name": "string (optional)",
+          "name_ext": "string (optional)",
+          "relation": "string (required)",
+          "date_of_birth": "string (optional, ISO date)",
+          "contact_number": "string (optional)",
+          "email": "string (optional)",
+          "address": "string (optional)",
+          "is_emergency_contact": "number (0 or 1, required)",
+          "is_family_contact": "number (0 or 1, required)",
+          "user_type": "string (optional)"
+        },
+        "responses": {
+          "201": { "success": true, "message": "Family/Emergency Contact created", "profile_family_ID": "string" },
+          "409": { "success": false, "message": "Duplicate family contact exists." },
+          "500": { "success": false, "message": "Error while inserting Family/Emergency Contact" }
+        }
+      },
+      {
+        "path": "/getFamilyContacts",
+        "method": "POST",
+        "description": "Get a list of family or emergency contacts with optional filters and pagination.",
+        "requestBody": {
+          "search": "string (optional)",
+          "is_emergency_contact": "number (optional, 0 or 1)",
+          "is_approved": "number (optional, 0 or 1)",
+          "profile_ID": "string (optional)",
+          "profile_family_ID": "string or array of strings (optional)",
+          "offset": "number (optional)",
+          "limit": "number (optional)"
+        },
+        "responses": {
+          "200": { "contacts": "array", "total": "number" },
+          "500": { "success": false, "message": "Error while fetching User Family/Emergency Contact" }
+        }
+      },
+      {
+        "path": "/updateFamilyContact",
+        "method": "PUT",
+        "description": "Update an existing family or emergency contact.",
+        "requestBody": {
+          "profile_family_ID": "string (required)",
+          "...fieldsToUpdate": "any updatable fields from create"
+        },
+        "responses": {
+          "200": { "success": true, "message": "Successfully updated User Family/Emergency Contact" },
+          "400": { "success": false, "message": "profile_family_ID is required or At least one field to update is required" },
+          "404": { "success": false, "message": "Family/Emergency Contact not found" },
+          "409": { "success": false, "message": "Update would create a duplicate family contact." },
+          "500": { "success": false, "message": "Error while updating Family/Emergency Contact" }
+        }
+      },
+      {
+        "path": "/deleteFamilyContact",
+        "method": "DELETE",
+        "description": "Delete a family or emergency contact.",
+        "requestBody": {
+          "profile_family_ID": "string (required)"
+        },
+        "responses": {
+          "200": { "success": true, "message": "Successfully deleted User Family/Emergency Contact" },
+          "400": { "success": false, "message": "profile_family_ID is required" },
+          "500": { "success": false, "message": "Error while deleting User Family/Emergency Contact" }
+        }
+      },
+      {
+        "path": "/getInformationUpdateRequests",
+        "method": "POST",
+        "description": "Get information update requests for family contacts.",
+        "requestBody": {
+          "search": "string (optional)",
+          "type": "string (optional)",
+          "action": "string (optional)",
+          "status": "string (optional)",
+          "offset": "number (optional)",
+          "limit": "number (optional)"
+        },
+        "responses": {
+          "200": { "requests": "array", "total": "number" },
+          "500": { "success": false, "message": "Error while fetching User Information Update Request" }
+        }
+      }
+    ]
+  } 

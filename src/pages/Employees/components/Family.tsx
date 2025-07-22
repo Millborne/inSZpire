@@ -1,56 +1,82 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ButtonsIcon, PurpleTaggedCard, SnackbarAlert, TextContent } from "enterprisze-global-components";
 import { Edit2 } from "iconsax-react";
 import FamilyModal from "./modals/FamilyModal";
+import { useFamilyService } from "../../../services/employee-profile/personal/family/use-family";
 
-const familyMembersData = [
-    {
-        id: 1,
-        relationship: "Mother",
-        lastName: "Abrams",
-        firstName: "Gracia",
-        middleName: "Ridgley",
-        extension: "I",
-        contactNumber: "0955-021-1889",
-        email: "graciathefirst@gmail.com",
-        address: {
-            country: "Philippines",
-            region: "Region X",
-            province: "Misamis Oriental",
-            cityMunicipality: "City of Cagayan de Oro",
-            barangay: "Brgy. 26",
-            streetHouseNoLot: "Blk 5 Lot 3, Villa Luz Subdivision",
-            postalCode: "9000",
-        },
-    },
-    {
-        id: 2,
-        relationship: "Father",
-        lastName: "dfdfdfdfdf",
-        firstName: "dfdfdfdfdfdf",
-        middleName: "Ridgley",
-        extension: "I",
-        contactNumber: "0955-021-1889",
-        email: "graciathefirst@gmail.com",
-        address: {
-            country: "Philippines",
-            region: "Region X",
-            province: "Misamis Oriental",
-            cityMunicipality: "City of Cagayan de Oro",
-            barangay: "Brgy. 26",
-            streetHouseNoLot: "Blk 5 Lot 3, Villa Luz Subdivision",
-            postalCode: "9000",
-        },
-    },
-];
+const PROFILE_ID = "11111111-0000-0000-0000-000000000002";
 
 const Family = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [snackbarType, setSnackbarType] = useState< "error" | "success" | "warning" | "info" | undefined>("success");
+    const [familyMembers, setFamilyMembers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<String | null>(null);
 
-    const handleSubmitSuccess = () => {
+    const familyService = useFamilyService();
+
+    // Fetch family data
+    const fetchFamily = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const result = await familyService.viewFamily({ profile_ID: PROFILE_ID });
+            console.log("family data", result.data.contacts)
+            if (result.data?.contacts) {
+                setFamilyMembers(result.data.contacts);
+                console.log(familyMembers)
+            } else {
+                setFamilyMembers([]);
+            }
+        } catch (err) {
+            setError("Failed to fetch family members");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchFamily();
+        // eslint-disable-next-line
+    }, []);
+
+    const handleSubmitSuccess = (message = "Successfully updated Family") => {
+        setSnackbarMessage(message);
+        setSnackbarType("success");
+        setIsSnackbarOpen(true);
+        fetchFamily();
+    };
+
+    const handleError = (message = "An error occurred") => {
+        setSnackbarMessage(message);
+        setSnackbarType("error");
         setIsSnackbarOpen(true);
     };
+
+    // Map API data to UI data structure
+    const mapFamilyData = (member:any) => ({
+        id: member.profile_family_ID,
+        relationship: member.relation,
+        lastName: member.last_name,
+        firstName: member.first_name,
+        middleName: member.middle_name,
+        extension: member.name_ext,
+        contactNumber: member.contact_number,
+        email: member.email || "",
+        isFamily: member.is_family_contact,
+        textAddress: member.address || "",
+        address: {
+            country: "Philippines", // fallback, or parse from address if structured
+            region: "",
+            province: "",
+            cityMunicipality: "",
+            barangay: "",
+            streetHouseNoLot: "",
+            postalCode: "",
+        },
+    });
 
     return (
         <div className="flex flex-col w-full">
@@ -60,28 +86,39 @@ const Family = () => {
                     <ButtonsIcon icon={<Edit2 variant="Linear" />} variant="secondary" size="small" onClick={() => setIsModalOpen(true)} />
                 </div>
                 <div className="flex flex-col gap-[24px]">
-                    {familyMembersData.map((member, index) => {
-                        const address = `${member.address.streetHouseNoLot}, ${member.address.barangay}, ${member.address.cityMunicipality}, ${member.address.province}, ${member.address.region}, ${member.address.postalCode}, ${member.address.country}`;
-                        return (
-                            <PurpleTaggedCard key={index} label={member.relationship}>
-                                <div className="flex flex-col gap-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-3">
-                                        <TextContent header="last name" text={member.lastName} />
-                                        <TextContent header="first name" text={member.firstName} />
-                                        <TextContent header="middle name" text={member.middleName} />
+                    {loading ? (
+                        <div>Loading...</div>
+                    ) : error ? (
+                        <div className="text-red-500">{error}</div>
+                    ) : familyMembers.length === 0 ? (
+                        <div>No family records found.</div>
+                    ) : (
+                        familyMembers
+                        .filter(member => (member.is_family_contact === 1))
+                        .map((member, index) => {
+                            const mapped = mapFamilyData(member);
+                            const address = mapped.textAddress;
+                            return (
+                                <PurpleTaggedCard key={mapped.id || index} label={mapped.relationship}>
+                                    <div className="flex flex-col gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-3">
+                                            <TextContent header="last name" text={mapped.lastName} />
+                                            <TextContent header="first name" text={mapped.firstName} />
+                                            <TextContent header="middle name" text={mapped.middleName} />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-3">
+                                            <TextContent header="extension" text={mapped.extension} />
+                                            <TextContent header="contact number" text={mapped.contactNumber} />
+                                            <TextContent header="email" text={mapped.email} />
+                                        </div>
+                                        <div className="flex flex-col lg:flex-row justify-between items-end gap-4">
+                                            <TextContent header="address" text={address} />
+                                        </div>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-3">
-                                        <TextContent header="extension" text={member.extension} />
-                                        <TextContent header="contact number" text={member.contactNumber} />
-                                        <TextContent header="email" text={member.email} />
-                                    </div>
-                                    <div className="flex flex-col lg:flex-row justify-between items-end gap-4">
-                                        <TextContent header="address" text={address} />
-                                    </div>
-                                </div>
-                            </PurpleTaggedCard>
-                        );
-                    })}
+                                </PurpleTaggedCard>
+                            );
+                        })
+                    )}
                 </div>
             </div>
 
@@ -89,16 +126,19 @@ const Family = () => {
             <FamilyModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                familyMembersData={familyMembersData}
+                familyMembersData={familyMembers}
                 onSubmitSuccess={handleSubmitSuccess}
+                onError={handleError}
+                familyService={familyService}
+                profileId={PROFILE_ID}
             />
 
             <SnackbarAlert
                 isOpen={isSnackbarOpen}
                 onClose={() => setIsSnackbarOpen(false)}
                 showCloseButton={true}
-                type="success"
-                title="Successfully updated Family"
+                type={snackbarType}
+                title={snackbarMessage}
                 animation="slide-up"
             />
         </div>
