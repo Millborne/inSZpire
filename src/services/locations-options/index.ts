@@ -1,21 +1,21 @@
 export {
     locationsAPI,
     useFetchCountriesQuery,
-    // useFetchRegionStatesQuery,
-    // useFetchProvincesQuery,
-    // useFetchMunicipalitiesQuery,
-    // useFetchBarangaysQuery,
+    useFetchRegionStatesQuery,
+    useFetchProvincesQuery,
+    useFetchMunicipalitiesQuery,
+    useFetchBarangaysQuery,
     useActionLocationsMutation,
-} from "./locationsAPI";
+} from "./list/locationsAPI";
 
 export {
     useLocations,
     useLocationsService,
-    // useCountries,
-    // useRegionStates,
-    // useProvinces,
-    // useMunicipalities,
-    // useBarangays,
+    useCountries,
+    useRegionStates,
+    useProvinces,
+    useMunicipalities,
+    useBarangays,
     type Country,
     type RegionState,
     type Province,
