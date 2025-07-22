@@ -122,6 +122,11 @@ export interface DeleteEducationRequest {
     user_type: string;
 }
 
+export interface BatchUpdateStatusRequest {
+    educ_IDs: string[];
+    status: string;
+}
+
 // Specific education service methods based on API documentation
 export const useEducationService = () => {
     const [

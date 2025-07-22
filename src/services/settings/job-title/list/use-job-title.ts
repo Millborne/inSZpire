@@ -99,6 +99,11 @@ export interface GetJobTitleRequest {
     job_ID: string;
 }
 
+export interface BatchUpdateStatusRequest {
+    job_IDs: string[];
+    status: string;
+}
+
 // Specific job title service methods based on API documentation
 export const useJobTitleService = () => {
     const [

@@ -88,6 +88,11 @@ export interface GetTagsByTypeRequest {
     tag_type: string;
 }
 
+export interface BatchUpdateStatusRequest {
+    tag_IDs: string[];
+    status: string;
+}
+
 // Specific tag service methods based on API documentation (using position endpoints)
 export const useTagService = () => {
     const [

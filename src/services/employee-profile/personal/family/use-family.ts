@@ -117,6 +117,11 @@ export interface InformationUpdateRequest {
     profile_ID?: string;
 }
 
+export interface BatchUpdateStatusRequest {
+    profile_family_IDs: string[];
+    status: string;
+}
+
 // Specific family service methods based on API documentation
 export const useFamilyService = () => {
     const [

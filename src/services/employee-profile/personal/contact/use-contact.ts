@@ -117,6 +117,11 @@ export interface InformationUpdateRequest {
     profile_ID?: string;
 }
 
+export interface BatchUpdateStatusRequest {
+    profile_family_IDs: string[];
+    status: string;
+}
+
 // Specific contact service methods based on API documentation (using family endpoints)
 export const useContactService = () => {
     const [

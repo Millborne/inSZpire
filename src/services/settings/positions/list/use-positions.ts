@@ -146,6 +146,11 @@ export interface GetTagsByTypeRequest {
     tag_type: string;
 }
 
+export interface BatchUpdateStatusRequest {
+    position_IDs: string[];
+    status: string;
+}
+
 // Specific position service methods based on API documentation
 export const usePositionService = () => {
     const [
