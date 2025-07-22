@@ -12,7 +12,7 @@ interface generalProps {
 export const basicInfoAPI = createApi({
     reducerPath: "basicInfo",
     baseQuery: fetchBaseQuery({
-        baseUrl: VITE_EMPLOYMENT_SERVICE,
+        baseUrl: VITE_EMPLOYMENT_SERVICE || "http://localhost:3000",
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 

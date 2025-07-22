@@ -53,6 +53,7 @@ const BasicInfo = () => {
             created_at: string;
             updated_at: string;
         }>;
+        getByIdView?: any;
     } | null>(null);
 
     // Location data state for enhanced address display
@@ -69,8 +70,9 @@ const BasicInfo = () => {
     const fetchBasicInfoData = async () => {
         try {
             const result = await getById({ employeeId: employeeId });
-            if (result.data) {
-                setBasicInfoData(result.data.data);
+            const result2 = await getByIdView({ employeeId: employeeId });
+            if (result.data && result2.data) {
+                setBasicInfoData({...result.data.data, getByIdView: result2.data.data});
             }
         } catch (error) {
             console.error("Error fetching basic info data:", error);
@@ -319,7 +321,7 @@ const BasicInfo = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
                     <TextContent
                         header="religion"
-                        text={basicInfoData.profile.religion_ID || "N/A"}
+                        text={basicInfoData.getByIdView.religion || "N/A"}
                     />
                     <TextContent
                         header="sex"

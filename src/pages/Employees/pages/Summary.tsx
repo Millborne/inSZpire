@@ -13,11 +13,13 @@ import {
     Rank,
 } from "iconsax-react";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import {
     useSummary,
     useSummaryService,
 } from "../../../services/employee-profile/summary/use-summary";
 import { ProfileSummaryData } from "../../../services/employee-profile/summary/use-summary";
+import { RootState } from "../../../reducers/store";
 
 const Summary = () => {
     const { getByIdView, actionIsLoading, actionIsError, actionError } =
@@ -28,23 +30,32 @@ const Summary = () => {
         null
     );
 
-    const [employeeAllData, setEmployeeAllData] = useState<any | null>(
-        null
+    const [employeeAllData, setEmployeeAllData] = useState<any | null>(null);
+
+    // Employee RTK State
+    const selectedEmployee = useSelector(
+        (state: RootState) => state.employeeState.selectedEmployee
     );
 
+    // Console log employee state
+    // console.log("=== Employee RTK State ===");
+    // console.log("selectedEmployee:", selectedEmployee);
+    // console.log("==========================");
 
     // Get employee ID from URL params or props - you may need to adjust this based on your routing setup
-    const employeeId = "6dd74bcf8f9946739abaaed997aaef71"; // This should come from your route params or props
+    // const employeeId = "6dd74bcf8f9946739abaaed997aaef71"; // This should come from your route params or props
 
     useEffect(() => {
         const fetchEmployeeData = async () => {
             try {
-                const result = await getByIdView({ employeeId: employeeId });
+                const result = await getByIdView({
+                    employeeId: selectedEmployee?.employee_ID || "",
+                });
                 const result2 = await useSummaryData.generalAction({
                     queryParameters: "/get-by-id",
                     method: "POST",
                     body: {
-                        employeeId: employeeId,
+                        employeeId: selectedEmployee?.employee_ID || "",
                     },
                 });
 
@@ -52,7 +63,7 @@ const Summary = () => {
                     setEmployeeData(result.data.data);
                 }
 
-                if(result2.data) {
+                if (result2.data) {
                     setEmployeeAllData(result2.data.data);
                 }
             } catch (error) {
@@ -60,10 +71,10 @@ const Summary = () => {
             }
         };
 
-        if (employeeId) {
+        if (selectedEmployee) {
             fetchEmployeeData();
         }
-    }, [employeeId]); // Removed getByIdView from dependencies to prevent infinite loop
+    }, [selectedEmployee]); // Removed getByIdView from dependencies to prevent infinite loop
 
     if (actionIsLoading) {
         return (
@@ -94,7 +105,6 @@ const Summary = () => {
         );
     }
 
-    
     return (
         <div className="flex flex-col gap-4">
             <CardContainer
@@ -131,7 +141,11 @@ const Summary = () => {
                                     />
                                 }
                                 header="Direct Head"
-                                text={employeeData.supervisor_first_name ? `${employeeData.supervisor_first_name} ${employeeData.supervisor_last_name}` : "N/A"}
+                                text={
+                                    employeeData.supervisor_first_name
+                                        ? `${employeeData.supervisor_first_name} ${employeeData.supervisor_last_name}`
+                                        : "N/A"
+                                }
                             />
                             <TextContent
                                 icon={<NotificationStatus />}
@@ -185,16 +199,24 @@ const Summary = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-auto">
                         <TextContent
                             header="Emergency Contact Name"
-                            text={employeeData.emergency_contact_first_name ? `${employeeData.emergency_contact_first_name} ${employeeData.emergency_contact_last_name}` : "N/A"}
+                            text={
+                                employeeData.emergency_contact_first_name
+                                    ? `${employeeData.emergency_contact_first_name} ${employeeData.emergency_contact_last_name}`
+                                    : "N/A"
+                            }
                         />
                         <TextContent
                             header="Emergency Contact Number"
-                            text={employeeData.emergency_contact_number || "N/A"}
+                            text={
+                                employeeData.emergency_contact_number || "N/A"
+                            }
                         />
 
                         <TextContent
                             header="Blood Type"
-                            text={employeeData.blood_type?.toUpperCase() || "N/A"}
+                            text={
+                                employeeData.blood_type?.toUpperCase() || "N/A"
+                            }
                         />
                     </div>
                 }

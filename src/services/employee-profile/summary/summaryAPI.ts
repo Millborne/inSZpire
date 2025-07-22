@@ -12,7 +12,7 @@ interface generalProps {
 export const summaryAPI = createApi({
     reducerPath: "summary",
     baseQuery: fetchBaseQuery({
-        baseUrl: VITE_EMPLOYMENT_SERVICE,
+        baseUrl: VITE_EMPLOYMENT_SERVICE || "http://localhost:3000",
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 
@@ -26,7 +26,8 @@ export const summaryAPI = createApi({
     tagTypes: ["summary"],
     endpoints: (builder) => ({
         fetchSummary: builder.query({
-            query: (data: generalProps) => `/api/v1/employee${data.queryParameters}`,
+            query: (data: generalProps) =>
+                `/api/v1/employee${data.queryParameters}`,
         }),
         actionSummary: builder.mutation({
             query: (data: generalProps) => ({

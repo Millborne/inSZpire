@@ -71,6 +71,7 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
     const {
         updateBasicInfo,
         getById,
+        getByIdView,
         actionIsLoading,
         actionIsError,
         actionIsSuccess,
@@ -154,6 +155,7 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
             created_at: string;
             updated_at: string;
         }>;
+        getByIdView?: any;
     } | null>(null);
     const [isLoadingData, setIsLoadingData] = useState(false);
 
@@ -172,8 +174,9 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
                 setIsLoadingData(true);
                 try {
                     const result = await getById({ employeeId });
-                    if (result.data) {
-                        setFetchedData(result.data.data);
+                    const result2 = await getByIdView({ employeeId });
+                    if (result.data && result2.data) {
+                        setFetchedData({...result.data.data, getByIdView: result2.data.data});
                         // Initialize form data with fetched data
                         const data = result.data.data;
                         const profile = data.profile || {};
@@ -196,7 +199,7 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
                             extension: profile.name_ext || "",
                             contactNumber: profile.mobile_number || "",
                             placeOfBirth: profile.birth_address || "",
-                            religion: profile.religion || "",
+                            religion: result2.data.data.religion || "",
                             sex: profile.gender || "",
                             civilStatus: profile.marital_status || "",
                             gender: profile.gender || "",
@@ -884,12 +887,12 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
                                     label="RELIGION"
                                     placeholder="Roman Catholic"
                                     value={formData.religion}
-                                    // onChange={(e) =>
-                                    //     handleInputChange(
-                                    //         "religion",
-                                    //         e.target.value
-                                    //     )
-                                    // }
+                                    onChange={(e) =>
+                                        handleInputChange(
+                                            "religion",
+                                            e.target.value
+                                        )
+                                    }
                                     disabled={isLoadingData}
                                 />
                                 <Inputs

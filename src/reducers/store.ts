@@ -24,9 +24,13 @@ import { workSetupAPI } from "../services/settings/work-setup/list/workSetupAPI"
 import { locationsAPI } from "../services/locations-options/locationsAPI";
 
 // Slices
-// here
+import employeeReducer from "./employeeSlice";
 
 const rootReducer = combineReducers({
+    // Slices
+    employeeState: employeeReducer,
+
+    // API Reducers
     [teamsAPI.reducerPath]: teamsAPI.reducer,
     [accountsAPI.reducerPath]: accountsAPI.reducer,
     [tagsAPI.reducerPath]: tagsAPI.reducer,
