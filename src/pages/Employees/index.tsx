@@ -19,6 +19,9 @@ const Employees = () => {
     const location = useLocation();
 
     // Employee RTK State
+    const selectedEmployee = useSelector(
+        (state: RootState) => state.employeeState.selectedEmployee
+    );
     
     const { getByIdView } = useSummaryService();
 
@@ -26,6 +29,7 @@ const Employees = () => {
         id: string;
         label: string;
         url: string;
+        icon: React.ReactNode;
     }[] = [
         {
             id: "summary",
