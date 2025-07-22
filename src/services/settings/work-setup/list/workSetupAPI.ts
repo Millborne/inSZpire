@@ -12,7 +12,7 @@ interface generalProps {
 export const workSetupAPI = createApi({
     reducerPath: "workSetup",
     baseQuery: fetchBaseQuery({
-        baseUrl: VITE_TEAM_AND_POSITION_SERVICE,
+        baseUrl: "/api/v1",
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 

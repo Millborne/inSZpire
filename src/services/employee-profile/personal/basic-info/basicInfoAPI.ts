@@ -36,8 +36,15 @@ export const basicInfoAPI = createApi({
                 body: data.body ?? undefined,
             }),
         }),
+        getBasicInfoByIdView: builder.mutation({
+            query: (data: generalProps) => ({
+                url: `/api/v1/employee${data.queryParameters}`,
+                method: data.method || "GET",
+                body: data.body ?? undefined,
+            }),
+        }),
     }),
 });
 
-export const { useFetchBasicInfoQuery, useActionBasicInfoMutation } =
+export const { useFetchBasicInfoQuery, useActionBasicInfoMutation, useGetBasicInfoByIdViewMutation } =
     basicInfoAPI;

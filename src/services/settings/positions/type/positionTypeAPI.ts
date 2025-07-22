@@ -12,7 +12,7 @@ interface generalProps {
 export const positionTypeAPI = createApi({
     reducerPath: "positionType",
     baseQuery: fetchBaseQuery({
-        baseUrl: VITE_TEAM_AND_POSITION_SERVICE,
+        baseUrl: VITE_TEAM_AND_POSITION_SERVICE ||"http://localhost:4172/api/v1",
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 

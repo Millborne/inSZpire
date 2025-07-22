@@ -7,10 +7,12 @@ interface generalProps {
     body?: any;
 }
 
+const { VITE_TEAM_AND_POSITION_SERVICE } = import.meta.env;
+
 export const teamMemberAPI = createApi({
     reducerPath: "teamMember",
     baseQuery: fetchBaseQuery({
-        baseUrl: "http://localhost:4172/api/v1",
+        baseUrl: VITE_TEAM_AND_POSITION_SERVICE ||"http://localhost:4172/api/v1",
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 
