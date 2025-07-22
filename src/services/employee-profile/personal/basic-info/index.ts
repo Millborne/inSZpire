@@ -2,11 +2,15 @@ export {
     basicInfoAPI,
     useFetchBasicInfoQuery,
     useActionBasicInfoMutation,
-    useGetBasicInfoByIdViewMutation,
 } from "./basicInfoAPI";
+export {
+    useFetchReligionQuery,
+    useActionReligionMutation,
+} from "./religionAPI";
 export {
     useBasicInfo,
     useBasicInfoService,
+    useReligionService,
     type BasicInfoData,
     type CreateBasicInfoRequest,
     type UpdateBasicInfoRequest,

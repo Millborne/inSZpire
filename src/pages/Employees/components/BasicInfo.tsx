@@ -17,8 +17,14 @@ import {
 } from "../../../services/employee-profile/personal/basic-info/use-basic-info";
 import { BasicInfoData } from "../../../services/employee-profile/personal/basic-info/use-basic-info";
 import { useLocationsService } from "../../../services/locations-options/use-locations";
+import { RootState } from "../../../reducers/store";
+import { useSelector } from "react-redux";
 
 const BasicInfo = () => {
+    // Employee RTK State
+    const selectedEmployee = useSelector(
+        (state: RootState) => state.employeeState.selectedEmployee
+    );
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
     const {
@@ -65,14 +71,21 @@ const BasicInfo = () => {
     });
 
     // Get employee ID from URL params or props - you may need to adjust this based on your routing setup
-    const employeeId = "6dd74bcf8f9946739abaaed997aaef71"; // This should come from your route params or props
+    // const employeeId = "6dd74bcf8f9946739abaaed997aaef71"; // This should come from your route params or props
 
     const fetchBasicInfoData = async () => {
         try {
-            const result = await getById({ employeeId: employeeId });
-            const result2 = await getByIdView({ employeeId: employeeId });
+            const result = await getById({
+                employeeId: selectedEmployee?.employee_ID || "",
+            });
+            const result2 = await getByIdView({
+                employeeId: selectedEmployee?.employee_ID || "",
+            });
             if (result.data && result2.data) {
-                setBasicInfoData({...result.data.data, getByIdView: result2.data.data});
+                setBasicInfoData({
+                    ...result.data.data,
+                    getByIdView: result2.data.data,
+                });
             }
         } catch (error) {
             console.error("Error fetching basic info data:", error);
@@ -83,7 +96,9 @@ const BasicInfo = () => {
     const fetchLocationData = async () => {
         try {
             // Fetch regions/states
-            const regionsResult = await getRegionStates({});
+            const regionsResult = await getRegionStates({
+                limit: 100,
+            });
             if (regionsResult.data?.data) {
                 setLocationData((prev) => ({
                     ...prev,
@@ -95,7 +110,9 @@ const BasicInfo = () => {
             }
 
             // Fetch provinces (you might want to filter by specific region if needed)
-            const provincesResult = await getProvinces({});
+            const provincesResult = await getProvinces({
+                limit: 100,
+            });
             if (provincesResult.data?.data) {
                 setLocationData((prev) => ({
                     ...prev,
@@ -109,21 +126,28 @@ const BasicInfo = () => {
             }
 
             // Fetch municipalities
-            const municipalitiesResult = await getMunicipalities({});
+            const municipalitiesResult = await getMunicipalities({
+                limit: 2000,
+            });
+
+            console.log(municipalitiesResult.data?.data);
+
             if (municipalitiesResult.data?.data) {
                 setLocationData((prev) => ({
                     ...prev,
                     municipalities: municipalitiesResult.data.data.map(
                         (municipality: any) => ({
                             value: municipality.city_municipality_ID.toString(),
-                            label: municipality.city_municipality_name,
+                            label: municipality.city_name,
                         })
                     ),
                 }));
             }
 
             // Fetch barangays
-            const barangaysResult = await getBarangays({});
+            const barangaysResult = await getBarangays({
+                limit: 45000,
+            });
             if (barangaysResult.data?.data) {
                 setLocationData((prev) => ({
                     ...prev,
@@ -141,11 +165,11 @@ const BasicInfo = () => {
     };
 
     useEffect(() => {
-        if (employeeId) {
+        if (selectedEmployee) {
             fetchBasicInfoData();
             fetchLocationData();
         }
-    }, [employeeId]);
+    }, [selectedEmployee]);
 
     // Helper function to get location name by ID
     const getLocationName = (
@@ -183,6 +207,11 @@ const BasicInfo = () => {
             address.region_state_ID,
             locationData.regions
         );
+
+        console.log(address.city_municipality_ID,
+            locationData.municipalities);
+
+        // console.log(barangay, municipality, province, region);
 
         if (barangay !== "N/A") parts.push(barangay);
         if (municipality !== "N/A") parts.push(municipality);
@@ -396,7 +425,7 @@ const BasicInfo = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSubmitSuccess={handleSubmitSuccess}
-                employeeId={employeeId}
+                employeeId={selectedEmployee?.employee_ID || ""}
                 currentData={basicInfoData?.profile || null}
             />
 

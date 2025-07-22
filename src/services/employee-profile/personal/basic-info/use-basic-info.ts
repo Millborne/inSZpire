@@ -2,6 +2,10 @@ import {
     useFetchBasicInfoQuery,
     useActionBasicInfoMutation,
 } from "./basicInfoAPI";
+import {
+    useFetchReligionQuery,
+    useActionReligionMutation,
+} from "./religionAPI";
 
 export const useBasicInfo = ({
     queryParameters,
@@ -345,5 +349,64 @@ export const useBasicInfoService = () => {
         batchUpdateStatus,
         getByIdView,
         getById,
+    };
+};
+
+export const useReligionService = () => {
+    
+    const {
+        data: getReligionData,
+        isSuccess: getReligionIsSuccess,
+        isError: getReligionIsError,
+        isLoading: getReligionIsLoading,
+        isFetching: getReligionIsFetching,
+        error: getReligionError,
+        refetch: getReligionRefetch,
+    } = useFetchReligionQuery({
+        queryParameters: "/getReligion",
+        method: "GET",
+    });
+
+    const [
+        generalAction,
+        {
+            data: actionData,
+            isError: actionIsError,
+            isLoading: actionIsLoading,
+            isSuccess: actionIsSuccess,
+            error: actionError,
+            reset: actionReset,
+        },
+    ] = useActionReligionMutation();
+
+    // Get Religion
+    const getReligion = async (requestData: any) => {
+        return generalAction({
+            queryParameters: "/getReligion",
+            method: "GET",
+            body: requestData,
+        });
+    };
+
+    return {
+        // fetching
+        getReligionData,
+        getReligionIsSuccess,
+        getReligionIsError,
+        getReligionIsLoading,
+        getReligionIsFetching,
+        getReligionError,
+        getReligionRefetch,
+
+        // mutation
+        actionData,
+        actionIsError,
+        actionIsLoading,
+        actionIsSuccess,
+        actionError,
+        actionReset,
+
+        // methods
+        getReligion,
     };
 };
