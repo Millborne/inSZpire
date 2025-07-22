@@ -22,7 +22,6 @@ const Employees = () => {
     const selectedEmployee = useSelector(
         (state: RootState) => state.employeeState.selectedEmployee
     );
-
     const { getByIdView } = useSummaryService();
 
     const menuItems: {
