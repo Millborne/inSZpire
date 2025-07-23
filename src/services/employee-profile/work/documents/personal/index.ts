@@ -1,8 +1,5 @@
-export {
-    personalDocumentsAPI,
-    useFetchPersonalDocumentsQuery,
-    useActionPersonalDocumentsMutation,
-} from "./personalDocumentsAPI";
+export { personalDocumentsAPI, useFetchPersonalDocumentsQuery, useActionPersonalDocumentsMutation } from "./personalDocumentsAPI";
+export { documentsAPI, useFetchDocumentsQuery, useActionDocumentsMutation } from "./documentsAPI";
 export {
     usePersonalDocuments,
     usePersonalDocumentsService,
@@ -13,3 +10,9 @@ export {
     type UpdateDocumentRequest,
     type BatchUpdateStatusRequest,
 } from "./use-personal-documents";
+export {
+    useDocuments,
+    useDocumentsService,
+    type DocumentData,
+    type UploadDocumentRequest as DocumentsUploadRequest,
+} from "./use-documents";

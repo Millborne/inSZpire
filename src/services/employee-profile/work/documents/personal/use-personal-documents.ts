@@ -1,256 +1,105 @@
-import {
-    useFetchPersonalDocumentsQuery,
-    useActionPersonalDocumentsMutation,
-} from "./personalDocumentsAPI";
+import { useEffect, useState } from "react";
+import { useFetchPersonalDocumentsQuery, useActionPersonalDocumentsMutation, useFetchDocumentByTypeMutation } from "./personalDocumentsAPI";
 
-export const usePersonalDocuments = ({
-    queryParameters,
-    method,
-    disableFetch = false,
-}: {
-    queryParameters?: string;
-    method?: string;
-    disableFetch?: boolean;
-}) => {
-    // fetch
-    const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
-        useFetchPersonalDocumentsQuery(
-            {
-                queryParameters: queryParameters ?? "",
-                method: method,
-            },
-            { skip: disableFetch }
-        );
-
-    // action
-    const [
-        generalAction,
-        {
-            data: actionData,
-            isError: actionIsError,
-            isLoading: actionIsLoading,
-            isSuccess: actionIsSuccess,
-            error: actionError,
-            reset: actionReset,
-        },
-    ] = useActionPersonalDocumentsMutation();
-
-    return {
-        // fetching
-        data,
-        isSuccess,
-        isError,
-        isLoading,
-        isFetching,
-        error,
-        refetch,
-
-        // mutation
-        generalAction,
-        actionData,
-        actionIsError,
-        actionIsLoading,
-        actionIsSuccess,
-        actionError,
-        actionReset,
-    };
+type UploadArgs = {
+    file: File;
+    employee_ID: string;
+    doc_type_ID: string;
+    title: string;
+    description?: string;
 };
 
-// Personal Documents-specific interfaces
-export interface PersonalDocumentData {
-    pd_ID?: string;
-    emp_ID: string;
-    pd_type: string;
-    pd_name: string;
-    pd_description?: string;
-    pd_file_path: string;
-    pd_file_size?: number;
-    pd_file_type?: string;
-    pd_upload_date: string;
-    pd_expiry_date?: string;
-    pd_status: "active" | "pending" | "expired" | "inactive";
-    pd_notes?: string;
-    is_archived?: number;
-    created_at?: string;
-    updated_at?: string;
-    // Related data
-    employee?: {
-        emp_ID: string;
-        emp_first_name: string;
-        emp_last_name: string;
-        emp_middle_name?: string;
-        emp_email: string;
+export const usePersonalDocuments = (employee_ID: string, docTypeList: { id: string }[]) => {
+    /* ---------- FETCH ONE ---------- */
+    const fetchOne = async (doc_type_ID: string) => {
+        try {
+            console.log(`Fetching single document for type: ${doc_type_ID}`);
+            const response = await fetchDocumentByType({
+                employee_ID,
+                doc_type_ID,
+            }).unwrap();
+
+            console.log(`Single fetch response for ${doc_type_ID}:`, response);
+
+            setDocMap((prev) => ({
+                ...prev,
+                [doc_type_ID]: response?.data?.documents?.[0] ?? null,
+            }));
+        } catch (error) {
+            console.error(`Error fetching document for type ${doc_type_ID}:`, error);
+        }
     };
-}
 
-export interface UploadDocumentRequest {
-    emp_ID: string;
-    pd_type: string;
-    pd_name: string;
-    pd_description?: string;
-    pd_file: File;
-    pd_expiry_date?: string;
-    pd_notes?: string;
-    pd_status?: "active" | "pending" | "expired" | "inactive";
-}
+    /* ---------- POST ---------- */
+    const [actionMutation, { isLoading: isUploading }] = useActionPersonalDocumentsMutation();
 
-export interface ViewDocumentRequest {
-    emp_ID?: string;
-    pd_type?: string;
-    pd_status?: "active" | "pending" | "expired" | "inactive";
-    search?: string;
-    is_archived?: number;
-    offset?: number;
-    limit?: number;
-}
-
-export interface PersonalDocumentDetailsRequest {
-    pd_ID: string;
-}
-
-export interface UpdateDocumentRequest {
-    pd_ID: string;
-    pd_type?: string;
-    pd_name?: string;
-    pd_description?: string;
-    pd_file?: File;
-    pd_expiry_date?: string;
-    pd_notes?: string;
-    pd_status?: "active" | "pending" | "expired" | "inactive";
-}
-
-export interface BatchUpdateStatusRequest {
-    req_IDs: string[];
-    pd_status: "active" | "pending" | "expired" | "inactive";
-}
-
-// Specific personal documents service methods
-export const usePersonalDocumentsService = () => {
-    const [
-        generalAction,
-        {
-            data: actionData,
-            isError: actionIsError,
-            isLoading: actionIsLoading,
-            isSuccess: actionIsSuccess,
-            error: actionError,
-            reset: actionReset,
-        },
-    ] = useActionPersonalDocumentsMutation();
-
-    const uploadDocument = async (request: UploadDocumentRequest) => {
+    const upload = async (args: UploadArgs) => {
         const formData = new FormData();
-        formData.append("emp_ID", request.emp_ID);
-        formData.append("pd_type", request.pd_type);
-        formData.append("pd_name", request.pd_name);
-        if (request.pd_description) {
-            formData.append("pd_description", request.pd_description);
-        }
-        formData.append("pd_file", request.pd_file);
-        if (request.pd_expiry_date) {
-            formData.append("pd_expiry_date", request.pd_expiry_date);
-        }
-        if (request.pd_notes) {
-            formData.append("pd_notes", request.pd_notes);
-        }
-        if (request.pd_status) {
-            formData.append("pd_status", request.pd_status);
-        }
+        formData.append("employee_ID", args.employee_ID);
+        formData.append("doc_type_ID", args.doc_type_ID);
+        formData.append("document_title", args.title);
+        formData.append("description", args.description ?? "");
+        formData.append("file", args.file);
 
-        return generalAction({
+        await actionMutation({
             queryParameters: "/upload",
             method: "POST",
             body: formData,
         });
+
+        await fetchOne(args.doc_type_ID);
     };
 
-    const viewDocument = async (filters: ViewDocumentRequest) => {
-        return generalAction({
-            queryParameters: "/view",
-            method: "POST",
-            body: filters,
+    /* ---------- DELETE ---------- */
+    const [deleteMutation, { isLoading: isDeleting }] = useActionPersonalDocumentsMutation();
+
+    const deleteDocument = async (document_ID: string, doc_type_ID: string) => {
+        await deleteMutation({
+            queryParameters: document_ID,
+            method: "DELETE",
         });
+        await fetchOne(doc_type_ID);
     };
 
-    const viewDocumentDetails = async (
-        request: PersonalDocumentDetailsRequest
-    ) => {
-        return generalAction({
-            queryParameters: `/details/${request.pd_ID}`,
-            method: "GET",
-        });
-    };
+    /* ---------- FETCH DOCUMENT BY TYPE ---------- */
+    const [fetchDocumentByType] = useFetchDocumentByTypeMutation();
+    const [docMap, setDocMap] = useState<Record<string, any>>({}); // keyed by doc_type_ID
 
-    const updateDocument = async (request: UpdateDocumentRequest) => {
-        const formData = new FormData();
-        formData.append("pd_ID", request.pd_ID);
-        if (request.pd_type) {
-            formData.append("pd_type", request.pd_type);
-        }
-        if (request.pd_name) {
-            formData.append("pd_name", request.pd_name);
-        }
-        if (request.pd_description) {
-            formData.append("pd_description", request.pd_description);
-        }
-        if (request.pd_file) {
-            formData.append("pd_file", request.pd_file);
-        }
-        if (request.pd_expiry_date) {
-            formData.append("pd_expiry_date", request.pd_expiry_date);
-        }
-        if (request.pd_notes) {
-            formData.append("pd_notes", request.pd_notes);
-        }
-        if (request.pd_status) {
-            formData.append("pd_status", request.pd_status);
-        }
+    useEffect(() => {
+        const fetchAll = async () => {
+            try {
+                const results = await Promise.all(
+                    docTypeList.map(async (doc) => {
+                        try {
+                            const response = await fetchDocumentByType({
+                                employee_ID,
+                                doc_type_ID: doc.id,
+                            }).unwrap();
 
-        return generalAction({
-            queryParameters: "/update",
-            method: "PUT",
-            body: formData,
-        });
-    };
+                            // Extract the first document from the documents array
+                            const document = response?.data?.documents?.[0] ?? null;
+                            return { [doc.id]: document };
+                        } catch (error) {
+                            return { [doc.id]: null };
+                        }
+                    })
+                );
 
-    const viewDocumentsByEmployee = async (emp_ID: string) => {
-        return generalAction({
-            queryParameters: `/employee/${emp_ID}`,
-            method: "GET",
-        });
-    };
+                const merged = Object.assign({}, ...results);
+                setDocMap(merged);
+            } catch (error) {
+                console.error("Error in fetchAll:", error);
+            }
+        };
 
-    const viewDocumentsByType = async (pd_type: string) => {
-        return generalAction({
-            queryParameters: `/type/${pd_type}`,
-            method: "GET",
-        });
-    };
-
-    const batchUpdateStatus = async (request: BatchUpdateStatusRequest) => {
-        return generalAction({
-            queryParameters: "/batch-update-status",
-            method: "PUT",
-            body: request,
-        });
-    };
+        if (employee_ID) fetchAll();
+    }, [employee_ID, docTypeList]);
 
     return {
-        // mutation
-        actionData,
-        actionIsError,
-        actionIsLoading,
-        actionIsSuccess,
-        actionError,
-        actionReset,
-
-        // methods
-        uploadDocument,
-        viewDocument,
-        viewDocumentDetails,
-        updateDocument,
-        viewDocumentsByEmployee,
-        viewDocumentsByType,
-        batchUpdateStatus,
+        docMap,
+        isUploading,
+        isDeleting,
+        upload,
+        deleteDocument,
     };
 };
