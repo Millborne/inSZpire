@@ -37,6 +37,8 @@ export interface addEmployeeData {
         pronouns: string;
         bloodType: string;
         birthAddress: string;
+        telephoneNumber: string;
+        mobileNumber: string;
     };
 }
 
@@ -81,6 +83,8 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
             pronouns: "",
             bloodType: "",
             birthAddress: "",
+            telephoneNumber: "",
+            mobileNumber: "",
         },
     });
 
@@ -255,6 +259,18 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                     label="BIRTH ADDRESS" 
                                     value={formData.others.birthAddress || ""} 
                                     onChange={(e: any) => handleNestedInputChange('others', 'birthAddress', e.target.value)}
+                                />
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] items-center">
+                                <Inputs 
+                                    label="TELEPHONE NUMBER" 
+                                    value={formData.others.telephoneNumber || ""} 
+                                    onChange={(e: any) => handleNestedInputChange('others', 'telephoneNumber', e.target.value)}
+                                />
+                                <Inputs 
+                                    label="MOBILE NUMBER" 
+                                    value={formData.others.mobileNumber || ""} 
+                                    onChange={(e: any) => handleNestedInputChange('others', 'mobileNumber', e.target.value)}
                                 />
                             </div>
                         </div>
