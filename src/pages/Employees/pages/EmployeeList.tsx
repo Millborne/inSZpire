@@ -1,8 +1,31 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ButtonsIcon, CardContainer, Inputs, Pagination, PopoverMenu, SnackbarAlert, Table } from "enterprisze-global-components";
-import { Add, Briefcase, Edit2, ExportCurve, Filter, InfoCircle, SearchNormal } from "iconsax-reactjs";
-import { useEmployeeService, type EmployeeData, type ViewEmployeesRequest } from "../../../services/employee/list/use-employee";
+import { useDispatch } from "react-redux";
+import {
+    ButtonsIcon,
+    CardContainer,
+    Inputs,
+    Pagination,
+    PopoverMenu,
+    SnackbarAlert,
+    Table,
+} from "enterprisze-global-components";
+import {
+    Add,
+    Briefcase,
+    Edit2,
+    ExportCurve,
+    Filter,
+    InfoCircle,
+    SearchNormal,
+} from "iconsax-reactjs";
+import {
+    useEmployeeService,
+    type EmployeeData,
+    type ViewEmployeesRequest,
+} from "../../../services/employee/list/use-employee";
+import { setSelectedEmployee } from "../../../reducers/employeeSlice";
+import type { AppDispatch } from "../../../reducers/store";
 // Components
 import EmployeeFilterModal from "../components/modals/EmployeeFilterModal";
 import EmployeeModal from "../components/modals/EmployeeModal";
@@ -10,6 +33,7 @@ import EmployeePositionModal from "../components/modals/EmployeePositionModal";
 
 const EmployeeList = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch<AppDispatch>();
     const employeeService = useEmployeeService();
 
     // State management
@@ -20,7 +44,7 @@ const EmployeeList = () => {
     const [filters, setFilters] = useState<ViewEmployeesRequest>({
         is_archived: 0,
         offset: 0,
-        limit: 10
+        limit: 10,
     });
 
     // Pagination state
@@ -28,15 +52,19 @@ const EmployeeList = () => {
         total: 0,
         offset: 0,
         limit: 10,
-        hasMore: false
+        hasMore: false,
     });
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<"add" | "edit">("add");
-    const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] = useState(false);
-    const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+    const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] =
+        useState(false);
+    const [selectedEmployeeLocal, setSelectedEmployeeLocal] =
+        useState<any>(null);
     const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
-    const [snackbarAction, setSnackbarAction] = useState<"add" | "edit" | "update" | null>(null);
+    const [snackbarAction, setSnackbarAction] = useState<
+        "add" | "edit" | "update" | null
+    >(null);
     const [openFilter, setOpenFilter] = useState(false);
 
     // Load employees on component mount
@@ -48,51 +76,72 @@ const EmployeeList = () => {
 
                 // Load employees using vw_employee view
                 console.log("Sending request with filters:", filters);
-                const employeesResponse = await employeeService.listEmployees(filters);
+                const employeesResponse = await employeeService.listEmployees(
+                    filters
+                );
                 console.log("Employees response:", employeesResponse);
 
                 // Handle different response structures
-                if (employeesResponse.data?.success && employeesResponse.data?.data?.employees) {
+                if (
+                    employeesResponse.data?.success &&
+                    employeesResponse.data?.data?.employees
+                ) {
                     // Response structure: { success: true, data: { employees: [...], pagination: {...} } }
                     const responseData = employeesResponse.data.data;
                     setEmployees(responseData.employees || []);
-                    setPagination(responseData.pagination || {
-                        total: 0,
-                        offset: 0,
-                        limit: 10,
-                        hasMore: false
-                    });
-                } else if (employeesResponse.data?.success && employeesResponse.data?.employees) {
+                    setPagination(
+                        responseData.pagination || {
+                            total: 0,
+                            offset: 0,
+                            limit: 10,
+                            hasMore: false,
+                        }
+                    );
+                } else if (
+                    employeesResponse.data?.success &&
+                    employeesResponse.data?.employees
+                ) {
                     // Direct response structure: { success: true, employees: [...], pagination: {...} }
                     const responseData = employeesResponse.data;
                     setEmployees(responseData.employees || []);
-                    setPagination(responseData.pagination || {
-                        total: 0,
-                        offset: 0,
-                        limit: 10,
-                        hasMore: false
-                    });
+                    setPagination(
+                        responseData.pagination || {
+                            total: 0,
+                            offset: 0,
+                            limit: 10,
+                            hasMore: false,
+                        }
+                    );
                 } else {
-                    console.error("No employee data received - response structure:", employeesResponse.data);
+                    console.error(
+                        "No employee data received - response structure:",
+                        employeesResponse.data
+                    );
                     setEmployees([]);
                     setPagination({
                         total: 0,
                         offset: 0,
                         limit: 10,
-                        hasMore: false
+                        hasMore: false,
                     });
                 }
-
             } catch (err) {
                 console.error("Error loading data:", err);
-                
+
                 // Check if it's a CORS error
-                if (err && typeof err === 'object' && 'status' in err) {
+                if (err && typeof err === "object" && "status" in err) {
                     const error = err as any;
-                    if (error.status === 'FETCH_ERROR' || error.status === 'CORS_ERROR') {
-                        setError("CORS Error: Backend needs to allow requests from frontend. Please check backend CORS configuration.");
+                    if (
+                        error.status === "FETCH_ERROR" ||
+                        error.status === "CORS_ERROR"
+                    ) {
+                        setError(
+                            "CORS Error: Backend needs to allow requests from frontend. Please check backend CORS configuration."
+                        );
                     } else {
-                        setError(`Failed to load employees. Status: ${error.status}`);
+                        setError(
+                            `Failed to load employees. Status: ${error.status}`
+                        );
                     }
                 } else {
                     setError("Failed to load employees. Please try again.");
@@ -108,10 +157,10 @@ const EmployeeList = () => {
     // Handle search
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            setFilters(prev => ({
+            setFilters((prev) => ({
                 ...prev,
                 search: searchTerm,
-                offset: 0
+                offset: 0,
             }));
         }, 500);
 
@@ -121,15 +170,19 @@ const EmployeeList = () => {
     // Handle page change
     const handlePageChange = (page: number) => {
         const newOffset = (page - 1) * pagination.limit;
-        setFilters(prev => ({
+        setFilters((prev) => ({
             ...prev,
-            offset: newOffset
+            offset: newOffset,
         }));
     };
 
     const handleRowClick = (index: number) => {
         console.log("Row clicked:", index);
-        navigate(`${employees[index]?.employee_ID}/summary`);
+        const selectedEmployee = employees[index];
+        if (selectedEmployee) {
+            dispatch(setSelectedEmployee(selectedEmployee));
+            navigate(`${selectedEmployee.employee_ID}/summary`);
+        }
     };
 
     const handleSubmitSuccess = (action: "add" | "edit" | "update") => {
@@ -139,13 +192,13 @@ const EmployeeList = () => {
 
     const openAddEmployee = () => {
         setModalMode("add");
-        setSelectedEmployee(null);
+        setSelectedEmployeeLocal(null);
         setIsModalOpen(true);
     };
 
     const openEditEmployee = (employee: any) => {
         setModalMode("edit");
-        setSelectedEmployee(employee);
+        setSelectedEmployeeLocal(employee);
         setIsModalOpen(true);
     };
 
@@ -155,7 +208,7 @@ const EmployeeList = () => {
             employee.first_name,
             employee.middle_name,
             employee.last_name,
-            employee.name_ext
+            employee.name_ext,
         ].filter(Boolean);
         return parts.join(" ");
     };
@@ -179,18 +232,32 @@ const EmployeeList = () => {
     };
 
     // Transform data for table
-    const tableData = employees.map(employee => ({
+    const tableData = employees.map((employee) => ({
         name: (
             <div className="md:flex items-center gap-1">
-                <div className={`w-[14px] h-[14px] rounded-full ${getStatusColor(employee.employee_status)}`}></div>
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{getEmployeeFullName(employee)}</span>
+                <div
+                    className={`w-[14px] h-[14px] rounded-full ${getStatusColor(
+                        employee.employee_status
+                    )}`}
+                ></div>
+                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
+                    {getEmployeeFullName(employee)}
+                </span>
             </div>
         ),
         id: employee.employee_number,
-        team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{employee.team_name}</span>,
-        jobTitle: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{employee.position_name}</span>,
+        team: (
+            <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
+                {employee.team_name}
+            </span>
+        ),
+        jobTitle: (
+            <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
+                {employee.position_name}
+            </span>
+        ),
         jobCode: employee.position_code,
-        directHead: "N/A" // This field is not available in vw_employee view
+        directHead: "N/A", // This field is not available in vw_employee view
     }));
 
     // For larger screen
@@ -214,22 +281,32 @@ const EmployeeList = () => {
                     <InfoCircle className="w-4 h-4 text-szBlack700 hover:text-szPrimary700 transition-colors duration-200 cursor-help" />
                     <div className="absolute z-10 invisible group-hover:visible bg-white shadow-lg rounded-lg p-2 w-[97px] -left-20 top-6">
                         <div className="flex flex-col gap-2 w-full items-start">
-                            <span className="text-body-small-reg text-szBlack800">Legends:</span>
+                            <span className="text-body-small-reg text-szBlack800">
+                                Legends:
+                            </span>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-success700 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Active</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Active
+                                </span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-szGrey300 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Inactive</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Inactive
+                                </span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-info500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Floating</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Floating
+                                </span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-warning500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Clearance</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Clearance
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -264,22 +341,32 @@ const EmployeeList = () => {
                     <InfoCircle className="w-4 h-4 text-szBlack700 hover:text-szPrimary700 transition-colors duration-200 cursor-help" />
                     <div className="absolute z-10 invisible group-hover:visible bg-white shadow-lg rounded-lg p-2 w-[97px] -left-20 top-6">
                         <div className="flex flex-col gap-2 w-full items-start">
-                            <span className="text-body-small-reg text-szBlack800">Legends:</span>
+                            <span className="text-body-small-reg text-szBlack800">
+                                Legends:
+                            </span>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-success700 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Active</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Active
+                                </span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-szGrey300 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Inactive</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Inactive
+                                </span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-info500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Floating</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Floating
+                                </span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-warning500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Clearance</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Clearance
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -308,7 +395,7 @@ const EmployeeList = () => {
             label: "Update Position",
             icon: <Briefcase />,
             onClick: (index: number) => {
-                setSelectedEmployee(employees[index]);
+                setSelectedEmployeeLocal(employees[index]);
                 setIsUpdatePositionModalOpen(true);
             },
         },
@@ -320,7 +407,9 @@ const EmployeeList = () => {
             <CardContainer
                 content={
                     <div className="flex items-center justify-center h-64">
-                        <div className="text-szPrimary700">Loading employees...</div>
+                        <div className="text-szPrimary700">
+                            Loading employees...
+                        </div>
                     </div>
                 }
             />
@@ -350,22 +439,37 @@ const EmployeeList = () => {
                         <PopoverMenu
                             size="small"
                             items={[
-                                { label: "Add Employee", icon: <Add />, onClick: openAddEmployee },
-                                { label: "Export", icon: <ExportCurve />, onClick: () => {} },
+                                {
+                                    label: "Add Employee",
+                                    icon: <Add />,
+                                    onClick: openAddEmployee,
+                                },
+                                {
+                                    label: "Export",
+                                    icon: <ExportCurve />,
+                                    onClick: () => {},
+                                },
                             ]}
                         />
                     </div>
 
                     <div className="flex gap-4">
                         <div className="w-full max-w-[355px]">
-                            <Inputs 
-                                placeholder="Search by Name, ID, Job Title, or Team" 
-                                icon={SearchNormal} 
+                            <Inputs
+                                placeholder="Search by Name, ID, Job Title, or Team"
+                                icon={SearchNormal}
                                 value={searchTerm}
-                                onChange={(e: any) => setSearchTerm(e.target.value)}
+                                onChange={(e: any) =>
+                                    setSearchTerm(e.target.value)
+                                }
                             />
                         </div>
-                        <ButtonsIcon icon={<Filter />} variant="ghost" size="large" onClick={() => setOpenFilter(true)} />
+                        <ButtonsIcon
+                            icon={<Filter />}
+                            variant="ghost"
+                            size="large"
+                            onClick={() => setOpenFilter(true)}
+                        />
                         {/* <Button leftIcon={<Filter />} variant="ghost" size="large" onClick={() => setOpenFilter(true)} label={""} /> */}
                     </div>
 
@@ -389,32 +493,45 @@ const EmployeeList = () => {
                             />
                         </div>
                         <div className="flex justify-end">
-                            <Pagination 
-                                currentPage={Math.floor(pagination.offset / pagination.limit) + 1}
-                                totalPages={Math.ceil(pagination.total / pagination.limit)}
-                                visiblePages={5} 
-                                onChange={handlePageChange} 
+                            <Pagination
+                                currentPage={
+                                    Math.floor(
+                                        pagination.offset / pagination.limit
+                                    ) + 1
+                                }
+                                totalPages={Math.ceil(
+                                    pagination.total / pagination.limit
+                                )}
+                                visiblePages={5}
+                                onChange={handlePageChange}
                             />
                         </div>
                     </div>
 
-                    <EmployeeFilterModal isOpen={openFilter} onClose={() => setOpenFilter(false)} />
+                    <EmployeeFilterModal
+                        isOpen={openFilter}
+                        onClose={() => setOpenFilter(false)}
+                    />
 
                     <EmployeeModal
                         isOpen={isModalOpen}
                         onClose={() => {
                             setIsModalOpen(false);
-                            setSelectedEmployee(null);
+                            setSelectedEmployeeLocal(null);
                         }}
                         mode={modalMode}
-                        addEmployeeData={modalMode === "edit" ? selectedEmployee : undefined}
+                        addEmployeeData={
+                            modalMode === "edit"
+                                ? selectedEmployeeLocal
+                                : undefined
+                        }
                         onSubmitSuccess={() => handleSubmitSuccess(modalMode)}
                     />
 
                     <EmployeePositionModal
                         isOpen={isUpdatePositionModalOpen}
                         onClose={() => setIsUpdatePositionModalOpen(false)}
-                        employeePositionData={selectedEmployee}
+                        employeePositionData={selectedEmployeeLocal}
                         onSubmitSuccess={() => handleSubmitSuccess("update")}
                     />
 
