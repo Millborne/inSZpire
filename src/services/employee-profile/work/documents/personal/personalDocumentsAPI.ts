@@ -26,20 +26,30 @@ export const personalDocumentsAPI = createApi({
     tagTypes: ["personalDocuments"],
     endpoints: (builder) => ({
         fetchPersonalDocuments: builder.query({
-            query: (data: generalProps) =>
-                `api/personal-documents${data.queryParameters}`,
+            query: (data: generalProps) => `api/v1/documents${data.queryParameters}`,
         }),
         actionPersonalDocuments: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/api/personal-documents${data.queryParameters}`,
+                url: `/api/v1/documents/${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
+            }),
+        }),
+        fetchDocumentByType: builder.mutation({
+            query: ({ employee_ID, doc_type_ID }: { employee_ID: string; doc_type_ID: string }) => ({
+                url: `/api/v1/documents/fetch`,
+                method: "POST",
+                body: {
+                    employee_ID,
+                    doc_type_ID,
+                    is_archived: 0,
+                    limit: 1,
+                    sort_by: "created_at",
+                    sort_order: "DESC",
+                },
             }),
         }),
     }),
 });
 
-export const {
-    useFetchPersonalDocumentsQuery,
-    useActionPersonalDocumentsMutation,
-} = personalDocumentsAPI;
+export const { useFetchPersonalDocumentsQuery, useActionPersonalDocumentsMutation, useFetchDocumentByTypeMutation } = personalDocumentsAPI;
