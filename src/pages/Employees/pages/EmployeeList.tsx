@@ -1,20 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-    CardContainer,
-    Button,
-    Inputs,
-    Pagination,
-    PopoverMenu,
-    SnackbarAlert,
-} from "enterprisze-global-components";
-import { SearchNormal, Edit2, Trash, Eye } from "iconsax-reactjs";
+import { ButtonsIcon, CardContainer, Inputs, Pagination, PopoverMenu, SnackbarAlert, Table } from "enterprisze-global-components";
+import { Add, Briefcase, Edit2, ExportCurve, Filter, InfoCircle, SearchNormal } from "iconsax-reactjs";
 
 // Import employee service
-import {
-    useEmployeeService,
-    type ViewEmployeesRequest,
-} from "../../../services/employee/list/use-employee";
+import { useEmployeeService, type ViewEmployeesRequest } from "../../../services/employee/list/use-employee";
 
 // Import RTK state
 import { useSelector, useDispatch } from "react-redux";
@@ -58,16 +48,11 @@ const EmployeeList = () => {
 
                 // Load employees using vw_employee view
                 console.log("Sending request with filters:", filters);
-                const employeesResponse = await employeeService.listEmployees(
-                    filters
-                );
+                const employeesResponse = await employeeService.listEmployees(filters);
                 console.log("Employees response:", employeesResponse);
 
                 // Handle different response structures
-                if (
-                    employeesResponse.data?.success &&
-                    employeesResponse.data?.data?.employees
-                ) {
+                if (employeesResponse.data?.success && employeesResponse.data?.data?.employees) {
                     // Response structure: { success: true, data: { employees: [...], pagination: {...} } }
                     const responseData = employeesResponse.data.data;
                     setEmployees(responseData.employees || []);
@@ -79,10 +64,7 @@ const EmployeeList = () => {
                             hasMore: false,
                         }
                     );
-                } else if (
-                    employeesResponse.data?.success &&
-                    employeesResponse.data?.employees
-                ) {
+                } else if (employeesResponse.data?.success && employeesResponse.data?.employees) {
                     // Direct response structure: { success: true, employees: [...], pagination: {...} }
                     const responseData = employeesResponse.data;
                     setEmployees(responseData.employees || []);
@@ -95,10 +77,7 @@ const EmployeeList = () => {
                         }
                     );
                 } else {
-                    console.error(
-                        "No employee data received - response structure:",
-                        employeesResponse.data
-                    );
+                    console.error("No employee data received - response structure:", employeesResponse.data);
                     setEmployees([]);
                     setPagination({
                         total: 0,
@@ -113,17 +92,10 @@ const EmployeeList = () => {
                 // Check if it's a CORS error
                 if (err && typeof err === "object" && "status" in err) {
                     const error = err as any;
-                    if (
-                        error.status === "FETCH_ERROR" ||
-                        error.status === "CORS_ERROR"
-                    ) {
-                        setError(
-                            "CORS Error: Backend needs to allow requests from frontend. Please check backend CORS configuration."
-                        );
+                    if (error.status === "FETCH_ERROR" || error.status === "CORS_ERROR") {
+                        setError("CORS Error: Backend needs to allow requests from frontend. Please check backend CORS configuration.");
                     } else {
-                        setError(
-                            `Failed to load employees. Status: ${error.status}`
-                        );
+                        setError(`Failed to load employees. Status: ${error.status}`);
                     }
                 } else {
                     setError("Failed to load employees. Please try again.");
@@ -160,12 +132,7 @@ const EmployeeList = () => {
 
     // Get employee full name
     const getEmployeeFullName = (employee: EmployeeData): string => {
-        const parts = [
-            employee.first_name,
-            employee.middle_name,
-            employee.last_name,
-            employee.name_ext,
-        ].filter(Boolean);
+        const parts = [employee.first_name, employee.middle_name, employee.last_name, employee.name_ext].filter(Boolean);
         return parts.join(" ");
     };
 
@@ -191,14 +158,8 @@ const EmployeeList = () => {
     const tableData = employees.map((employee: EmployeeData) => ({
         name: (
             <div className="flex items-center gap-2">
-                <div
-                    className={`w-2 h-2 rounded-full ${getStatusColor(
-                        employee.employee_status
-                    )}`}
-                ></div>
-                <span className="font-medium">
-                    {getEmployeeFullName(employee)}
-                </span>
+                <div className={`w-2 h-2 rounded-full ${getStatusColor(employee.employee_status)}`}></div>
+                <span className="font-medium">{getEmployeeFullName(employee)}</span>
             </div>
         ),
         id: employee.employee_number,
@@ -214,9 +175,7 @@ const EmployeeList = () => {
             <CardContainer
                 content={
                     <div className="flex items-center justify-center h-64">
-                        <div className="text-szPrimary700">
-                            Loading employees...
-                        </div>
+                        <div className="text-szPrimary700">Loading employees...</div>
                     </div>
                 }
             />
@@ -243,17 +202,13 @@ const EmployeeList = () => {
                     <div className="flex flex-col gap-6">
                         {/* Header */}
                         <div className="flex items-center justify-between">
-                            <h1 className="text-2xl font-bold text-szPrimary700">
-                                Employees
-                            </h1>
+                            <h1 className="text-2xl font-bold text-szPrimary700">Employees</h1>
                             <Button
                                 label="Add Employee"
                                 variant="primary"
                                 size="medium"
                                 onClick={() => {
-                                    setSnackbarMessage(
-                                        "Add employee functionality coming soon"
-                                    );
+                                    setSnackbarMessage("Add employee functionality coming soon");
                                     setShowSuccessSnackbar(true);
                                 }}
                             />
@@ -266,9 +221,7 @@ const EmployeeList = () => {
                                     placeholder="Search by Name, ID, Job Title, or Team"
                                     icon={SearchNormal}
                                     value={searchTerm}
-                                    onChange={(e: any) =>
-                                        setSearchTerm(e.target.value)
-                                    }
+                                    onChange={(e: any) => setSearchTerm(e.target.value)}
                                 />
                             </div>
                             <Button
@@ -276,9 +229,7 @@ const EmployeeList = () => {
                                 variant="secondary"
                                 size="medium"
                                 onClick={() => {
-                                    setSnackbarMessage(
-                                        "Filter functionality coming soon"
-                                    );
+                                    setSnackbarMessage("Filter functionality coming soon");
                                     setShowSuccessSnackbar(true);
                                 }}
                             />
@@ -289,129 +240,61 @@ const EmployeeList = () => {
                             <table className="w-full border-collapse">
                                 <thead>
                                     <tr className="border-b border-szGrey200">
-                                        <th className="text-left p-3 font-medium text-szGrey700">
-                                            Name
-                                        </th>
-                                        <th className="text-left p-3 font-medium text-szGrey700">
-                                            ID
-                                        </th>
-                                        <th className="text-left p-3 font-medium text-szGrey700">
-                                            Team
-                                        </th>
-                                        <th className="text-left p-3 font-medium text-szGrey700">
-                                            Job Title
-                                        </th>
-                                        <th className="text-left p-3 font-medium text-szGrey700">
-                                            Job Code
-                                        </th>
-                                        <th className="text-left p-3 font-medium text-szGrey700">
-                                            Direct Head
-                                        </th>
-                                        <th className="text-left p-3 font-medium text-szGrey700">
-                                            Actions
-                                        </th>
+                                        <th className="text-left p-3 font-medium text-szGrey700">Name</th>
+                                        <th className="text-left p-3 font-medium text-szGrey700">ID</th>
+                                        <th className="text-left p-3 font-medium text-szGrey700">Team</th>
+                                        <th className="text-left p-3 font-medium text-szGrey700">Job Title</th>
+                                        <th className="text-left p-3 font-medium text-szGrey700">Job Code</th>
+                                        <th className="text-left p-3 font-medium text-szGrey700">Direct Head</th>
+                                        <th className="text-left p-3 font-medium text-szGrey700">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {tableData.map(
-                                        (row: any, index: number) => (
-                                            <tr
-                                                key={index}
-                                                className="border-b border-szGrey100 hover:bg-szSecondary50 cursor-pointer"
-                                                onClick={() => {
-                                                    navigate(
-                                                        `/home/employees/${employees[index].employee_ID}`
-                                                    );
-                                                    dispatch(
-                                                        setSelectedEmployee(
-                                                            employees[index]
-                                                        )
-                                                    );
-                                                }}
-                                            >
-                                                <td className="p-3">
-                                                    {row.name}
-                                                </td>
-                                                <td className="p-3">
-                                                    {row.id}
-                                                </td>
-                                                <td className="p-3">
-                                                    {row.team}
-                                                </td>
-                                                <td className="p-3">
-                                                    {row.jobTitle}
-                                                </td>
-                                                <td className="p-3">
-                                                    {row.jobCode}
-                                                </td>
-                                                <td className="p-3">
-                                                    {row.directHead}
-                                                </td>
-                                                <td
-                                                    className="p-3"
-                                                    onClick={(e) =>
-                                                        e.stopPropagation()
-                                                    }
-                                                >
-                                                    <PopoverMenu
-                                                        size="small"
-                                                        items={[
-                                                            {
-                                                                label: "View Details",
-                                                                icon: (
-                                                                    <Eye
-                                                                        size={
-                                                                            16
-                                                                        }
-                                                                    />
-                                                                ),
-                                                                onClick: () =>
-                                                                    navigate(
-                                                                        `/home/employees/${employees[index].employee_ID}`
-                                                                    ),
+                                    {tableData.map((row: any, index: number) => (
+                                        <tr
+                                            key={index}
+                                            className="border-b border-szGrey100 hover:bg-szSecondary50 cursor-pointer"
+                                            onClick={() => {
+                                                navigate(`/home/employees/${employees[index].employee_ID}`);
+                                                dispatch(setSelectedEmployee(employees[index]));
+                                            }}
+                                        >
+                                            <td className="p-3">{row.name}</td>
+                                            <td className="p-3">{row.id}</td>
+                                            <td className="p-3">{row.team}</td>
+                                            <td className="p-3">{row.jobTitle}</td>
+                                            <td className="p-3">{row.jobCode}</td>
+                                            <td className="p-3">{row.directHead}</td>
+                                            <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                                                <PopoverMenu
+                                                    size="small"
+                                                    items={[
+                                                        {
+                                                            label: "View Details",
+                                                            icon: <Eye size={16} />,
+                                                            onClick: () => navigate(`/home/employees/${employees[index].employee_ID}`),
+                                                        },
+                                                        {
+                                                            label: "Edit Employee",
+                                                            icon: <Edit2 size={16} />,
+                                                            onClick: () => {
+                                                                setSnackbarMessage("Edit functionality coming soon");
+                                                                setShowSuccessSnackbar(true);
                                                             },
-                                                            {
-                                                                label: "Edit Employee",
-                                                                icon: (
-                                                                    <Edit2
-                                                                        size={
-                                                                            16
-                                                                        }
-                                                                    />
-                                                                ),
-                                                                onClick: () => {
-                                                                    setSnackbarMessage(
-                                                                        "Edit functionality coming soon"
-                                                                    );
-                                                                    setShowSuccessSnackbar(
-                                                                        true
-                                                                    );
-                                                                },
+                                                        },
+                                                        {
+                                                            label: "Delete Employee",
+                                                            icon: <Trash size={16} />,
+                                                            onClick: () => {
+                                                                setSnackbarMessage("Delete functionality coming soon");
+                                                                setShowSuccessSnackbar(true);
                                                             },
-                                                            {
-                                                                label: "Delete Employee",
-                                                                icon: (
-                                                                    <Trash
-                                                                        size={
-                                                                            16
-                                                                        }
-                                                                    />
-                                                                ),
-                                                                onClick: () => {
-                                                                    setSnackbarMessage(
-                                                                        "Delete functionality coming soon"
-                                                                    );
-                                                                    setShowSuccessSnackbar(
-                                                                        true
-                                                                    );
-                                                                },
-                                                            },
-                                                        ]}
-                                                    />
-                                                </td>
-                                            </tr>
-                                        )
-                                    )}
+                                                        },
+                                                    ]}
+                                                />
+                                            </td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
@@ -419,22 +302,12 @@ const EmployeeList = () => {
                         {/* Pagination */}
                         <div className="flex items-center justify-between">
                             <div className="text-sm text-szGrey600">
-                                Displaying {pagination.offset + 1}-
-                                {Math.min(
-                                    pagination.offset + pagination.limit,
-                                    pagination.total
-                                )}{" "}
-                                of {pagination.total} records
+                                Displaying {pagination.offset + 1}-{Math.min(pagination.offset + pagination.limit, pagination.total)} of{" "}
+                                {pagination.total} records
                             </div>
                             <Pagination
-                                currentPage={
-                                    Math.floor(
-                                        pagination.offset / pagination.limit
-                                    ) + 1
-                                }
-                                totalPages={Math.ceil(
-                                    pagination.total / pagination.limit
-                                )}
+                                currentPage={Math.floor(pagination.offset / pagination.limit) + 1}
+                                totalPages={Math.ceil(pagination.total / pagination.limit)}
                                 onChange={handlePageChange}
                             />
                         </div>
