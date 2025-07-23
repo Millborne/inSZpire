@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Inputs, Modal, Dropdown, CustomDatePicker } from "enterprisze-global-components";
-// import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
-// import { Trash, Calendar } from "iconsax-reactjs";
+import React, { useState } from "react";
+import { Modal, Inputs, Dropdown, Avatar, SnackbarAlert, CustomDatePicker } from "enterprisze-global-components";
+import { InfoCircle } from "iconsax-reactjs";
 import EmployeeConfirmationModal from "./EmployeeConfirmationModal";
+import SZOfficialLogo from "../../../assets/SZ Official Logo_circle.png";
 
 export interface addEmployeeData {
     fullName: {
@@ -20,7 +20,16 @@ export interface addEmployeeData {
         employmentStatus: string;
         workEmail: string;
     };
-    address: {
+    permanentAddress: {
+        region: string;
+        province: string;
+        cityMunicipality: string;
+        barangay: string;
+        streetHouseNoLot: string;
+        postalCode: string;
+        country: string;
+    };
+    presentAddress: {
         region: string;
         province: string;
         cityMunicipality: string;
@@ -66,7 +75,16 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
             employmentStatus: "",
             workEmail: "",
         },
-        address: {
+        permanentAddress: {
+            region: "",
+            province: "",
+            cityMunicipality: "",
+            barangay: "",
+            streetHouseNoLot: "",
+            postalCode: "",
+            country: "",
+        },
+        presentAddress: {
             region: "",
             province: "",
             cityMunicipality: "",
@@ -93,6 +111,20 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
         mode === "edit" && addEmployeeData ? addEmployeeData : null
     );
     const [setAsPresentAddress, setSetAsPresentAddress] = useState(false);
+
+    // Handle "Set as present address" checkbox effect
+    const handleSetAsPresentAddressChange = (checked: boolean) => {
+        setSetAsPresentAddress(checked);
+        if (checked) {
+            // Copy permanent address to present address
+            setFormData(prev => ({
+                ...prev,
+                presentAddress: {
+                    ...prev.permanentAddress
+                }
+            }));
+        }
+    };
     // const [profileImg, setProfileImg] = useState<string | undefined>();
 
     const handleConfirmationClose = () => {
@@ -302,23 +334,23 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                             { label: "Region VII (Central Visayas)", value: "08" },
                                             { label: "Region VIII (Eastern Visayas)", value: "09" }
                                         ]} 
-                                        onSelectionChange={(selected: any) => handleNestedInputChange('address', 'region', selected?.value || '')}
-                                        value={formData.address.region ? { 
-                                            label: formData.address.region === "09" ? "Region IX (Zamboanga Peninsula)" :
-                                                   formData.address.region === "10" ? "Region X (Northern Mindanao)" :
-                                                   formData.address.region === "11" ? "Region XI (Davao Region)" :
-                                                   formData.address.region === "12" ? "Region XII (SOCCSKSARGEN)" :
-                                                   formData.address.region === "13" ? "National Capital Region (NCR)" :
-                                                   formData.address.region === "14" ? "Cordillera Administrative Region (CAR)" :
-                                                   formData.address.region === "01" ? "Region I (Ilocos Region)" :
-                                                   formData.address.region === "02" ? "Region II (Cagayan Valley)" :
-                                                   formData.address.region === "03" ? "Region III (Central Luzon)" :
-                                                   formData.address.region === "04" ? "Region IV-A (CALABARZON)" :
-                                                   formData.address.region === "05" ? "Region IV-B (MIMAROPA)" :
-                                                   formData.address.region === "06" ? "Region VI (Western Visayas)" :
-                                                   formData.address.region === "07" ? "Region VII (Central Visayas)" :
-                                                   formData.address.region === "08" ? "Region VIII (Eastern Visayas)" : formData.address.region,
-                                            value: formData.address.region 
+                                        onSelectionChange={(selected: any) => handleNestedInputChange('permanentAddress', 'region', selected?.value || '')}
+                                        value={formData.permanentAddress.region ? { 
+                                            label: formData.permanentAddress.region === "09" ? "Region IX (Zamboanga Peninsula)" :
+                                                   formData.permanentAddress.region === "10" ? "Region X (Northern Mindanao)" :
+                                                   formData.permanentAddress.region === "11" ? "Region XI (Davao Region)" :
+                                                   formData.permanentAddress.region === "12" ? "Region XII (SOCCSKSARGEN)" :
+                                                   formData.permanentAddress.region === "13" ? "National Capital Region (NCR)" :
+                                                   formData.permanentAddress.region === "14" ? "Cordillera Administrative Region (CAR)" :
+                                                   formData.permanentAddress.region === "01" ? "Region I (Ilocos Region)" :
+                                                   formData.permanentAddress.region === "02" ? "Region II (Cagayan Valley)" :
+                                                   formData.permanentAddress.region === "03" ? "Region III (Central Luzon)" :
+                                                   formData.permanentAddress.region === "04" ? "Region IV-A (CALABARZON)" :
+                                                   formData.permanentAddress.region === "05" ? "Region IV-B (MIMAROPA)" :
+                                                   formData.permanentAddress.region === "06" ? "Region VI (Western Visayas)" :
+                                                   formData.permanentAddress.region === "07" ? "Region VII (Central Visayas)" :
+                                                   formData.permanentAddress.region === "08" ? "Region VIII (Eastern Visayas)" : formData.permanentAddress.region,
+                                            value: formData.permanentAddress.region 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -341,22 +373,22 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                             { label: "Misamis Occidental", value: "1016" },
                                             { label: "Misamis Oriental", value: "1017" }
                                         ]} 
-                                        onSelectionChange={(selected: any) => handleNestedInputChange('address', 'province', selected?.value || '')}
-                                        value={formData.address.province ? { 
-                                            label: formData.address.province === "1182" ? "Davao del Sur" :
-                                                   formData.address.province === "1183" ? "Davao del Norte" :
-                                                   formData.address.province === "1184" ? "Davao Oriental" :
-                                                   formData.address.province === "1186" ? "Davao de Oro" :
-                                                   formData.address.province === "1187" ? "Davao Occidental" :
-                                                   formData.address.province === "0972" ? "Zamboanga del Sur" :
-                                                   formData.address.province === "0971" ? "Zamboanga del Norte" :
-                                                   formData.address.province === "0973" ? "Zamboanga Sibugay" :
-                                                   formData.address.province === "1013" ? "Bukidnon" :
-                                                   formData.address.province === "1014" ? "Camiguin" :
-                                                   formData.address.province === "1015" ? "Lanao del Norte" :
-                                                   formData.address.province === "1016" ? "Misamis Occidental" :
-                                                   formData.address.province === "1017" ? "Misamis Oriental" : formData.address.province,
-                                            value: formData.address.province 
+                                        onSelectionChange={(selected: any) => handleNestedInputChange('permanentAddress', 'province', selected?.value || '')}
+                                        value={formData.permanentAddress.province ? { 
+                                            label: formData.permanentAddress.province === "1182" ? "Davao del Sur" :
+                                                   formData.permanentAddress.province === "1183" ? "Davao del Norte" :
+                                                   formData.permanentAddress.province === "1184" ? "Davao Oriental" :
+                                                   formData.permanentAddress.province === "1186" ? "Davao de Oro" :
+                                                   formData.permanentAddress.province === "1187" ? "Davao Occidental" :
+                                                   formData.permanentAddress.province === "0972" ? "Zamboanga del Sur" :
+                                                   formData.permanentAddress.province === "0971" ? "Zamboanga del Norte" :
+                                                   formData.permanentAddress.province === "0973" ? "Zamboanga Sibugay" :
+                                                   formData.permanentAddress.province === "1013" ? "Bukidnon" :
+                                                   formData.permanentAddress.province === "1014" ? "Camiguin" :
+                                                   formData.permanentAddress.province === "1015" ? "Lanao del Norte" :
+                                                   formData.permanentAddress.province === "1016" ? "Misamis Occidental" :
+                                                   formData.permanentAddress.province === "1017" ? "Misamis Oriental" : formData.permanentAddress.province,
+                                            value: formData.permanentAddress.province 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -382,25 +414,25 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                             { label: "Maco", value: "1186009" },
                                             { label: "Maragusan", value: "1186011" }
                                         ]} 
-                                        onSelectionChange={(selected: any) => handleNestedInputChange('address', 'cityMunicipality', selected?.value || '')}
-                                        value={formData.address.cityMunicipality ? { 
-                                            label: formData.address.cityMunicipality === "1182022" ? "Davao City" :
-                                                   formData.address.cityMunicipality === "1182064" ? "Digos City" :
-                                                   formData.address.cityMunicipality === "1183024" ? "Tagum City" :
-                                                   formData.address.cityMunicipality === "1183019" ? "Panabo City" :
-                                                   formData.address.cityMunicipality === "1183023" ? "Island Garden City of Samal" :
-                                                   formData.address.cityMunicipality === "1184037" ? "Mati City" :
-                                                   formData.address.cityMunicipality === "1186017" ? "Nabunturan" :
-                                                   formData.address.cityMunicipality === "1186012" ? "Mawab" :
-                                                   formData.address.cityMunicipality === "1186008" ? "Monkayo" :
-                                                   formData.address.cityMunicipality === "1186004" ? "Compostela" :
-                                                   formData.address.cityMunicipality === "1186015" ? "New Bataan" :
-                                                   formData.address.cityMunicipality === "1186007" ? "Laak" :
-                                                   formData.address.cityMunicipality === "1186014" ? "Montevista" :
-                                                   formData.address.cityMunicipality === "1186020" ? "Pantukan" :
-                                                   formData.address.cityMunicipality === "1186009" ? "Maco" :
-                                                   formData.address.cityMunicipality === "1186011" ? "Maragusan" : formData.address.cityMunicipality,
-                                            value: formData.address.cityMunicipality 
+                                        onSelectionChange={(selected: any) => handleNestedInputChange('permanentAddress', 'cityMunicipality', selected?.value || '')}
+                                        value={formData.permanentAddress.cityMunicipality ? { 
+                                            label: formData.permanentAddress.cityMunicipality === "1182022" ? "Davao City" :
+                                                   formData.permanentAddress.cityMunicipality === "1182064" ? "Digos City" :
+                                                   formData.permanentAddress.cityMunicipality === "1183024" ? "Tagum City" :
+                                                   formData.permanentAddress.cityMunicipality === "1183019" ? "Panabo City" :
+                                                   formData.permanentAddress.cityMunicipality === "1183023" ? "Island Garden City of Samal" :
+                                                   formData.permanentAddress.cityMunicipality === "1184037" ? "Mati City" :
+                                                   formData.permanentAddress.cityMunicipality === "1186017" ? "Nabunturan" :
+                                                   formData.permanentAddress.cityMunicipality === "1186012" ? "Mawab" :
+                                                   formData.permanentAddress.cityMunicipality === "1186008" ? "Monkayo" :
+                                                   formData.permanentAddress.cityMunicipality === "1186004" ? "Compostela" :
+                                                   formData.permanentAddress.cityMunicipality === "1186015" ? "New Bataan" :
+                                                   formData.permanentAddress.cityMunicipality === "1186007" ? "Laak" :
+                                                   formData.permanentAddress.cityMunicipality === "1186014" ? "Montevista" :
+                                                   formData.permanentAddress.cityMunicipality === "1186020" ? "Pantukan" :
+                                                   formData.permanentAddress.cityMunicipality === "1186009" ? "Maco" :
+                                                   formData.permanentAddress.cityMunicipality === "1186011" ? "Maragusan" : formData.permanentAddress.cityMunicipality,
+                                            value: formData.permanentAddress.cityMunicipality 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -432,31 +464,31 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                             { label: "10-A", value: "021" },
                                             { label: "10-B", value: "022" }
                                         ]} 
-                                        onSelectionChange={(selected: any) => handleNestedInputChange('address', 'barangay', selected?.value || '')}
-                                        value={formData.address.barangay ? { 
-                                            label: formData.address.barangay === "001" ? "1-A" :
-                                                   formData.address.barangay === "002" ? "1-B" :
-                                                   formData.address.barangay === "003" ? "1-C" :
-                                                   formData.address.barangay === "004" ? "2-A" :
-                                                   formData.address.barangay === "005" ? "2-B" :
-                                                   formData.address.barangay === "006" ? "2-C" :
-                                                   formData.address.barangay === "007" ? "3-A" :
-                                                   formData.address.barangay === "008" ? "3-B" :
-                                                   formData.address.barangay === "009" ? "4-A" :
-                                                   formData.address.barangay === "010" ? "4-B" :
-                                                   formData.address.barangay === "011" ? "5-A" :
-                                                   formData.address.barangay === "012" ? "5-B" :
-                                                   formData.address.barangay === "013" ? "6-A" :
-                                                   formData.address.barangay === "014" ? "6-B" :
-                                                   formData.address.barangay === "015" ? "7-A" :
-                                                   formData.address.barangay === "016" ? "7-B" :
-                                                   formData.address.barangay === "017" ? "8-A" :
-                                                   formData.address.barangay === "018" ? "8-B" :
-                                                   formData.address.barangay === "019" ? "9-A" :
-                                                   formData.address.barangay === "020" ? "9-B" :
-                                                   formData.address.barangay === "021" ? "10-A" :
-                                                   formData.address.barangay === "022" ? "10-B" : formData.address.barangay,
-                                            value: formData.address.barangay 
+                                        onSelectionChange={(selected: any) => handleNestedInputChange('permanentAddress', 'barangay', selected?.value || '')}
+                                        value={formData.permanentAddress.barangay ? { 
+                                            label: formData.permanentAddress.barangay === "001" ? "1-A" :
+                                                   formData.permanentAddress.barangay === "002" ? "1-B" :
+                                                   formData.permanentAddress.barangay === "003" ? "1-C" :
+                                                   formData.permanentAddress.barangay === "004" ? "2-A" :
+                                                   formData.permanentAddress.barangay === "005" ? "2-B" :
+                                                   formData.permanentAddress.barangay === "006" ? "2-C" :
+                                                   formData.permanentAddress.barangay === "007" ? "3-A" :
+                                                   formData.permanentAddress.barangay === "008" ? "3-B" :
+                                                   formData.permanentAddress.barangay === "009" ? "4-A" :
+                                                   formData.permanentAddress.barangay === "010" ? "4-B" :
+                                                   formData.permanentAddress.barangay === "011" ? "5-A" :
+                                                   formData.permanentAddress.barangay === "012" ? "5-B" :
+                                                   formData.permanentAddress.barangay === "013" ? "6-A" :
+                                                   formData.permanentAddress.barangay === "014" ? "6-B" :
+                                                   formData.permanentAddress.barangay === "015" ? "7-A" :
+                                                   formData.permanentAddress.barangay === "016" ? "7-B" :
+                                                   formData.permanentAddress.barangay === "017" ? "8-A" :
+                                                   formData.permanentAddress.barangay === "018" ? "8-B" :
+                                                   formData.permanentAddress.barangay === "019" ? "9-A" :
+                                                   formData.permanentAddress.barangay === "020" ? "9-B" :
+                                                   formData.permanentAddress.barangay === "021" ? "10-A" :
+                                                   formData.permanentAddress.barangay === "022" ? "10-B" : formData.permanentAddress.barangay,
+                                            value: formData.permanentAddress.barangay 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -466,15 +498,15 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                     <div className="sm:col-span-4 col-span-1">
                                         <Inputs 
                                             label="STREET / HOUSE NUMBER / LOT" 
-                                            value={formData.address.streetHouseNoLot || ""} 
-                                            onChange={(e: any) => handleNestedInputChange('address', 'streetHouseNoLot', e.target.value)}
+                                            value={formData.permanentAddress.streetHouseNoLot || ""} 
+                                            onChange={(e: any) => handleNestedInputChange('permanentAddress', 'streetHouseNoLot', e.target.value)}
                                         />
                                     </div>
                                     <div className="sm:col-span-1 col-span-2">
                                         <Inputs 
                                             label="POSTAL CODE" 
-                                            value={formData.address.postalCode || ""} 
-                                            onChange={(e: any) => handleNestedInputChange('address', 'postalCode', e.target.value)}
+                                            value={formData.permanentAddress.postalCode || ""} 
+                                            onChange={(e: any) => handleNestedInputChange('permanentAddress', 'postalCode', e.target.value)}
                                         />
                                     </div>
                                 </div>
@@ -483,7 +515,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                         type="checkbox" 
                                         id="setAsPresent" 
                                         checked={setAsPresentAddress}
-                                        onChange={(e) => setSetAsPresentAddress(e.target.checked)}
+                                        onChange={(e) => handleSetAsPresentAddressChange(e.target.checked)}
                                         className="w-[16px] h-[16px] rounded border-szGrey300 text-szPrimary700 focus:ring-szPrimary700 focus:ring-2 focus:ring-offset-0" 
                                     />
                                     <label htmlFor="setAsPresent" className="text-body-regular text-szGrey700 cursor-pointer">
@@ -518,23 +550,23 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                                                                     { label: "Region VII (Central Visayas)", value: "08" },
                                             { label: "Region VIII (Eastern Visayas)", value: "09" }
                                     ]} 
-                                    onSelectionChange={(selected: any) => handleNestedInputChange('address', 'region', selected?.value || '')}
-                                                                            value={formData.address.region ? { 
-                                            label: formData.address.region === "09" ? "Region IX (Zamboanga Peninsula)" :
-                                                   formData.address.region === "10" ? "Region X (Northern Mindanao)" :
-                                                   formData.address.region === "11" ? "Region XI (Davao Region)" :
-                                                   formData.address.region === "12" ? "Region XII (SOCCSKSARGEN)" :
-                                                   formData.address.region === "13" ? "National Capital Region (NCR)" :
-                                                   formData.address.region === "14" ? "Cordillera Administrative Region (CAR)" :
-                                                   formData.address.region === "01" ? "Region I (Ilocos Region)" :
-                                                   formData.address.region === "02" ? "Region II (Cagayan Valley)" :
-                                                   formData.address.region === "03" ? "Region III (Central Luzon)" :
-                                                   formData.address.region === "04" ? "Region IV-A (CALABARZON)" :
-                                                   formData.address.region === "05" ? "Region IV-B (MIMAROPA)" :
-                                                   formData.address.region === "06" ? "Region VI (Western Visayas)" :
-                                                   formData.address.region === "07" ? "Region VII (Central Visayas)" :
-                                                   formData.address.region === "08" ? "Region VIII (Eastern Visayas)" : formData.address.region,
-                                            value: formData.address.region 
+                                    onSelectionChange={(selected: any) => handleNestedInputChange('presentAddress', 'region', selected?.value || '')}
+                                                                            value={formData.presentAddress.region ? { 
+                                            label: formData.presentAddress.region === "09" ? "Region IX (Zamboanga Peninsula)" :
+                                                   formData.presentAddress.region === "10" ? "Region X (Northern Mindanao)" :
+                                                   formData.presentAddress.region === "11" ? "Region XI (Davao Region)" :
+                                                   formData.presentAddress.region === "12" ? "Region XII (SOCCSKSARGEN)" :
+                                                   formData.presentAddress.region === "13" ? "National Capital Region (NCR)" :
+                                                   formData.presentAddress.region === "14" ? "Cordillera Administrative Region (CAR)" :
+                                                   formData.presentAddress.region === "01" ? "Region I (Ilocos Region)" :
+                                                   formData.presentAddress.region === "02" ? "Region II (Cagayan Valley)" :
+                                                   formData.presentAddress.region === "03" ? "Region III (Central Luzon)" :
+                                                   formData.presentAddress.region === "04" ? "Region IV-A (CALABARZON)" :
+                                                   formData.presentAddress.region === "05" ? "Region IV-B (MIMAROPA)" :
+                                                   formData.presentAddress.region === "06" ? "Region VI (Western Visayas)" :
+                                                   formData.presentAddress.region === "07" ? "Region VII (Central Visayas)" :
+                                                   formData.presentAddress.region === "08" ? "Region VIII (Eastern Visayas)" : formData.presentAddress.region,
+                                            value: formData.presentAddress.region 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -557,22 +589,22 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                         { label: "Misamis Occidental", value: "1016" },
                                         { label: "Misamis Oriental", value: "1017" }
                                     ]} 
-                                    onSelectionChange={(selected: any) => handleNestedInputChange('address', 'province', selected?.value || '')}
-                                                                            value={formData.address.province ? { 
-                                            label: formData.address.province === "1182" ? "Davao del Sur" :
-                                                   formData.address.province === "1183" ? "Davao del Norte" :
-                                                   formData.address.province === "1184" ? "Davao Oriental" :
-                                                   formData.address.province === "1186" ? "Davao de Oro" :
-                                                   formData.address.province === "1187" ? "Davao Occidental" :
-                                                   formData.address.province === "0972" ? "Zamboanga del Sur" :
-                                                   formData.address.province === "0971" ? "Zamboanga del Norte" :
-                                                   formData.address.province === "0973" ? "Zamboanga Sibugay" :
-                                                   formData.address.province === "1013" ? "Bukidnon" :
-                                                   formData.address.province === "1014" ? "Camiguin" :
-                                                   formData.address.province === "1015" ? "Lanao del Norte" :
-                                                   formData.address.province === "1016" ? "Misamis Occidental" :
-                                                   formData.address.province === "1017" ? "Misamis Oriental" : formData.address.province,
-                                            value: formData.address.province 
+                                    onSelectionChange={(selected: any) => handleNestedInputChange('presentAddress', 'province', selected?.value || '')}
+                                                                            value={formData.presentAddress.province ? { 
+                                            label: formData.presentAddress.province === "1182" ? "Davao del Sur" :
+                                                   formData.presentAddress.province === "1183" ? "Davao del Norte" :
+                                                   formData.presentAddress.province === "1184" ? "Davao Oriental" :
+                                                   formData.presentAddress.province === "1186" ? "Davao de Oro" :
+                                                   formData.presentAddress.province === "1187" ? "Davao Occidental" :
+                                                   formData.presentAddress.province === "0972" ? "Zamboanga del Sur" :
+                                                   formData.presentAddress.province === "0971" ? "Zamboanga del Norte" :
+                                                   formData.presentAddress.province === "0973" ? "Zamboanga Sibugay" :
+                                                   formData.presentAddress.province === "1013" ? "Bukidnon" :
+                                                   formData.presentAddress.province === "1014" ? "Camiguin" :
+                                                   formData.presentAddress.province === "1015" ? "Lanao del Norte" :
+                                                   formData.presentAddress.province === "1016" ? "Misamis Occidental" :
+                                                   formData.presentAddress.province === "1017" ? "Misamis Oriental" : formData.presentAddress.province,
+                                            value: formData.presentAddress.province 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -598,25 +630,25 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                         { label: "Maco", value: "1186009" },
                                         { label: "Maragusan", value: "1186011" }
                                     ]} 
-                                    onSelectionChange={(selected: any) => handleNestedInputChange('address', 'cityMunicipality', selected?.value || '')}
-                                                                            value={formData.address.cityMunicipality ? { 
-                                            label: formData.address.cityMunicipality === "1182022" ? "Davao City" :
-                                                   formData.address.cityMunicipality === "1182064" ? "Digos City" :
-                                                   formData.address.cityMunicipality === "1183024" ? "Tagum City" :
-                                                   formData.address.cityMunicipality === "1183019" ? "Panabo City" :
-                                                   formData.address.cityMunicipality === "1183023" ? "Island Garden City of Samal" :
-                                                   formData.address.cityMunicipality === "1184037" ? "Mati City" :
-                                                   formData.address.cityMunicipality === "1186017" ? "Nabunturan" :
-                                                   formData.address.cityMunicipality === "1186012" ? "Mawab" :
-                                                   formData.address.cityMunicipality === "1186008" ? "Monkayo" :
-                                                   formData.address.cityMunicipality === "1186004" ? "Compostela" :
-                                                   formData.address.cityMunicipality === "1186015" ? "New Bataan" :
-                                                   formData.address.cityMunicipality === "1186007" ? "Laak" :
-                                                   formData.address.cityMunicipality === "1186014" ? "Montevista" :
-                                                   formData.address.cityMunicipality === "1186020" ? "Pantukan" :
-                                                   formData.address.cityMunicipality === "1186009" ? "Maco" :
-                                                   formData.address.cityMunicipality === "1186011" ? "Maragusan" : formData.address.cityMunicipality,
-                                            value: formData.address.cityMunicipality 
+                                    onSelectionChange={(selected: any) => handleNestedInputChange('presentAddress', 'cityMunicipality', selected?.value || '')}
+                                                                            value={formData.presentAddress.cityMunicipality ? { 
+                                            label: formData.presentAddress.cityMunicipality === "1182022" ? "Davao City" :
+                                                   formData.presentAddress.cityMunicipality === "1182064" ? "Digos City" :
+                                                   formData.presentAddress.cityMunicipality === "1183024" ? "Tagum City" :
+                                                   formData.presentAddress.cityMunicipality === "1183019" ? "Panabo City" :
+                                                   formData.presentAddress.cityMunicipality === "1183023" ? "Island Garden City of Samal" :
+                                                   formData.presentAddress.cityMunicipality === "1184037" ? "Mati City" :
+                                                   formData.presentAddress.cityMunicipality === "1186017" ? "Nabunturan" :
+                                                   formData.presentAddress.cityMunicipality === "1186012" ? "Mawab" :
+                                                   formData.presentAddress.cityMunicipality === "1186008" ? "Monkayo" :
+                                                   formData.presentAddress.cityMunicipality === "1186004" ? "Compostela" :
+                                                   formData.presentAddress.cityMunicipality === "1186015" ? "New Bataan" :
+                                                   formData.presentAddress.cityMunicipality === "1186007" ? "Laak" :
+                                                   formData.presentAddress.cityMunicipality === "1186014" ? "Montevista" :
+                                                   formData.presentAddress.cityMunicipality === "1186020" ? "Pantukan" :
+                                                   formData.presentAddress.cityMunicipality === "1186009" ? "Maco" :
+                                                   formData.presentAddress.cityMunicipality === "1186011" ? "Maragusan" : formData.presentAddress.cityMunicipality,
+                                            value: formData.presentAddress.cityMunicipality 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -648,31 +680,31 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                         { label: "10-A", value: "021" },
                                         { label: "10-B", value: "022" }
                                     ]} 
-                                    onSelectionChange={(selected: any) => handleNestedInputChange('address', 'barangay', selected?.value || '')}
-                                                                            value={formData.address.barangay ? { 
-                                            label: formData.address.barangay === "001" ? "1-A" :
-                                                   formData.address.barangay === "002" ? "1-B" :
-                                                   formData.address.barangay === "003" ? "1-C" :
-                                                   formData.address.barangay === "004" ? "2-A" :
-                                                   formData.address.barangay === "005" ? "2-B" :
-                                                   formData.address.barangay === "006" ? "2-C" :
-                                                   formData.address.barangay === "007" ? "3-A" :
-                                                   formData.address.barangay === "008" ? "3-B" :
-                                                   formData.address.barangay === "009" ? "4-A" :
-                                                   formData.address.barangay === "010" ? "4-B" :
-                                                   formData.address.barangay === "011" ? "5-A" :
-                                                   formData.address.barangay === "012" ? "5-B" :
-                                                   formData.address.barangay === "013" ? "6-A" :
-                                                   formData.address.barangay === "014" ? "6-B" :
-                                                   formData.address.barangay === "015" ? "7-A" :
-                                                   formData.address.barangay === "016" ? "7-B" :
-                                                   formData.address.barangay === "017" ? "8-A" :
-                                                   formData.address.barangay === "018" ? "8-B" :
-                                                   formData.address.barangay === "019" ? "9-A" :
-                                                   formData.address.barangay === "020" ? "9-B" :
-                                                   formData.address.barangay === "021" ? "10-A" :
-                                                   formData.address.barangay === "022" ? "10-B" : formData.address.barangay,
-                                            value: formData.address.barangay 
+                                    onSelectionChange={(selected: any) => handleNestedInputChange('presentAddress', 'barangay', selected?.value || '')}
+                                                                            value={formData.presentAddress.barangay ? { 
+                                            label: formData.presentAddress.barangay === "001" ? "1-A" :
+                                                   formData.presentAddress.barangay === "002" ? "1-B" :
+                                                   formData.presentAddress.barangay === "003" ? "1-C" :
+                                                   formData.presentAddress.barangay === "004" ? "2-A" :
+                                                   formData.presentAddress.barangay === "005" ? "2-B" :
+                                                   formData.presentAddress.barangay === "006" ? "2-C" :
+                                                   formData.presentAddress.barangay === "007" ? "3-A" :
+                                                   formData.presentAddress.barangay === "008" ? "3-B" :
+                                                   formData.presentAddress.barangay === "009" ? "4-A" :
+                                                   formData.presentAddress.barangay === "010" ? "4-B" :
+                                                   formData.presentAddress.barangay === "011" ? "5-A" :
+                                                   formData.presentAddress.barangay === "012" ? "5-B" :
+                                                   formData.presentAddress.barangay === "013" ? "6-A" :
+                                                   formData.presentAddress.barangay === "014" ? "6-B" :
+                                                   formData.presentAddress.barangay === "015" ? "7-A" :
+                                                   formData.presentAddress.barangay === "016" ? "7-B" :
+                                                   formData.presentAddress.barangay === "017" ? "8-A" :
+                                                   formData.presentAddress.barangay === "018" ? "8-B" :
+                                                   formData.presentAddress.barangay === "019" ? "9-A" :
+                                                   formData.presentAddress.barangay === "020" ? "9-B" :
+                                                   formData.presentAddress.barangay === "021" ? "10-A" :
+                                                   formData.presentAddress.barangay === "022" ? "10-B" : formData.presentAddress.barangay,
+                                            value: formData.presentAddress.barangay 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -682,15 +714,15 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                 <div className="sm:col-span-4 col-span-1">
                                     <Inputs 
                                         label="STREET / HOUSE NUMBER / LOT" 
-                                        value={formData.address.streetHouseNoLot || ""} 
-                                        onChange={(e: any) => handleNestedInputChange('address', 'streetHouseNoLot', e.target.value)}
+                                        value={formData.presentAddress.streetHouseNoLot || ""} 
+                                        onChange={(e: any) => handleNestedInputChange('presentAddress', 'streetHouseNoLot', e.target.value)}
                                     />
                                 </div>
                                 <div className="sm:col-span-1 col-span-2">
                                     <Inputs 
                                         label="POSTAL CODE" 
-                                        value={formData.address.postalCode || ""} 
-                                        onChange={(e: any) => handleNestedInputChange('address', 'postalCode', e.target.value)}
+                                        value={formData.presentAddress.postalCode || ""} 
+                                        onChange={(e: any) => handleNestedInputChange('presentAddress', 'postalCode', e.target.value)}
                                     />
                                 </div>
                             </div>
@@ -708,42 +740,42 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                         value={formData.work.dateHired || ""} 
                                         onChange={(value: Date) => handleNestedInputChange('work', 'dateHired', value.toISOString())}
                                     />
-                                    <Dropdown
-                                        label="POSITION"
-                                        placeholder="Select position"
-                                        options={[
-                                            { label: "Software Engineer", value: "SE001" },
-                                            { label: "Senior Software Engineer", value: "SSE001" },
-                                            { label: "Team Lead", value: "TL001" },
-                                            { label: "Project Manager", value: "PM001" },
-                                            { label: "Business Analyst", value: "BA001" },
-                                            { label: "Quality Assurance Engineer", value: "QA001" },
-                                            { label: "UI/UX Designer", value: "UX001" },
-                                            { label: "DevOps Engineer", value: "DE001" },
-                                            { label: "Data Analyst", value: "DA001" },
-                                            { label: "Product Manager", value: "PDM001" },
-                                            { label: "Scrum Master", value: "SM001" },
-                                            { label: "Technical Writer", value: "TW001" }
-                                        ]}
-                                        onSelectionChange={(selected: any) => handleNestedInputChange('work', 'position', selected?.value || '')}
-                                        value={formData.work.position ? { 
-                                            label: formData.work.position === "SE001" ? "Software Engineer" :
-                                                   formData.work.position === "SSE001" ? "Senior Software Engineer" :
-                                                   formData.work.position === "TL001" ? "Team Lead" :
-                                                   formData.work.position === "PM001" ? "Project Manager" :
-                                                   formData.work.position === "BA001" ? "Business Analyst" :
-                                                   formData.work.position === "QA001" ? "Quality Assurance Engineer" :
-                                                   formData.work.position === "UX001" ? "UI/UX Designer" :
-                                                   formData.work.position === "DE001" ? "DevOps Engineer" :
-                                                   formData.work.position === "DA001" ? "Data Analyst" :
-                                                   formData.work.position === "PDM001" ? "Product Manager" :
-                                                   formData.work.position === "SM001" ? "Scrum Master" :
-                                                   formData.work.position === "TW001" ? "Technical Writer" : formData.work.position,
-                                            value: formData.work.position 
-                                        } : undefined}
-                                        usePortal={true}
-                                        size="small"
-                                    />
+                                                                    <Dropdown 
+                                    label="POSITION" 
+                                    placeholder="Select position"
+                                    options={[
+                                        { label: "pos 5 - 124", value: "fc01fee95e8a11f0b4b102dcb324866b" },
+                                        { label: "bsi-dir-01 - bsi-dir-01", value: "f89bb5af459111f0b6b802dcb324866b" },
+                                        { label: "another newest bsi project manager - bsi-projmgr-04", value: "f639b02d459e11f0b6b802dcb324866b" },
+                                        { label: "another coo for bsi - bsi-dir-02", value: "f639d0d3459e11f0b6b802dcb324866b" },
+                                        { label: "another coo for bsi - coo-bsi-mgr", value: "cc8413ec58d611f0b6b802dcb324866b" },
+                                        { label: "another coo for bsi - coo-bsi-mgr2", value: "a50ebaca58b311f0b6b802dcb324866b" },
+                                        { label: "another coo for bsi - coo-bsi-mgr3", value: "7bcd1724451611f0b6b802dcb324866b" },
+                                        { label: "coo mngr 4 - coo-bsi-mgr4", value: "5382919b5e6211f0b4b102dcb324866b" },
+                                        { label: "special projects manager 1 edit - bsi-sptmgr-01", value: "ab88ede7459b11f0b6b802dcb324866b" },
+                                        { label: "pos 73 - 34423", value: "c92cf16b5e8b11f0b4b102dcb324866b" },
+                                        { label: "position mill edit - mill edit", value: "c7f05146615011f0b4b102dcb324866b" },
+                                        { label: "position mill new - 3234", value: "04ba80e2615d11f0b4b102dcb324866b" }
+                                    ]} 
+                                    onSelectionChange={(selected: any) => handleNestedInputChange('work', 'position', selected?.value || '')}
+                                    value={formData.work.position ? {
+                                        label: formData.work.position === "fc01fee95e8a11f0b4b102dcb324866b" ? "pos 5 - 124" :
+                                               formData.work.position === "f89bb5af459111f0b6b802dcb324866b" ? "bsi-dir-01 - bsi-dir-01" :
+                                               formData.work.position === "f639b02d459e11f0b6b802dcb324866b" ? "another newest bsi project manager - bsi-projmgr-04" :
+                                               formData.work.position === "f639d0d3459e11f0b6b802dcb324866b" ? "another coo for bsi - bsi-dir-02" :
+                                               formData.work.position === "cc8413ec58d611f0b6b802dcb324866b" ? "another coo for bsi - coo-bsi-mgr" :
+                                               formData.work.position === "a50ebaca58b311f0b6b802dcb324866b" ? "another coo for bsi - coo-bsi-mgr2" :
+                                               formData.work.position === "7bcd1724451611f0b6b802dcb324866b" ? "another coo for bsi - coo-bsi-mgr3" :
+                                               formData.work.position === "5382919b5e6211f0b4b102dcb324866b" ? "coo mngr 4 - coo-bsi-mgr4" :
+                                               formData.work.position === "ab88ede7459b11f0b6b802dcb324866b" ? "special projects manager 1 edit - bsi-sptmgr-01" :
+                                               formData.work.position === "c92cf16b5e8b11f0b4b102dcb324866b" ? "pos 73 - 34423" :
+                                               formData.work.position === "c7f05146615011f0b4b102dcb324866b" ? "position mill edit - mill edit" :
+                                               formData.work.position === "04ba80e2615d11f0b4b102dcb324866b" ? "position mill new - 3234" : formData.work.position,
+                                        value: formData.work.position
+                                    } : undefined}
+                                    usePortal={true}
+                                    size="small"
+                                />
                                     <Dropdown
                                         label="POSITION STATUS"
                                         placeholder="Select position status"

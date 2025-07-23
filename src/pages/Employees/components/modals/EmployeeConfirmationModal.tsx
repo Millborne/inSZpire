@@ -1,10 +1,9 @@
-import { Avatar, ConfirmationContent, Modal, TextContent } from "enterprisze-global-components";
-import { InfoCircle } from "iconsax-reactjs";
-import { useState } from "react";
-import BasicInfoPendingModal from "./BasicInfoPendingModal";
+import React, { useState } from "react";
+import { Modal, Inputs, Dropdown, Avatar, SnackbarAlert, ConfirmationContent, TextContent } from "enterprisze-global-components";
+import { InfoCircle, Warning2 } from "iconsax-reactjs";
+import { useCreateEmployeeMutation } from "../../../../services/employee/create/employeeCreateAPI";
 import { addEmployeeData } from "./EmployeeModal";
 import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
-import { useCreateEmployeeMutation } from "../../../../services/employee/create/employeeCreateAPI";
 
 interface EmployeeConfirmationModalProps {
     isOpen: boolean;
@@ -14,16 +13,15 @@ interface EmployeeConfirmationModalProps {
 }
 
 const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ isOpen, onClose, addEmployeeData, onSubmitSuccess }) => {
-    const [isBasicInfoPendingModalOpen, setIsBasicInfoPendingModalOpen] = useState(false);
+    const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
-    const [profileImg, setProfileImg] = useState<string | undefined>();
-    
     const [createEmployee, { isLoading }] = useCreateEmployeeMutation();
 
-    // Get the first employee data (since we're adding one employee)
     const employeeData = addEmployeeData[0];
 
-    // Helper function to convert database codes to display labels
+    // Helper function to get display labels for dropdown values
     const getDisplayLabel = (value: string, type: string) => {
         switch (type) {
             case 'gender':
@@ -36,55 +34,99 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                 return value === "TRAINEE" ? "Trainee" : value === "PROBATIONARY" ? "Probationary" : value === "REGULAR" ? "Regular" : value === "CONTRACT" ? "Contract" : value === "PART_TIME" ? "Part-time" : value === "INTERN" ? "Intern" : value;
             case 'employmentStatus':
                 return value === "ACTIVE" ? "Active" : value === "INACTIVE" ? "Inactive" : value === "TERMINATED" ? "Terminated" : value === "RESIGNED" ? "Resigned" : value === "RETIRED" ? "Retired" : value === "SUSPENDED" ? "Suspended" : value;
-            case 'region':
-                return value === "10" ? "Region X (Northern Mindanao)" : value === "11" ? "Region XI (Davao Region)" : value === "12" ? "Region XII (SOCCSKSARGEN)" : value === "13" ? "National Capital Region (NCR)" : value === "14" ? "Cordillera Administrative Region (CAR)" : value === "01" ? "Region I (Ilocos Region)" : value === "02" ? "Region II (Cagayan Valley)" : value === "03" ? "Region III (Central Luzon)" : value === "04" ? "Region IV-A (CALABARZON)" : value === "05" ? "Region IV-B (MIMAROPA)" : value === "06" ? "Region V (Bicol Region)" : value === "07" ? "Region VI (Western Visayas)" : value === "08" ? "Region VII (Central Visayas)" : value === "09" ? "Region VIII (Eastern Visayas)" : value;
-            case 'province':
-                return value === "1182" ? "Davao del Sur" : value === "1183" ? "Davao del Norte" : value === "1184" ? "Davao Oriental" : value === "1186" ? "Davao de Oro" : value === "1187" ? "Davao Occidental" : value === "0972" ? "Zamboanga del Sur" : value === "0971" ? "Zamboanga del Norte" : value === "0973" ? "Zamboanga Sibugay" : value === "1013" ? "Bukidnon" : value === "1014" ? "Camiguin" : value === "1015" ? "Lanao del Norte" : value === "1016" ? "Misamis Occidental" : value === "1017" ? "Misamis Oriental" : value;
-            case 'city':
-                return value === "1182022" ? "Davao City" : value === "1182064" ? "Digos City" : value === "1183024" ? "Tagum City" : value === "1183019" ? "Panabo City" : value === "1183023" ? "Island Garden City of Samal" : value === "1184037" ? "Mati City" : value === "1186017" ? "Nabunturan" : value === "1186012" ? "Mawab" : value === "1186008" ? "Monkayo" : value === "1186004" ? "Compostela" : value === "1186015" ? "New Bataan" : value === "1186007" ? "Laak" : value === "1186014" ? "Montevista" : value === "1186020" ? "Pantukan" : value === "1186009" ? "Maco" : value === "1186011" ? "Maragusan" : value;
-            case 'barangay':
-                return value === "001" ? "1-A" : value === "002" ? "1-B" : value === "003" ? "1-C" : value === "004" ? "2-A" : value === "005" ? "2-B" : value === "006" ? "2-C" : value === "007" ? "3-A" : value === "008" ? "3-B" : value === "009" ? "4-A" : value === "010" ? "4-B" : value === "011" ? "5-A" : value === "012" ? "5-B" : value === "013" ? "6-A" : value === "014" ? "6-B" : value === "015" ? "7-A" : value === "016" ? "7-B" : value === "017" ? "8-A" : value === "018" ? "8-B" : value === "019" ? "9-A" : value === "020" ? "9-B" : value === "021" ? "10-A" : value === "022" ? "10-B" : value;
+            case "region":
+                switch (value) {
+                    case "09": return "Region IX (Zamboanga Peninsula)";
+                    case "10": return "Region X (Northern Mindanao)";
+                    case "11": return "Region XI (Davao Region)";
+                    case "12": return "Region XII (SOCCSKSARGEN)";
+                    case "13": return "National Capital Region (NCR)";
+                    case "14": return "Cordillera Administrative Region (CAR)";
+                    case "01": return "Region I (Ilocos Region)";
+                    case "02": return "Region II (Cagayan Valley)";
+                    case "03": return "Region III (Central Luzon)";
+                    case "04": return "Region IV-A (CALABARZON)";
+                    case "05": return "Region IV-B (MIMAROPA)";
+                    case "06": return "Region V (Bicol Region)";
+                    case "07": return "Region VI (Western Visayas)";
+                    case "08": return "Region VII (Central Visayas)";
+                    default: return value;
+                }
+            case "province":
+                switch (value) {
+                    case "1182": return "Davao del Sur";
+                    case "1183": return "Davao del Norte";
+                    case "1184": return "Davao Oriental";
+                    case "1186": return "Davao de Oro";
+                    case "1187": return "Davao Occidental";
+                    case "0972": return "Zamboanga del Sur";
+                    case "0971": return "Zamboanga del Norte";
+                    case "0973": return "Zamboanga Sibugay";
+                    case "1013": return "Bukidnon";
+                    case "1014": return "Camiguin";
+                    case "1015": return "Lanao del Norte";
+                    case "1016": return "Misamis Occidental";
+                    case "1017": return "Misamis Oriental";
+                    default: return value;
+                }
+            case "city":
+                switch (value) {
+                    case "1182022": return "Davao City";
+                    case "1182064": return "Digos City";
+                    case "1183024": return "Tagum City";
+                    case "1183019": return "Panabo City";
+                    case "1183023": return "Island Garden City of Samal";
+                    case "1184037": return "Mati City";
+                    case "1186017": return "Nabunturan";
+                    case "1186012": return "Mawab";
+                    case "1186008": return "Monkayo";
+                    case "1186004": return "Compostela";
+                    case "1186015": return "New Bataan";
+                    case "1186007": return "Laak";
+                    case "1186014": return "Montevista";
+                    case "1186020": return "Pantukan";
+                    case "1186009": return "Maco";
+                    case "1186011": return "Maragusan";
+                    default: return value;
+                }
+            case "barangay":
+                switch (value) {
+                    case "001": return "1-A";
+                    case "002": return "1-B";
+                    case "003": return "1-C";
+                    case "004": return "2-A";
+                    case "005": return "2-B";
+                    case "006": return "2-C";
+                    case "007": return "3-A";
+                    case "008": return "3-B";
+                    case "009": return "4-A";
+                    case "010": return "4-B";
+                    case "011": return "5-A";
+                    case "012": return "5-B";
+                    case "013": return "6-A";
+                    case "014": return "6-B";
+                    case "015": return "7-A";
+                    case "016": return "7-B";
+                    case "017": return "8-A";
+                    case "018": return "8-B";
+                    case "019": return "9-A";
+                    case "020": return "9-B";
+                    case "021": return "10-A";
+                    case "022": return "10-B";
+                    default: return value;
+                }
             default:
                 return value;
         }
     };
 
-    // Convert form data to display format
-    const nameAndBirthdayData = employeeData ? [
-        { label: "Extension", value: employeeData.fullName.extension || "" },
-        { label: "First Name", value: employeeData.fullName.firstName || "" },
-        { label: "Middle Name", value: employeeData.fullName.middleName || "" },
-        { label: "Last Name", value: employeeData.fullName.lastName || "" },
-        { label: "Nickname", value: employeeData.fullName.nickname || "" },
-        { label: "Date of Birth", value: employeeData.fullName.dateOfBirth || "" },
-    ] : [];
-
-    const workData = employeeData ? [
-        { label: "Date Hired", value: employeeData.work.dateHired || "" },
-        { label: "Position", value: getDisplayLabel(employeeData.work.position || "", "position") },
-        { label: "Position Status", value: getDisplayLabel(employeeData.work.positionStatus || "", "positionStatus") },
-        { label: "Employment Status", value: getDisplayLabel(employeeData.work.employmentStatus || "", "employmentStatus") },
-        { label: "Work Email", value: employeeData.work.workEmail || "" },
-    ] : [];
-
-    const otherData = employeeData ? [
-        { label: "Religion", value: employeeData.others.religion || "" },
-        { label: "Gender", value: getDisplayLabel(employeeData.others.gender || "", "gender") },
-        { label: "Civil Status", value: getDisplayLabel(employeeData.others.civilStatus || "", "civilStatus") },
-        { label: "Pronouns", value: employeeData.others.pronouns || "" },
-        { label: "Blood Type", value: employeeData.others.bloodType || "" },
-        { label: "Birth Address", value: employeeData.others.birthAddress || "" },
-        { label: "Telephone Number", value: employeeData.others.telephoneNumber || "" },
-        { label: "Mobile Number", value: employeeData.others.mobileNumber || "" },
-    ] : [];
-
     const addressData = employeeData ? [
-        { label: "Region", value: getDisplayLabel(employeeData.address.region || "", "region") },
-        { label: "Province", value: getDisplayLabel(employeeData.address.province || "", "province") },
-        { label: "City / Municipality", value: getDisplayLabel(employeeData.address.cityMunicipality || "", "city") },
-        { label: "Barangay", value: getDisplayLabel(employeeData.address.barangay || "", "barangay") },
-        { label: "Street / House Number / Lot", value: employeeData.address.streetHouseNoLot || "" },
-        { label: "Postal Code", value: employeeData.address.postalCode || "" },
+        { label: "Region", value: getDisplayLabel(employeeData.permanentAddress.region || "", "region") },
+        { label: "Province", value: getDisplayLabel(employeeData.permanentAddress.province || "", "province") },
+        { label: "City / Municipality", value: getDisplayLabel(employeeData.permanentAddress.cityMunicipality || "", "city") },
+        { label: "Barangay", value: getDisplayLabel(employeeData.permanentAddress.barangay || "", "barangay") },
+        { label: "Street / House Number / Lot", value: employeeData.permanentAddress.streetHouseNoLot || "" },
+        { label: "Postal Code", value: employeeData.permanentAddress.postalCode || "" },
     ] : [];
 
     // Get employee full name for display
@@ -92,37 +134,36 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
         `${employeeData.fullName.firstName || ""} ${employeeData.fullName.middleName || ""} ${employeeData.fullName.lastName || ""}`.trim() : 
         "Employee Name";
 
-    // Get employee position for display
-    const employeePosition = employeeData ? getDisplayLabel(employeeData.work.position || "", "position") : "Position";
+    // Get employee position for display - show position name if available, otherwise show the ID
+    const getPositionDisplayName = (positionId: string) => {
+        switch (positionId) {
+            case "fc01fee95e8a11f0b4b102dcb324866b": return "pos 5 - 124";
+            case "f89bb5af459111f0b6b802dcb324866b": return "bsi-dir-01 - bsi-dir-01";
+            case "f639b02d459e11f0b6b802dcb324866b": return "another newest bsi project manager - bsi-projmgr-04";
+            case "f639d0d3459e11f0b6b802dcb324866b": return "another coo for bsi - bsi-dir-02";
+            case "cc8413ec58d611f0b6b802dcb324866b": return "another coo for bsi - coo-bsi-mgr";
+            case "a50ebaca58b311f0b6b802dcb324866b": return "another coo for bsi - coo-bsi-mgr2";
+            case "7bcd1724451611f0b6b802dcb324866b": return "another coo for bsi - coo-bsi-mgr3";
+            case "5382919b5e6211f0b4b102dcb324866b": return "coo mngr 4 - coo-bsi-mgr4";
+            case "ab88ede7459b11f0b6b802dcb324866b": return "special projects manager 1 edit - bsi-sptmgr-01";
+            case "c92cf16b5e8b11f0b4b102dcb324866b": return "pos 73 - 34423";
+            case "c7f05146615011f0b4b102dcb324866b": return "position mill edit - mill edit";
+            case "04ba80e2615d11f0b4b102dcb324866b": return "position mill new - 3234";
+            default: return positionId;
+        }
+    };
+
+    const employeePosition = employeeData ? 
+        (employeeData.work.position ? getPositionDisplayName(employeeData.work.position) : "Position") : 
+        "Position";
 
     const handlePendingCheck = async () => {
-        // setIsBasicInfoPendingModalOpen(true);
         try {
             const employeeData = addEmployeeData[0];
             if (employeeData) {
-                // Transform the form data to match the backend API structure
-                // Helper function to convert position codes to UUIDs based on actual database
-                const getPositionUUID = (positionCode: string) => {
-                    switch (positionCode) {
-                        case "SE001": return "fc01fee95e8a11f0b4b102dcb324866b"; // pos 5
-                        case "SSE001": return "7bcd1724451611f0b6b802dcb324866b"; // another coo for bsi
-                        case "TL001": return "a50ebaca58b311f0b6b802dcb324866b"; // another coo for bsi
-                        case "PM001": return "f639b02d459e11f0b6b802dcb324866b"; // another newest bsi project manager
-                        case "BA001": return "f639d0d3459e11f0b6b802dcb324866b"; // another coo for bsi
-                        case "QA001": return "f89bb5af459111f0b6b802dcb324866b"; // bsi-dir-01
-                        case "UX001": return "ab88ede7459b11f0b6b802dcb324866b"; // special projects manager 1 edit
-                        case "DE001": return "cc8413ec58d611f0b6b802dcb324866b"; // new coo for bsi
-                        case "DA001": return "5382919b5e6211f0b4b102dcb324866b"; // coo mngr 4
-                        case "PDM001": return "04ba80e2615d11f0b4b102dcb324866b"; // position mill new
-                        case "SM001": return "c92cf16b5e8b11f0b4b102dcb324866b"; // pos 73
-                        case "TW001": return "c7f05146615011f0b4b102dcb324866b"; // position mill edit
-                        default: return "fc01fee95e8a11f0b4b102dcb324866b"; // Default to pos 5
-                    }
-                };
-
                 const transformedData = {
                     work_email: employeeData.work.workEmail || "",
-                    current_position_ID: getPositionUUID(employeeData.work.position || ""),
+                    current_position_ID: employeeData.work.position || "", // Use the actual position_ID from the dropdown
                     sched_type: "flexible", // Default value
                     hire_date: employeeData.work.dateHired ? new Date(employeeData.work.dateHired).toISOString().split('T')[0] : "",
                     has_atm: 1,
@@ -156,48 +197,81 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                         blood_type: employeeData.others.bloodType || "",
                         telephone_number: employeeData.others.telephoneNumber || "",
                         mobile_number: employeeData.others.mobileNumber || "",
-                        personal_email: "test@example.com", // Required field with valid email format
+                        personal_email: "anothertestingIntegration@example.com", // Required field with valid email format
                         educational_attainment_ID: "7cbd3ea82b1111f0b6b802dcb324866b" // Default value
                     },
+                    // Create permanent address record
                     permanent_address: {
-                        address_line_1: employeeData.address.streetHouseNoLot || "",
+                        address_line_1: employeeData.permanentAddress.streetHouseNoLot || "",
                         address_line_2: "",
                         country_ID: 1, // Default to Philippines
-                        region_state_ID: parseInt(employeeData.address.region) || 14,
-                        province_ID: parseInt(employeeData.address.province) || 62,
-                        city_municipality_ID: parseInt(employeeData.address.cityMunicipality) || 1357,
-                        barangay_ID: parseInt(employeeData.address.barangay) || 35769,
-                        postal_code: employeeData.address.postalCode || "",
+                        region_state_ID: parseInt(employeeData.permanentAddress.region) || 14,
+                        province_ID: parseInt(employeeData.permanentAddress.province) || 62,
+                        city_municipality_ID: parseInt(employeeData.permanentAddress.cityMunicipality) || 1357,
+                        barangay_ID: parseInt(employeeData.permanentAddress.barangay) || 35769,
+                        postal_code: employeeData.permanentAddress.postalCode || "",
                         service_identifier: "HOME",
-                        address_type_ID: 1,
+                        address_type_ID: 1, // Permanent address type
                         entity: "PROFILE"
                     },
+                    // Create present address record
                     present_address: {
-                        address_line_1: employeeData.address.streetHouseNoLot || "",
+                        address_line_1: employeeData.presentAddress.streetHouseNoLot || "",
                         address_line_2: "",
                         country_ID: 1, // Default to Philippines
-                        region_state_ID: parseInt(employeeData.address.region) || 14,
-                        province_ID: parseInt(employeeData.address.province) || 62,
-                        city_municipality_ID: parseInt(employeeData.address.cityMunicipality) || 1357,
-                        barangay_ID: parseInt(employeeData.address.barangay) || 35770,
-                        postal_code: employeeData.address.postalCode || "",
+                        region_state_ID: parseInt(employeeData.presentAddress.region) || 14,
+                        province_ID: parseInt(employeeData.presentAddress.province) || 62,
+                        city_municipality_ID: parseInt(employeeData.presentAddress.cityMunicipality) || 1357,
+                        barangay_ID: parseInt(employeeData.presentAddress.barangay) || 35770,
+                        postal_code: employeeData.presentAddress.postalCode || "",
                         service_identifier: "WORK",
-                        address_type_ID: 2,
+                        address_type_ID: 2, // Present address type
                         entity: "PROFILE"
                     }
                 };
 
                 await createEmployee(transformedData).unwrap();
+                
+                // Show success notification
+                setShowSuccessSnackbar(true);
+                
                 if (onSubmitSuccess) {
                     onSubmitSuccess();
                 }
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error creating employee:', error);
             console.error('Full error details:', JSON.stringify(error, null, 2));
-            // You might want to show an error message here
+            
+            // Parse error message to show specific error
+            let errorMsg = "An error occurred while creating the employee.";
+            
+            if (error?.data?.error) {
+                const errorString = error.data.error;
+                
+                // Check for duplicate position error
+                if (errorString.includes("Duplicate entry") && errorString.includes("current_position_ID")) {
+                    const positionName = employeeData?.work.position ? getPositionDisplayName(employeeData.work.position) : "Selected position";
+                    errorMsg = `The position "${positionName}" is already assigned to another employee. Please select a different position.`;
+                } else if (errorString.includes("Duplicate entry")) {
+                    errorMsg = "A duplicate entry was found. Please check your input and try again.";
+                } else if (errorString.includes("foreign key constraint")) {
+                    errorMsg = "Invalid reference data. Please check the selected options.";
+                } else {
+                    errorMsg = errorString;
+                }
+            } else if (error?.data?.message) {
+                errorMsg = error.data.message;
+            }
+            
+            setErrorMessage(errorMsg);
+            setShowErrorModal(true);
         }
-        onClose();
+    };
+
+    const handleErrorModalClose = () => {
+        setShowErrorModal(false);
+        setErrorMessage("");
     };
 
     return (
@@ -223,10 +297,11 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                         size: "medium",
                     },
                     {
-                        label: "Proceed",
+                        label: isLoading ? "Creating..." : "Proceed",
                         variant: "primary",
                         onClick: handlePendingCheck,
                         size: "medium",
+                        disabled: isLoading,
                     },
                 ]}
                 content={
@@ -234,27 +309,99 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                         <div className="flex flex-col gap-[8px]">
                             <p className="text-body-base-strong text-szBlack800 text-center">You are about to add this employee.</p>
                             <div className="flex flex-row items-center justify-center gap-[8px]">
-                                <Avatar size="xsmall" src={profileImg || SZOfficialLogo} />
+                                <Avatar size="xsmall" src={SZOfficialLogo} />
                                 <div className="flex flex-col">
                                     <p className="text-body-small-strong font-dmsans text-szBlack800">{employeeFullName}</p>
                                     <TextContent header={employeePosition} />
                                 </div>
                             </div>
-                            <div className="flex flex-col gap-[16px]">
-                                <ConfirmationContent variant="add" sectionLabel="NAME AND BIRTHDAY" data={nameAndBirthdayData} />
-                                <ConfirmationContent variant="add" sectionLabel="WORK" data={workData} />
-                                <ConfirmationContent variant="add" sectionLabel="ADDRESS" data={addressData} />
-                                <ConfirmationContent variant="add" sectionLabel="OTHERS" data={otherData} />
-                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-[16px]">
+                            <ConfirmationContent 
+                                variant="add" 
+                                sectionLabel="NAME AND BIRTHDAY" 
+                                data={[
+                                    { label: "EXTENSION", value: employeeData?.fullName.extension || "—" },
+                                    { label: "NICKNAME", value: employeeData?.fullName.nickname || "—" },
+                                    { label: "BIRTHDATE", value: employeeData?.fullName.dateOfBirth || "—" }
+                                ]} 
+                            />
+                            <ConfirmationContent 
+                                variant="add" 
+                                sectionLabel="WORK" 
+                                data={[
+                                    { label: "DATE HIRED", value: employeeData?.work.dateHired || "—" },
+                                    { label: "POSITION", value: employeePosition },
+                                    { label: "POSITION STATUS", value: getDisplayLabel(employeeData?.work.positionStatus || "", "positionStatus") },
+                                    { label: "EMPLOYMENT STATUS", value: getDisplayLabel(employeeData?.work.employmentStatus || "", "employmentStatus") },
+                                    { label: "WORK EMAIL", value: employeeData?.work.workEmail || "—" }
+                                ]} 
+                            />
+                            <ConfirmationContent 
+                                variant="add" 
+                                sectionLabel="ADDRESS" 
+                                data={addressData} 
+                            />
+                            <ConfirmationContent 
+                                variant="add" 
+                                sectionLabel="OTHERS" 
+                                data={[
+                                    { label: "RELIGION", value: employeeData?.others.religion || "—" },
+                                    { label: "GENDER", value: getDisplayLabel(employeeData?.others.gender || "", "gender") },
+                                    { label: "CIVIL STATUS", value: getDisplayLabel(employeeData?.others.civilStatus || "", "civilStatus") },
+                                    { label: "PRONOUNS", value: employeeData?.others.pronouns || "—" },
+                                    { label: "BLOOD TYPE", value: employeeData?.others.bloodType || "—" },
+                                    { label: "BIRTH ADDRESS", value: employeeData?.others.birthAddress || "—" },
+                                    { label: "TELEPHONE NUMBER", value: employeeData?.others.telephoneNumber || "—" },
+                                    { label: "MOBILE NUMBER", value: employeeData?.others.mobileNumber || "—" }
+                                ]} 
+                            />
                         </div>
                     </div>
                 }
             />
-            <BasicInfoPendingModal
-                isOpen={isBasicInfoPendingModalOpen}
-                onClose={() => setIsBasicInfoPendingModalOpen(false)}
-                onCloseConfirmation={onClose}
-                onSubmitSuccess={onSubmitSuccess}
+
+            {/* Error Modal */}
+            <Modal
+                isOpen={showErrorModal}
+                onClose={handleErrorModalClose}
+                showHeaderDivider={false}
+                showFooterDivider={false}
+                icon={<Warning2 />}
+                title="Error"
+                showButton={false}
+                modalWidth="w-[500px]"
+                contentHeight="h-auto"
+                headerOptions="left"
+                footerOptions="center"
+                showCloseIcon={false}
+                footerButtons={[
+                    {
+                        label: "OK",
+                        variant: "primary",
+                        onClick: handleErrorModalClose,
+                        size: "medium",
+                    },
+                ]}
+                content={
+                    <div className="flex flex-col gap-[16px]">
+                        <div className="flex flex-col gap-[8px]">
+                            <p className="text-body-base-strong text-szBlack800 text-center">Employee creation failed</p>
+                            <p className="text-body-regular text-szGrey700 text-center">{errorMessage}</p>
+                        </div>
+                    </div>
+                }
+            />
+
+            {/* Success Snackbar */}
+            <SnackbarAlert
+                isOpen={showSuccessSnackbar}
+                onClose={() => setShowSuccessSnackbar(false)}
+                showCloseButton={true}
+                type="success"
+                title="Employee created successfully!"
+                animation="slide-up"
             />
         </>
     );
