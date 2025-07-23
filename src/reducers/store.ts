@@ -22,7 +22,7 @@ import { personalDocumentsAPI } from "../services/employee-profile/work/document
 import { positionTypeAPI } from "../services/settings/positions/type/positionTypeAPI";
 import { workSetupAPI } from "../services/settings/work-setup/list/workSetupAPI";
 import { locationsAPI } from "../services/locations-options/locationsAPI";
-import { religionAPI } from "../services/employee-profile/personal/basic-info/religionAPI"; 
+import { religionAPI } from "../services/employee-profile/personal/basic-info/religionAPI";
 
 // Slices
 import employeeReducer from "./employeeSlice";
@@ -83,3 +83,4 @@ const configStore = configureStore({
 
 export { configStore };
 export type RootState = ReturnType<typeof configStore.getState>; //to get states from slices
+export type AppDispatch = typeof configStore.dispatch; //to get dispatch type
