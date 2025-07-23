@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ButtonsIcon, CardContainer, Inputs, Pagination, PopoverMenu, SnackbarAlert, Table } from "enterprisze-global-components";
 import { Add, Briefcase, Edit2, ExportCurve, Filter, InfoCircle, SearchNormal } from "iconsax-reactjs";
-
+import { useEmployeeService, type EmployeeData, type ViewEmployeesRequest } from "../../../services/employee/list/use-employee";
 // Components
 import EmployeeFilterModal from "../components/modals/EmployeeFilterModal";
 import EmployeeModal from "../components/modals/EmployeeModal";
@@ -10,6 +10,26 @@ import EmployeePositionModal from "../components/modals/EmployeePositionModal";
 
 const EmployeeList = () => {
     const navigate = useNavigate();
+    const employeeService = useEmployeeService();
+
+    // State management
+    const [employees, setEmployees] = useState<EmployeeData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filters, setFilters] = useState<ViewEmployeesRequest>({
+        is_archived: 0,
+        offset: 0,
+        limit: 10
+    });
+
+    // Pagination state
+    const [pagination, setPagination] = useState({
+        total: 0,
+        offset: 0,
+        limit: 10,
+        hasMore: false
+    });
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<"add" | "edit">("add");
@@ -19,9 +39,97 @@ const EmployeeList = () => {
     const [snackbarAction, setSnackbarAction] = useState<"add" | "edit" | "update" | null>(null);
     const [openFilter, setOpenFilter] = useState(false);
 
+    // Load employees on component mount
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
+
+                // Load employees using vw_employee view
+                console.log("Sending request with filters:", filters);
+                const employeesResponse = await employeeService.listEmployees(filters);
+                console.log("Employees response:", employeesResponse);
+
+                // Handle different response structures
+                if (employeesResponse.data?.success && employeesResponse.data?.data?.employees) {
+                    // Response structure: { success: true, data: { employees: [...], pagination: {...} } }
+                    const responseData = employeesResponse.data.data;
+                    setEmployees(responseData.employees || []);
+                    setPagination(responseData.pagination || {
+                        total: 0,
+                        offset: 0,
+                        limit: 10,
+                        hasMore: false
+                    });
+                } else if (employeesResponse.data?.success && employeesResponse.data?.employees) {
+                    // Direct response structure: { success: true, employees: [...], pagination: {...} }
+                    const responseData = employeesResponse.data;
+                    setEmployees(responseData.employees || []);
+                    setPagination(responseData.pagination || {
+                        total: 0,
+                        offset: 0,
+                        limit: 10,
+                        hasMore: false
+                    });
+                } else {
+                    console.error("No employee data received - response structure:", employeesResponse.data);
+                    setEmployees([]);
+                    setPagination({
+                        total: 0,
+                        offset: 0,
+                        limit: 10,
+                        hasMore: false
+                    });
+                }
+
+            } catch (err) {
+                console.error("Error loading data:", err);
+                
+                // Check if it's a CORS error
+                if (err && typeof err === 'object' && 'status' in err) {
+                    const error = err as any;
+                    if (error.status === 'FETCH_ERROR' || error.status === 'CORS_ERROR') {
+                        setError("CORS Error: Backend needs to allow requests from frontend. Please check backend CORS configuration.");
+                    } else {
+                        setError(`Failed to load employees. Status: ${error.status}`);
+                    }
+                } else {
+                    setError("Failed to load employees. Please try again.");
+                }
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadData();
+    }, [filters]);
+
+    // Handle search
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setFilters(prev => ({
+                ...prev,
+                search: searchTerm,
+                offset: 0
+            }));
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm]);
+
+    // Handle page change
+    const handlePageChange = (page: number) => {
+        const newOffset = (page - 1) * pagination.limit;
+        setFilters(prev => ({
+            ...prev,
+            offset: newOffset
+        }));
+    };
+
     const handleRowClick = (index: number) => {
         console.log("Row clicked:", index);
-        navigate(`${data[index]?.id}/summary`);
+        navigate(`${employees[index]?.employee_ID}/summary`);
     };
 
     const handleSubmitSuccess = (action: "add" | "edit" | "update") => {
@@ -40,6 +148,50 @@ const EmployeeList = () => {
         setSelectedEmployee(employee);
         setIsModalOpen(true);
     };
+
+    // Get employee full name
+    const getEmployeeFullName = (employee: EmployeeData) => {
+        const parts = [
+            employee.first_name,
+            employee.middle_name,
+            employee.last_name,
+            employee.name_ext
+        ].filter(Boolean);
+        return parts.join(" ");
+    };
+
+    // Get status color
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "Active":
+                return "bg-success700";
+            case "On Leave":
+                return "bg-szGrey300";
+            case "Suspended":
+                return "bg-info500";
+            case "AWOL":
+                return "bg-warning500";
+            case "Terminated":
+                return "bg-error500";
+            default:
+                return "bg-szGrey300";
+        }
+    };
+
+    // Transform data for table
+    const tableData = employees.map(employee => ({
+        name: (
+            <div className="md:flex items-center gap-1">
+                <div className={`w-[14px] h-[14px] rounded-full ${getStatusColor(employee.employee_status)}`}></div>
+                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{getEmployeeFullName(employee)}</span>
+            </div>
+        ),
+        id: employee.employee_number,
+        team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{employee.team_name}</span>,
+        jobTitle: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{employee.position_name}</span>,
+        jobCode: employee.position_code,
+        directHead: "N/A" // This field is not available in vw_employee view
+    }));
 
     // For larger screen
     const headers: Array<
@@ -142,65 +294,6 @@ const EmployeeList = () => {
         { type: "more", header: <></>, accessor: "more" },
     ];
 
-    const data = [
-        {
-            name: (
-                <div className="md:flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Germanotta, Stephanie Luke A.</span>
-                </div>
-            ),
-            id: "1234567890",
-            team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">BSI</span>,
-            jobTitle: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Junior Web Developer</span>,
-            jobCode: "1234567890",
-            directHead: "John Doe",
-        },
-        {
-            name: (
-                <div className="md:flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-success700"></div>
-                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Smith, John William B.</span>
-                </div>
-            ),
-            id: "2345678901",
-            team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Shoopee</span>,
-            jobTitle: (
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Customer Service Representative</span>
-            ),
-            jobCode: "2345678901",
-            directHead: "Jane Smith",
-        },
-        {
-            name: (
-                <div className="md:flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-info500"></div>
-                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Johnson, Emily Rose C.</span>
-                </div>
-            ),
-            id: "3456789012",
-            team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Shoopee</span>,
-            jobTitle: (
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Customer Service Representative</span>
-            ),
-            jobCode: "3456789012",
-            directHead: "Michael Brown",
-        },
-        {
-            name: (
-                <div className="md:flex items-center gap-1">
-                    <div className="w-[14px] h-[14px] rounded-full bg-warning500"></div>
-                    <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Davis, Robert James D.</span>
-                </div>
-            ),
-            id: "4567890123",
-            team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Shoopee</span>,
-            jobTitle: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">Manager</span>,
-            jobCode: "4567890123",
-            directHead: "Sarah Wilson",
-        },
-    ];
-
     const moreOptions = [
         // {
         //     label: "View",
@@ -209,17 +302,43 @@ const EmployeeList = () => {
         {
             label: "Edit Employee",
             icon: <Edit2 />,
-            onClick: (index: number) => openEditEmployee(data[index]),
+            onClick: (index: number) => openEditEmployee(employees[index]),
         },
         {
             label: "Update Position",
             icon: <Briefcase />,
             onClick: (index: number) => {
-                setSelectedEmployee(data[index]);
+                setSelectedEmployee(employees[index]);
                 setIsUpdatePositionModalOpen(true);
             },
         },
     ];
+
+    // Loading state
+    if (isLoading) {
+        return (
+            <CardContainer
+                content={
+                    <div className="flex items-center justify-center h-64">
+                        <div className="text-szPrimary700">Loading employees...</div>
+                    </div>
+                }
+            />
+        );
+    }
+
+    // Error state
+    if (error) {
+        return (
+            <CardContainer
+                content={
+                    <div className="flex items-center justify-center h-64">
+                        <div className="text-red-600">{error}</div>
+                    </div>
+                }
+            />
+        );
+    }
 
     return (
         <CardContainer
@@ -239,7 +358,12 @@ const EmployeeList = () => {
 
                     <div className="flex gap-4">
                         <div className="w-full max-w-[355px]">
-                            <Inputs placeholder="Search by Name, ID, Job Title, or Team" icon={SearchNormal} />
+                            <Inputs 
+                                placeholder="Search by Name, ID, Job Title, or Team" 
+                                icon={SearchNormal} 
+                                value={searchTerm}
+                                onChange={(e: any) => setSearchTerm(e.target.value)}
+                            />
                         </div>
                         <ButtonsIcon icon={<Filter />} variant="ghost" size="large" onClick={() => setOpenFilter(true)} />
                         {/* <Button leftIcon={<Filter />} variant="ghost" size="large" onClick={() => setOpenFilter(true)} label={""} /> */}
@@ -249,7 +373,7 @@ const EmployeeList = () => {
                         <div className="hidden lg:block">
                             <Table
                                 headers={headers}
-                                data={data}
+                                data={tableData}
                                 moreOptions={moreOptions}
                                 tableHeight="h-[400px]"
                                 onRowClick={handleRowClick}
@@ -258,14 +382,19 @@ const EmployeeList = () => {
                         <div className="block lg:hidden">
                             <Table
                                 headers={headersSmall}
-                                data={data}
+                                data={tableData}
                                 moreOptions={moreOptions}
                                 tableHeight="h-[400px]"
                                 onRowClick={handleRowClick}
                             />
                         </div>
                         <div className="flex justify-end">
-                            <Pagination currentPage={1} totalPages={10} visiblePages={5} onChange={() => {}} />
+                            <Pagination 
+                                currentPage={Math.floor(pagination.offset / pagination.limit) + 1}
+                                totalPages={Math.ceil(pagination.total / pagination.limit)}
+                                visiblePages={5} 
+                                onChange={handlePageChange} 
+                            />
                         </div>
                     </div>
 
