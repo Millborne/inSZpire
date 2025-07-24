@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AppDispatch } from "./store";
 
 // Employee data interface based on the existing EmployeeData type
 export interface EmployeeData {
@@ -59,6 +60,12 @@ export interface EmployeeData {
     setup_name?: string;
     job_code: string;
     job_title: string;
+
+    filters?: {
+        is_archived: number;
+        offset: number;
+        limit: number;
+    };
 }
 
 interface EmployeeState {
@@ -93,3 +100,27 @@ export const { setSelectedEmployee, clearSelectedEmployee } =
     employeeSlice.actions;
 
 export default employeeSlice.reducer;
+
+export const resetAndFetchEmployee = async (
+    dispatch: AppDispatch,
+    selectedEmployee: any,
+    employeeService: any
+) => {
+    if (selectedEmployee?.filters) {
+        const employeesResponse = await employeeService.listEmployees(
+            selectedEmployee?.filters
+        );
+
+        let employeeData = employeesResponse.data.data.employees.find(
+            (employee: any) =>
+                employee.employee_ID === selectedEmployee.employee_ID
+        );
+
+        dispatch(
+            setSelectedEmployee({
+                ...employeeData,
+                filters: selectedEmployee.filters,
+            })
+        );
+    }
+};
