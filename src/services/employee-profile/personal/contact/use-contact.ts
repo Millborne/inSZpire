@@ -134,7 +134,7 @@ export const useContactService = () => {
     const listContact = async (filters: ViewContactRequest) => {
         return generalAction({
             queryParameters: "/getFamilyContacts",
-            method: "GET",
+            method: "POST",
             body: filters,
         });
     };
@@ -165,7 +165,7 @@ export const useContactService = () => {
     const viewContact = async (filters: ViewContactRequest) => {
         return generalAction({
             queryParameters: "/getFamilyContacts",
-            method: "GET",
+            method: "POST",
             body: filters,
         });
     };

@@ -165,7 +165,7 @@ export const useFamilyService = () => {
     const viewFamily = async (filters: ViewFamilyRequest) => {
         return generalAction({
             queryParameters: "/getFamilyContacts",
-            method: "GET",
+            method: "POST",
             body: filters,
         });
     };
