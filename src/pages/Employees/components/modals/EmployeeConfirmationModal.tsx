@@ -156,7 +156,7 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                         blood_type: employeeData.others.bloodType || "",
                         telephone_number: employeeData.others.telephoneNumber || "",
                         mobile_number: employeeData.others.mobileNumber || "",
-                        personal_email: "test@example.com", // Required field with valid email format
+                        personal_email: "fortestinglang@example.com", // Required field with valid email format
                         educational_attainment_ID: "7cbd3ea82b1111f0b6b802dcb324866b" // Default value
                     },
                     permanent_address: {
