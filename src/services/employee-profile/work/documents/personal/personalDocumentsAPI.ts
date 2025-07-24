@@ -9,6 +9,12 @@ interface generalProps {
     body?: any;
 }
 
+interface DeleteDocumentByEmployeeProps {
+    document_ID: string;
+    profile_ID: string;
+    doc_type_ID: string;
+}
+
 export const personalDocumentsAPI = createApi({
     reducerPath: "personalDocuments",
     baseQuery: fetchBaseQuery({
@@ -49,7 +55,23 @@ export const personalDocumentsAPI = createApi({
                 },
             }),
         }),
+        deleteDocumentByEmployee: builder.mutation({
+            query: (data: DeleteDocumentByEmployeeProps) => ({
+                url: `/api/v1/documents/employee/document`,
+                method: "DELETE",
+                body: {
+                    document_ID: data.document_ID,
+                    profile_ID: data.profile_ID,
+                    doc_type_ID: data.doc_type_ID,
+                },
+            }),
+        }),
     }),
 });
 
-export const { useFetchPersonalDocumentsQuery, useActionPersonalDocumentsMutation, useFetchDocumentByTypeMutation } = personalDocumentsAPI;
+export const {
+    useFetchPersonalDocumentsQuery,
+    useActionPersonalDocumentsMutation,
+    useFetchDocumentByTypeMutation,
+    useDeleteDocumentByEmployeeMutation,
+} = personalDocumentsAPI;

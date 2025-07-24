@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { useFetchPersonalDocumentsQuery, useActionPersonalDocumentsMutation, useFetchDocumentByTypeMutation } from "./personalDocumentsAPI";
+import {
+    useFetchPersonalDocumentsQuery,
+    useActionPersonalDocumentsMutation,
+    useFetchDocumentByTypeMutation,
+    useDeleteDocumentByEmployeeMutation,
+} from "./personalDocumentsAPI";
 
 type UploadArgs = {
     file: File;
@@ -7,6 +12,12 @@ type UploadArgs = {
     doc_type_ID: string;
     title: string;
     description?: string;
+};
+
+type DeleteDocumentByEmployeeArgs = {
+    document_ID: string;
+    profile_ID: string;
+    doc_type_ID: string;
 };
 
 export const usePersonalDocuments = (employee_ID: string, docTypeList: { id: string }[]) => {
@@ -52,6 +63,7 @@ export const usePersonalDocuments = (employee_ID: string, docTypeList: { id: str
 
     /* ---------- DELETE ---------- */
     const [deleteMutation, { isLoading: isDeleting }] = useActionPersonalDocumentsMutation();
+    const [deleteByEmployeeMutation, { isLoading: isDeletingByEmployee }] = useDeleteDocumentByEmployeeMutation();
 
     const deleteDocument = async (document_ID: string, doc_type_ID: string) => {
         await deleteMutation({
@@ -59,6 +71,16 @@ export const usePersonalDocuments = (employee_ID: string, docTypeList: { id: str
             method: "DELETE",
         });
         await fetchOne(doc_type_ID);
+    };
+
+    const deleteDocumentByEmployee = async (args: DeleteDocumentByEmployeeArgs) => {
+        try {
+            await deleteByEmployeeMutation(args).unwrap();
+            await fetchOne(args.doc_type_ID);
+        } catch (error) {
+            console.error("Error deleting document by employee:", error);
+            throw error;
+        }
     };
 
     /* ---------- FETCH DOCUMENT BY TYPE ---------- */
@@ -99,7 +121,9 @@ export const usePersonalDocuments = (employee_ID: string, docTypeList: { id: str
         docMap,
         isUploading,
         isDeleting,
+        isDeletingByEmployee,
         upload,
         deleteDocument,
+        deleteDocumentByEmployee,
     };
 };
