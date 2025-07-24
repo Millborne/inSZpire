@@ -19,6 +19,7 @@ export interface CreateEducationRequest {
 
 export interface UpdateEducationRequest {
     educ_ID: string;
+    profile_ID: string;
     education_level_ID?: string;
     school_ID?: string;
     degree?: string;

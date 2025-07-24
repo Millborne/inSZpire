@@ -4,6 +4,7 @@ import {
     Inputs,
     Modal,
     PurpleTaggedCard,
+    SnackbarAlert,
     TextContent,
 } from "enterprisze-global-components";
 
@@ -20,6 +21,7 @@ import {
     useEducation,
     useEducationLevels,
 } from "../../../../services/employee-profile/personal/education";
+import { bufferToHex } from "../../../../utils/bufferToHex";
 
 export interface EducationalDataType {
     id: string;
@@ -269,6 +271,12 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
     const { createEducation, updateEducation, deleteEducation } =
         useEducation();
 
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [snackbarType, setSnackbarType] = useState<
+        "success" | "warning" | "error"
+    >("success");
+
     // For Adding Education
     const handleAddEducationClick = () => {
         setShowInputContainer(true);
@@ -293,19 +301,20 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
         }
 
         try {
-            // Helper function to convert Buffer to hex string
-            const bufferToHex = (bufferObj: any): string => {
-                if (
-                    !bufferObj ||
-                    !bufferObj.data ||
-                    !Array.isArray(bufferObj.data)
-                ) {
-                    return "";
-                }
-                return bufferObj.data
-                    .map((byte: number) => byte.toString(16).padStart(2, "0"))
-                    .join("");
-            };
+            // Validate required fields
+            if (educationalLevel === "Educational Level") {
+                setSnackbarOpen(true);
+                setSnackbarMessage("Please select an educational level");
+                setSnackbarType("warning");
+                return;
+            }
+
+            if (!formData.schoolName) {
+                setSnackbarOpen(true);
+                setSnackbarMessage("Please enter a school name");
+                setSnackbarType("warning");
+                return;
+            }
 
             // Map educational level to education level ID
             const foundEducationLevel = educationLevels.data.find(
@@ -315,8 +324,7 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
 
             const educationLevelId = foundEducationLevel?.education_level_ID
                 ? bufferToHex(foundEducationLevel.education_level_ID)
-                : "";
-            const schoolId = "school-id"; // Replace with actual school ID
+                : "00000000000000000000000000000000";
 
             await createEducation({
                 profile_ID: selectedEmployee.profile_ID,
@@ -331,12 +339,17 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                     ? parseInt(formData.yearLeft)
                     : undefined,
                 honors_received: formData.honorsReceived || undefined,
-                user_type: "employee", // Replace with actual user type
+                user_type: "employee",
             });
 
             setShowInputContainer(false);
             setEducationalLevel("Educational Level");
             setShowEducationalLevelDropdown(false);
+
+            // Show success message
+            setSnackbarOpen(true);
+            setSnackbarMessage("Education record created successfully");
+            setSnackbarType("success");
 
             // Call success callback
             if (onSubmitSuccess) {
@@ -350,6 +363,15 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
     // For Editing Education
     const handleEditClick = (index: number) => {
         const education = educationalData[index];
+        setEducationalLevel(
+            education.level
+                .split(" ")
+                .map(
+                    (word: string) =>
+                        word.charAt(0).toUpperCase() + word.slice(1)
+                )
+                .join(" ")
+        );
         setShowInputContainer(true);
         setIsEditMode(true);
         setEditingIndex(index);
@@ -369,10 +391,39 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
     const handleDoneClick = async () => {
         if (editingIndex !== null) {
             try {
+                // Validate required fields
+                if (educationalLevel === "Educational Level") {
+                    setSnackbarOpen(true);
+                    setSnackbarMessage("Please select an educational level");
+                    setSnackbarType("warning");
+                    return;
+                }
+
+                if (!formData.schoolName) {
+                    setSnackbarOpen(true);
+                    setSnackbarMessage("Please enter a school name");
+                    setSnackbarType("warning");
+                    return;
+                }
+
                 const education = educationalData[editingIndex];
 
+                // Map educational level to education level ID
+                const foundEducationLevel = educationLevels.data.find(
+                    (item: any) =>
+                        item.name.toLowerCase() ===
+                        educationalLevel.toLowerCase()
+                );
+
+                const educationLevelId = foundEducationLevel?.education_level_ID
+                    ? bufferToHex(foundEducationLevel.education_level_ID)
+                    : "00000000000000000000000000000000";
+
                 await updateEducation({
-                    educ_ID: education.id,
+                    educ_ID: bufferToHex(education.id),
+                    profile_ID: selectedEmployee?.profile_ID || "",
+                    education_level_ID: educationLevelId,
+                    school_ID: "77777777000000000000000000000001",
                     degree: formData.degree || undefined,
                     course: formData.course || undefined,
                     year_started: formData.yearStarted
@@ -388,12 +439,20 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                 setEducationalLevel("Educational Level");
                 setShowEducationalLevelDropdown(false);
 
+                // Show success message
+                setSnackbarOpen(true);
+                setSnackbarMessage("Education record updated successfully");
+                setSnackbarType("success");
+
                 // Call success callback
                 if (onSubmitSuccess) {
                     onSubmitSuccess();
                 }
             } catch (error) {
                 console.error("Error updating education:", error);
+                setSnackbarOpen(true);
+                setSnackbarMessage("Error updating education record");
+                setSnackbarType("error");
             }
         }
     };
@@ -419,7 +478,7 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                 const profileId = selectedEmployee.profile_ID;
 
                 await deleteEducation({
-                    educ_ID: education.id,
+                    educ_ID: bufferToHex(education.id),
                     profile_ID: profileId,
                     user_type: "employee", // Replace with actual user type
                 });
@@ -440,7 +499,13 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
         <>
             <Modal
                 isOpen={isOpen}
-                onClose={onClose}
+                onClose={() => {
+                    onClose();
+                    setShowInputContainer(false);
+                    setIsEditMode(false);
+                    setEditingIndex(null);
+                    setEducationalLevel("Educational Level");
+                }}
                 showHeaderDivider={false}
                 title="Edit Educational Background"
                 buttonLabel="Education"
@@ -453,13 +518,26 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                     {
                         label: "Cancel",
                         variant: "ghost",
-                        onClick: () => onClose(),
+                        onClick: () => {
+                            setShowInputContainer(false);
+                            setIsEditMode(false);
+                            setEditingIndex(null);
+                            setEducationalLevel("Educational Level");
+                            onClose();
+                        },
                         size: "medium",
                     },
                     {
                         label: "Submit",
                         variant: "primary",
-                        onClick: handleSubmit,
+                        onClick: () => {
+                            handleSubmit();
+                            setShowInputContainer(false);
+                            setIsEditMode(false);
+                            setEditingIndex(null);
+                            setEducationalLevel("Educational Level");
+                            onClose();
+                        },
                         size: "medium",
                     },
                 ]}
@@ -494,7 +572,16 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                                             className="flex flex-col gap-[24px]"
                                         >
                                             <PurpleTaggedCard
-                                                label={educationalData.level}
+                                                label={educationalData.level
+                                                    .split(" ")
+                                                    .map(
+                                                        (word: string) =>
+                                                            word
+                                                                .charAt(0)
+                                                                .toUpperCase() +
+                                                            word.slice(1)
+                                                    )
+                                                    .join(" ")}
                                                 children={
                                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
                                                         <TextContent
@@ -612,6 +699,13 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                 onClose={() => setIsDeleteModalOpen(false)}
                 onClick={handleDeleteConfirm}
                 description="Are you sure you want to delete this educational background?"
+            />
+
+            <SnackbarAlert
+                isOpen={snackbarOpen}
+                onClose={() => setSnackbarOpen(false)}
+                message={snackbarMessage}
+                type={snackbarType}
             />
         </>
     );

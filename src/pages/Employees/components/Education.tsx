@@ -43,8 +43,8 @@ const Education = () => {
     const transformedEducationData =
         educationData?.data?.map((education: any, index: number) => ({
             id: education.educ_ID,
-            level: education.education_level?.name || "Unknown Level",
-            "school name": education.school?.name || "Unknown School",
+            level: education.education_level || "Unknown Level",
+            "school name": education.school_name || "Unknown School",
             degree: education.degree || "-",
             course: education.course || "-",
             "year started": education.year_started?.toString() || "-",
@@ -90,7 +90,7 @@ const Education = () => {
                             (education: any, index: number) => (
                                 <PurpleTaggedCard
                                     key={index}
-                                    label={education.level}
+                                    label={education.level.split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                                     children={
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
                                             <TextContent
