@@ -180,7 +180,14 @@ const EmployeeList = () => {
         console.log("Row clicked:", index);
         const selectedEmployee = employees[index];
         if (selectedEmployee) {
-            dispatch(setSelectedEmployee(selectedEmployee));
+            dispatch(setSelectedEmployee({ 
+                ...selectedEmployee, 
+                filters: {
+                    is_archived: filters.is_archived || 0,
+                    offset: filters.offset || 0,
+                    limit: filters.limit || 10
+                }
+            }));
             navigate(`${selectedEmployee.employee_ID}/summary`);
         }
     };
