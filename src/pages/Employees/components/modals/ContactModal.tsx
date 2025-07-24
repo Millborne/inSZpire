@@ -195,6 +195,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
   const handleSubmit = async () => {
     setFormLoading(true);
     try {
+      
       // Update basic info (mobile number and personal email)
       if (employeeId && (contactInfo.mobileNumber || contactInfo.personalEmail)) {
         const updateData: any = {
