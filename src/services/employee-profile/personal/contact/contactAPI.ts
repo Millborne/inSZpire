@@ -12,7 +12,7 @@ interface generalProps {
 export const contactAPI = createApi({
     reducerPath: "contact",
     baseQuery: fetchBaseQuery({
-        baseUrl: VITE_IDENTITY_SERVICE,
+        baseUrl: VITE_IDENTITY_SERVICE || "http://localhost:4173",
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 

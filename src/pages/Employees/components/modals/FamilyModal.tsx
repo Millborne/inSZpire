@@ -11,6 +11,8 @@ import {
 // icons
 import { ArrowDown2, TickCircle, Trash, Edit2 } from "iconsax-reactjs";
 import { useState } from "react";
+import React from "react";
+import { useLocationsService } from "../../../../services/locations-options/use-locations";
 
 // components
 //   import DeleteConfirmation from "../../../../components/DeleteConfirmation";
@@ -40,7 +42,7 @@ export interface FamilyMemberDataType {
   dateOfBirth: string;
   isFamilyContact: number,
   isEmergencyContact: number,
-  address: {
+  addressObj: {
     region: string;
     province: string;
     cityMunicipality: string;
@@ -100,7 +102,15 @@ const FamilyModal: React.FC<FamilyModalProps> = ({
         name_ext: formData?.extension || "",
         relation: relationship,
         contact_number: formData?.contactNumber || "",
-        address: formData?.textAddress || "Address not provided",
+        // addressObj: JSON.stringify({
+        //   region: formData?.region || "",
+        //   province: formData?.province || "",
+        //   city: formData?.city || "",
+        //   barangay: formData?.barangay || "",
+        //   street: formData?.street || "",
+        //   postalCode: formData?.postalCode || "",
+        // }),
+        address: formData?.address || "",
         email: formData?.email || "",
         // date_of_birth: formData?.dateOfBirth || "2000-01-01",
         is_family_contact: 1,
@@ -145,7 +155,15 @@ const FamilyModal: React.FC<FamilyModalProps> = ({
           relation: relationship,
           contact_number: formData?.contactNumber || member.contact_number,
           // date_of_birth: formData?.dateOfBirth || member.date_of_birth,
-          address: formData?.street || member.address,
+          // addressObj: JSON.stringify({
+          //   region: formData?.region || "",
+          //   province: formData?.province || "",
+          //   city: formData?.city || "",
+          //   barangay: formData?.barangay || "",
+          //   street: formData?.street || "",
+          //   postalCode: formData?.postalCode || "",
+          // }),
+          address: formData?.address || "",
           email: formData?.email || member.email,
           is_family_contact: 1,
           is_emergency_contact: Number(formData?.isEmergencyContact) || Number(member.is_emergency_contact),
@@ -216,10 +234,16 @@ const FamilyModal: React.FC<FamilyModalProps> = ({
             middleName: currentFamilyData.middle_name,
             extension: currentFamilyData.name_ext,
             contactNumber: currentFamilyData.contact_number,
-            textAddress: currentFamilyData.address,
+            address: currentFamilyData.address,
             dateOfBirth: "2000-01-01",
             isFamily: 1,
-            isEmergency:currentFamilyData.is_emergency_contact || 0
+            isEmergency:currentFamilyData.is_emergency_contact || 0,
+            region: "",
+            province: "",
+            city: "",
+            barangay: "",
+            street: "",
+            postalCode: ""
           }
         : {
             firstName: "",
@@ -227,11 +251,130 @@ const FamilyModal: React.FC<FamilyModalProps> = ({
             middleName: "",
             extension: "",
             contactNumber: "",
-            textAddress: "",
+            Address: "",
             isFamily: 1,
-            isEmergency: 0
+            isEmergency: 0,
+            region: "",
+            province: "",
+            city: "",
+            barangay: "",
+            street: "",
+            postalCode: ""
           }
     );
+
+    // Location dropdown state
+    const { getRegionStates, getProvinces, getMunicipalities, getBarangays } = useLocationsService();
+    const [regions, setRegions] = useState<{ value: string; label: string }[]>([]);
+    const [provinces, setProvinces] = useState<{ value: string; label: string }[]>([]);
+    const [municipalities, setMunicipalities] = useState<{ value: string; label: string }[]>([]);
+    const [barangays, setBarangays] = useState<{ value: string; label: string }[]>([]);
+    const [loading, setLoading] = useState({
+      regions: false,
+      provinces: false,
+      municipalities: false,
+      barangays: false,
+    });
+
+    // Fetch regions on mount/show
+    React.useEffect(() => {
+      const fetchRegions = async () => {
+        setLoading((prev) => ({ ...prev, regions: true }));
+        try {
+          const result = await getRegionStates({ page: 1, limit: 100, sortBy: "region_name", sortOrder: "ASC" });
+          if (result.data?.data) {
+            setRegions(result.data.data.map((region: any) => ({ value: region.region_state_ID.toString(), label: region.region_name || "" })));
+          }
+        } catch (e) { /* handle error if needed */ }
+        setLoading((prev) => ({ ...prev, regions: false }));
+      };
+      fetchRegions();
+    }, []);
+
+    // Fetch provinces when region changes
+    React.useEffect(() => {
+      if (!formData.region) { setProvinces([]); return; }
+      const fetchProvinces = async () => {
+        setLoading((prev) => ({ ...prev, provinces: true }));
+        try {
+          const result = await getProvinces({ region_ID: parseInt(formData.region), limit: 100 });
+          if (result.data?.data) {
+            setProvinces(result.data.data.map((province: any) => ({ value: province.province_ID.toString(), label: province.province_name || "" })));
+          }
+        } catch (e) { setProvinces([]); }
+        setLoading((prev) => ({ ...prev, provinces: false }));
+      };
+      fetchProvinces();
+    }, [formData.region]);
+
+    // Fetch municipalities when region or province changes
+    React.useEffect(() => {
+      const fetchMunicipalities = async () => {
+        setLoading((prev) => ({ ...prev, municipalities: true }));
+        try {
+            const params: { region_ID?: number, province_ID?: number, limit: number } = { limit: 2000 };
+            if (formData.province) {
+                params.province_ID = parseInt(formData.province);
+            } else if (formData.region) {
+                params.region_ID = parseInt(formData.region);
+            } else {
+                setMunicipalities([]);
+                setLoading((prev) => ({ ...prev, municipalities: false }));
+                return;
+            }
+            const result = await getMunicipalities(params);
+            if (result.data?.data) {
+                setMunicipalities(result.data.data.map((city: any) => ({ value: city.city_municipality_ID.toString(), label: city.city_name || "" })));
+            } else {
+                setMunicipalities([]);
+            }
+        } catch (e) { setMunicipalities([]); }
+        setLoading((prev) => ({ ...prev, municipalities: false }));
+    };
+    if (formData.region) {
+        fetchMunicipalities();
+    } else {
+        setMunicipalities([]);
+    }
+    }, [formData.region, formData.province]);
+
+    // Fetch barangays when city changes
+    React.useEffect(() => {
+      if (!formData.city) { setBarangays([]); return; }
+      const fetchBarangays = async () => {
+        setLoading((prev) => ({ ...prev, barangays: true }));
+        try {
+          const result = await getBarangays({ city_municipality_ID: parseInt(formData.city), limit: 45000 });
+          if (result.data?.data) {
+            setBarangays(result.data.data.map((barangay: any) => ({ value: barangay.barangay_ID.toString(), label: barangay.barangay_name || "" })));
+          }
+        } catch (e) { setBarangays([]); }
+        setLoading((prev) => ({ ...prev, barangays: false }));
+      };
+      fetchBarangays();
+    }, [formData.city]);
+
+    // Dropdown change handlers
+    const handleDropdownChange = (field: string, value: any) => {
+      setFormData((prev: any) => {
+        if (field === "region") {
+          setProvinces([]);
+          setMunicipalities([]);
+          setBarangays([]);
+          return { ...prev, region: value.value, province: "", city: "", barangay: "" };
+        } else if (field === "province") {
+          setMunicipalities([]);
+          setBarangays([]);
+          return { ...prev, province: value?.value || "", city: "", barangay: "" };
+        } else if (field === "city") {
+          setBarangays([]);
+          return { ...prev, city: value.value, barangay: "" };
+        } else if (field === "barangay") {
+          return { ...prev, barangay: value.value };
+        }
+        return prev;
+      });
+    };
 
     return (
       <div
@@ -288,27 +431,35 @@ const FamilyModal: React.FC<FamilyModalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-[16px] mb-[16px] relative z-50">
               <Dropdown
                 label="REGION"
-                placeholder=""
-                options={[]}
-                onSelectionChange={() => {}}
+                placeholder={loading.regions ? "Loading..." : "Select region"}
+                options={regions}
+                value={regions.find(opt => opt.value === formData.region) || undefined}
+                onSelectionChange={val => handleDropdownChange("region", val)}
+                disabled={loading.regions}
               />
               <Dropdown
                 label="PROVINCE"
-                placeholder=""
-                options={[]}
-                onSelectionChange={() => {}}
+                placeholder={loading.provinces ? "Loading..." : "Select province (optional)"}
+                options={provinces}
+                value={provinces.find(opt => opt.value === formData.province) || undefined}
+                onSelectionChange={val => handleDropdownChange("province", val)}
+                disabled={loading.provinces || !formData.region}
               />
               <Dropdown
                 label="CITY / MUNICIPALITY"
-                placeholder=""
-                options={[]}
-                onSelectionChange={() => {}}
+                placeholder={loading.municipalities ? "Loading..." : "Select city/municipality"}
+                options={municipalities}
+                value={municipalities.find(opt => opt.value === formData.city) || undefined}
+                onSelectionChange={val => handleDropdownChange("city", val)}
+                disabled={loading.municipalities || !formData.region}
               />
               <Dropdown
                 label="BARANGAY"
-                placeholder=""
-                options={[]}
-                onSelectionChange={() => {}}
+                placeholder={loading.barangays ? "Loading..." : "Select barangay"}
+                options={barangays}
+                value={barangays.find(opt => opt.value === formData.barangay) || undefined}
+                onSelectionChange={val => handleDropdownChange("barangay", val)}
+                disabled={loading.barangays || !formData.city}
               />
             </div>
             {/* Address Row 2: Street (wide) and Postal Code (narrow) */}
@@ -322,7 +473,12 @@ const FamilyModal: React.FC<FamilyModalProps> = ({
                 />
               </div>
               <div className="sm:col-span-1 col-span-2">
-                <Inputs label="POSTAL CODE" placeholder="9000" />
+                <Inputs
+                  label="POSTAL CODE"
+                  placeholder="9000"
+                  value={formData.postalCode}
+                  onChange={e => setFormData((f: any) => ({ ...f, postalCode: e.target.value }))}
+                />
               </div>
             </div>
           </div>
@@ -339,7 +495,30 @@ const FamilyModal: React.FC<FamilyModalProps> = ({
             variant="primary"
             size="small"
             leftIcon={<TickCircle />}
-            onClick={() => isEditMode ? handleDoneClick(formData) : handleAddClick(formData)}
+            onClick={() => {
+              const regionLabel = regions.find(r => r.value === formData.region)?.label;
+              const provinceLabel = provinces.find(p => p.value === formData.province)?.label;
+              const cityLabel = municipalities.find(c => c.value === formData.city)?.label;
+              const barangayLabel = barangays.find(b => b.value === formData.barangay)?.label;
+
+              const address = [
+                formData.street,
+                barangayLabel,
+                cityLabel,
+                provinceLabel,
+                regionLabel,
+                formData.postalCode,
+              ]
+                .filter(Boolean)
+                .join(", ");
+
+              const submissionData = { ...formData, address };
+              if (isEditMode) {
+                handleDoneClick(submissionData);
+              } else {
+                handleAddClick(submissionData);
+              }
+            }}
             loading={formLoading}
           />
         </div>
@@ -347,6 +526,7 @@ const FamilyModal: React.FC<FamilyModalProps> = ({
     );
   };
 
+ 
   return (
     <>
       <Modal

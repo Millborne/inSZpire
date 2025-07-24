@@ -3,8 +3,12 @@ import { ButtonsIcon, PurpleTaggedCard, SnackbarAlert, TextContent } from "enter
 import { Edit2 } from "iconsax-react";
 import FamilyModal from "./modals/FamilyModal";
 import { useFamilyService } from "../../../services/employee-profile/personal/family/use-family";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../reducers/store";
 
-const PROFILE_ID = "11111111-0000-0000-0000-000000000002";
+// const PROFILE_ID = "11111111-0000-0000-0000-000000000002";
+
+
 
 const Family = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,6 +20,19 @@ const Family = () => {
     const [error, setError] = useState<String | null>(null);
 
     const familyService = useFamilyService();
+
+    
+    // Employee RTK State - commented out until employeeState is added to store
+    const selectedEmployee = useSelector(
+        (state: RootState) => state.employeeState.selectedEmployee
+    );
+    const PROFILE_ID = selectedEmployee?.profile_ID;
+
+   // Don't render if PROFILE_ID is not available
+   if (!PROFILE_ID) {
+    return <div>No employee selected</div>;
+}
+
 
     // Fetch family data
     const fetchFamily = async () => {
@@ -40,7 +57,7 @@ const Family = () => {
     useEffect(() => {
         fetchFamily();
         // eslint-disable-next-line
-    }, []);
+    }, [PROFILE_ID]);
 
     const handleSubmitSuccess = (message = "Successfully updated Family") => {
         setSnackbarMessage(message);
@@ -66,8 +83,8 @@ const Family = () => {
         contactNumber: member.contact_number,
         email: member.email || "",
         isFamily: member.is_family_contact,
-        textAddress: member.address || "",
-        address: {
+        address: member.address || "",
+        addressObj: {
             country: "Philippines", // fallback, or parse from address if structured
             region: "",
             province: "",
@@ -97,7 +114,7 @@ const Family = () => {
                         .filter(member => (member.is_family_contact === 1))
                         .map((member, index) => {
                             const mapped = mapFamilyData(member);
-                            const address = mapped.textAddress;
+                            const address = mapped.address;
                             return (
                                 <PurpleTaggedCard key={mapped.id || index} label={mapped.relationship}>
                                     <div className="flex flex-col gap-4">
