@@ -1,15 +1,22 @@
 export {
     educationAPI,
-    useFetchEducationQuery,
-    useActionEducationMutation,
-} from "./educationAPI";
-export {
-    useEducation,
-    useEducationService,
-    type EducationData,
+    useCreateEducationMutation,
+    useUpdateEducationMutation,
+    useListEducationQuery,
+    useDeleteEducationMutation,
+    useViewEducationLevelsQuery,
     type CreateEducationRequest,
     type UpdateEducationRequest,
-    type ViewEducationRequest,
-    type GetEducationRequest,
-    type BatchUpdateStatusRequest,
+    type ListEducationRequest,
+    type DeleteEducationRequest,
+    type ViewEducationLevelsRequest,
+    type EducationLevelData,
+} from "./educationAPI";
+
+export {
+    useEducation,
+    useEducationList,
+    useEducationLevels,
+    useEducationService,
+    type EducationData,
 } from "./use-education";
