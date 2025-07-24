@@ -19,12 +19,15 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
     const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-
+    const [isBasicInfoPendingModalOpen, setIsBasicInfoPendingModalOpen] = useState(false);
+    const [profileImg, setProfileImg] = useState<string | undefined>();
+    
     const [createEmployee, { isLoading }] = useCreateEmployeeMutation();
 
+    // Get the first employee data (since we're adding one employee)
     const employeeData = addEmployeeData[0];
 
-    // Helper function to get display labels for dropdown values
+    // Helper function to convert database codes to display labels
     const getDisplayLabel = (value: string, type: string) => {
         switch (type) {
             case 'gender':
