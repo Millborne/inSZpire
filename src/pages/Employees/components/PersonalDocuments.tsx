@@ -1,8 +1,11 @@
 // import React, { useEffect, useState } from "react";
 import { CardContainer, TextContent, Document } from "enterprisze-global-components";
 import { usePersonalDocuments } from "../../../services/employee-profile/work/documents/personal/use-personal-documents";
+import { sanitizeUUID } from "../../../utils/uuid";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../reducers/store";
 
-const EMPLOYEE_ID = "3f90afacb181454d810a5946a73307bf";
+// const EMPLOYEE_ID = "";
 
 const applicationDocuments = [
     { id: "3e29e02e525611f0b6b802dcb324866b", header: "nbi clearance" },
@@ -21,7 +24,14 @@ const applicationDocuments = [
 ];
 
 const PersonalDocuments = () => {
-    const { docMap, isUploading, isDeleting, upload, deleteDocument } = usePersonalDocuments(EMPLOYEE_ID, applicationDocuments);
+    const selectedEmployee = useSelector((state: RootState) => state.employeeState.selectedEmployee);
+
+    console.log(selectedEmployee);
+
+    const { docMap, isUploading, isDeleting, upload, deleteDocument, deleteDocumentByEmployee } = usePersonalDocuments(
+        selectedEmployee?.employee_ID || "",
+        applicationDocuments
+    );
 
     const handleUploadDocument = async (fileObj: any, docTypeId: string) => {
         // Convert the file object to a proper File object
@@ -42,9 +52,14 @@ const PersonalDocuments = () => {
             file = fileObj as File;
         }
 
+        if (!selectedEmployee?.employee_ID) {
+            console.error("No employee ID found");
+            return;
+        }
+
         await upload({
             file,
-            employee_ID: EMPLOYEE_ID,
+            employee_ID: selectedEmployee.employee_ID,
             doc_type_ID: docTypeId,
             title: fileObj.name || "uploaded-file",
             description: "uploaded from frontend",
@@ -53,7 +68,12 @@ const PersonalDocuments = () => {
 
     const handleDeleteDocument = async (document_ID: string, docTypeId: string) => {
         console.log("Deleting document:", document_ID, docTypeId);
-        await deleteDocument(document_ID, docTypeId);
+        // await deleteDocument(document_ID, docTypeId);
+        await deleteDocumentByEmployee({
+            document_ID: sanitizeUUID(document_ID),
+            profile_ID: selectedEmployee?.profile_ID || "",
+            doc_type_ID: docTypeId,
+        });
     };
 
     return (
