@@ -34,11 +34,11 @@ export const idsAPI = createApi({
   endpoints: (builder) => ({
     fetchIds: builder.query({
       query: (data: generalProps) =>
-        `/employee-identifiers${data.queryParameters}`,
+        `/api/v1/employee-identifiers${data.queryParameters}`,
     }),
     fetchEmployeeIdentifiers: builder.query({
       query: (filters: EmployeeIdentifiersRequest) => ({
-        url: "/employee-identifiers/view",
+        url: "/api/v1/employee-identifiers/view",
         method: "POST",
         body: filters,
       }),
@@ -55,14 +55,14 @@ export const idsAPI = createApi({
     }),
     fetchIdentifiers: builder.query({
       query: () => ({
-        url: "/identifiers/view",
+        url: "/api/v1/identifiers/view",
         method: "POST",
       }),
       providesTags: [{ type: "identifiers", id: "LIST" }],
     }),
     actionIds: builder.mutation({
       query: (data: generalProps) => ({
-        url: `/employee-identifiers${data.queryParameters}`,
+        url: `/api/v1/employee-identifiers${data.queryParameters}`,
         method: data.method,
         body: data.body ?? undefined,
       }),
