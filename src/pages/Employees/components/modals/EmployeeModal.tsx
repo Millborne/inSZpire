@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Modal, Inputs, Dropdown, Avatar, SnackbarAlert, CustomDatePicker } from "enterprisze-global-components";
-import { InfoCircle } from "iconsax-reactjs";
+import { useState, useEffect } from "react";
+import { Inputs, Modal, Dropdown, CustomDatePicker } from "enterprisze-global-components";
+// import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
+// import { Trash, Calendar } from "iconsax-reactjs";
 import EmployeeConfirmationModal from "./EmployeeConfirmationModal";
-
-import SZOfficialLogo from "../../../assets/SZ Official Logo_circle.png";
+import EmployeeUpdateConfirmationModal from "./EmployeeUpdateConfirmationModal";
 
 export interface addEmployeeData {
     fullName: {
@@ -21,16 +21,7 @@ export interface addEmployeeData {
         employmentStatus: string;
         workEmail: string;
     };
-    permanentAddress: {
-        region: string;
-        province: string;
-        cityMunicipality: string;
-        barangay: string;
-        streetHouseNoLot: string;
-        postalCode: string;
-        country: string;
-    };
-    presentAddress: {
+    address: {
         region: string;
         province: string;
         cityMunicipality: string;
@@ -59,8 +50,9 @@ interface EmployeeModalProps {
     onSubmitSuccess?: () => void;
     addEmployeeData?: addEmployeeData;
     mode: "add" | "edit";
+    employeeId?: string; // For edit mode
 }
-const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode }: EmployeeModalProps) => {
+const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode, employeeId }: EmployeeModalProps) => {
     const [formData, setFormData] = useState<addEmployeeData>({
         fullName: {
             lastName: "",
@@ -77,16 +69,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
             employmentStatus: "",
             workEmail: "",
         },
-        permanentAddress: {
-            region: "",
-            province: "",
-            cityMunicipality: "",
-            barangay: "",
-            streetHouseNoLot: "",
-            postalCode: "",
-            country: "",
-        },
-        presentAddress: {
+        address: {
             region: "",
             province: "",
             cityMunicipality: "",
@@ -110,6 +93,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
     });
 
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+    const [showUpdateConfirmationModal, setShowUpdateConfirmationModal] = useState(false);
     const [currentAddEmployeeData, setCurrentAddEmployeeData] = useState<addEmployeeData | null>(
         mode === "edit" && addEmployeeData ? addEmployeeData : null
     );
@@ -161,16 +145,23 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
     const handleSetAsPresentAddressChange = (checked: boolean) => {
         setSetAsPresentAddress(checked);
         if (checked) {
-            // Copy permanent address to present address
-            setFormData(prev => ({
-                ...prev,
-                presentAddress: {
-                    ...prev.permanentAddress
-                }
-            }));
+                    // Copy address to present address (if needed)
+        setFormData(prev => ({
+            ...prev,
+            address: {
+                ...prev.address
+            }
+        }));
         }
     };
     // const [profileImg, setProfileImg] = useState<string | undefined>();
+
+    // Populate form data when in edit mode
+    useEffect(() => {
+        if (mode === "edit" && addEmployeeData) {
+            setFormData(addEmployeeData);
+        }
+    }, [mode, addEmployeeData]);
 
     const handleConfirmationClose = () => {
         setShowConfirmationModal(false);
@@ -179,7 +170,11 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
 
     const handleProceed = () => {
         setCurrentAddEmployeeData(formData);
-        setShowConfirmationModal(true);
+        if (mode === "edit") {
+            setShowUpdateConfirmationModal(true);
+        } else {
+            setShowConfirmationModal(true);
+        }
     };
 
     // Handle input changes for form fields
@@ -388,23 +383,23 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                             { label: "Region VII (Central Visayas)", value: "08" },
                                             { label: "Region VIII (Eastern Visayas)", value: "09" }
                                         ]} 
-                                        onSelectionChange={(selected: any) => handleNestedInputChange('permanentAddress', 'region', selected?.value || '')}
-                                        value={formData.permanentAddress.region ? { 
-                                            label: formData.permanentAddress.region === "09" ? "Region IX (Zamboanga Peninsula)" :
-                                                   formData.permanentAddress.region === "10" ? "Region X (Northern Mindanao)" :
-                                                   formData.permanentAddress.region === "11" ? "Region XI (Davao Region)" :
-                                                   formData.permanentAddress.region === "12" ? "Region XII (SOCCSKSARGEN)" :
-                                                   formData.permanentAddress.region === "13" ? "National Capital Region (NCR)" :
-                                                   formData.permanentAddress.region === "14" ? "Cordillera Administrative Region (CAR)" :
-                                                   formData.permanentAddress.region === "01" ? "Region I (Ilocos Region)" :
-                                                   formData.permanentAddress.region === "02" ? "Region II (Cagayan Valley)" :
-                                                   formData.permanentAddress.region === "03" ? "Region III (Central Luzon)" :
-                                                   formData.permanentAddress.region === "04" ? "Region IV-A (CALABARZON)" :
-                                                   formData.permanentAddress.region === "05" ? "Region IV-B (MIMAROPA)" :
-                                                   formData.permanentAddress.region === "06" ? "Region VI (Western Visayas)" :
-                                                   formData.permanentAddress.region === "07" ? "Region VII (Central Visayas)" :
-                                                   formData.permanentAddress.region === "08" ? "Region VIII (Eastern Visayas)" : formData.permanentAddress.region,
-                                            value: formData.permanentAddress.region 
+                                        onSelectionChange={(selected: any) => handleNestedInputChange('address', 'region', selected?.value || '')}
+                                        value={formData.address.region ? { 
+                                            label: formData.address.region === "09" ? "Region IX (Zamboanga Peninsula)" :
+                                                   formData.address.region === "10" ? "Region X (Northern Mindanao)" :
+                                                   formData.address.region === "11" ? "Region XI (Davao Region)" :
+                                                   formData.address.region === "12" ? "Region XII (SOCCSKSARGEN)" :
+                                                   formData.address.region === "13" ? "National Capital Region (NCR)" :
+                                                   formData.address.region === "14" ? "Cordillera Administrative Region (CAR)" :
+                                                   formData.address.region === "01" ? "Region I (Ilocos Region)" :
+                                                   formData.address.region === "02" ? "Region II (Cagayan Valley)" :
+                                                   formData.address.region === "03" ? "Region III (Central Luzon)" :
+                                                   formData.address.region === "04" ? "Region IV-A (CALABARZON)" :
+                                                   formData.address.region === "05" ? "Region IV-B (MIMAROPA)" :
+                                                   formData.address.region === "06" ? "Region VI (Western Visayas)" :
+                                                   formData.address.region === "07" ? "Region VII (Central Visayas)" :
+                                                   formData.address.region === "08" ? "Region VIII (Eastern Visayas)" : formData.address.region,
+                                            value: formData.address.region 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -865,6 +860,13 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                 isOpen={showConfirmationModal}
                 onClose={handleConfirmationClose}
                 addEmployeeData={currentAddEmployeeData ? [currentAddEmployeeData] : []}
+                onSubmitSuccess={onSubmitSuccess}
+            />
+            <EmployeeUpdateConfirmationModal
+                isOpen={showUpdateConfirmationModal}
+                onClose={() => setShowUpdateConfirmationModal(false)}
+                updateEmployeeData={currentAddEmployeeData ? [currentAddEmployeeData] : []}
+                employeeId={employeeId || ""}
                 onSubmitSuccess={onSubmitSuccess}
             />
         </div>

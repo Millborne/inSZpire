@@ -1,5 +1,6 @@
 import { EmployeeData } from "../services/employee/list/use-employee";
 import { addEmployeeData } from "../pages/Employees/components/modals/EmployeeModal";
+<<<<<<< HEAD
 import { safeFormatDateForBackend } from "./index";
 
 // Transform fetched employee data to form format
@@ -173,6 +174,48 @@ export const getEmployeeById = async (employeeId: string, getEmployeeByIdMutatio
         console.error('Error fetching employee by ID:', error);
         throw error;
     }
+=======
+
+// Transform fetched employee data to form format
+export const transformEmployeeToFormData = (employee: EmployeeData): addEmployeeData => {
+    return {
+        fullName: {
+            lastName: employee.last_name || "",
+            firstName: employee.first_name || "",
+            middleName: employee.middle_name || "",
+            nickname: employee.preferred_name || "",
+            extension: employee.name_ext || "",
+            dateOfBirth: employee.date_of_birth || "",
+        },
+        work: {
+            dateHired: employee.hire_date || "",
+            position: employee.position_code || "",
+            positionStatus: "", // This might need to be fetched separately
+            employmentStatus: employee.employment_status || "",
+            workEmail: employee.work_email || "",
+        },
+        address: {
+            region: "", // These might need to be parsed from address strings
+            province: "",
+            cityMunicipality: "",
+            barangay: "",
+            streetHouseNoLot: "",
+            postalCode: "",
+            country: "",
+        },
+        others: {
+            religion: employee.religion || "",
+            sex: "",
+            civilStatus: employee.marital_status || "",
+            gender: employee.gender || "",
+            pronouns: employee.pronoun || "",
+            bloodType: employee.blood_type || "",
+            birthAddress: employee.birth_address || "",
+            telephoneNumber: "", // Not available in current data
+            mobileNumber: employee.mobile_number || "",
+        },
+    };
+>>>>>>> 200eb3e (All goods)
 };
 
 // Helper function to convert position codes to display names
@@ -214,6 +257,7 @@ export const getCivilStatusDisplayName = (status: string): string => {
         case "separated": return "SEP";
         default: return status || "";
     }
+<<<<<<< HEAD
 }; 
 
 // Helper function to convert religion ID to name
@@ -250,4 +294,6 @@ export const getReligionId = (religionName: string): string => {
         case "seventh day adventist": return "fa3d4f312cce11f0b6b802dcb324866b";
         default: return religionName || "";
     }
+=======
+>>>>>>> 200eb3e (All goods)
 }; 
