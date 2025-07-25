@@ -22,8 +22,9 @@ import {
     useEmployeeService,
     type EmployeeData,
 } from "../../../services/employee/list/use-employee";
-import { useEmployeeFilters } from "../../../services/employee/list/use-employee-filters";
-import { type FrontendFilters } from "../../../services/employee/list/filterAPI";
+import { setSelectedEmployee } from "../../../reducers/employeeSlice";
+import type { AppDispatch } from "../../../reducers/store";
+import { transformEmployeeToFormData } from "../../../utils/employeeTransformers";
 // Components
 import EmployeeFilterModal from "../components/modals/EmployeeFilterModal";
 import EmployeeModal from "../components/modals/EmployeeModal";
@@ -58,7 +59,10 @@ const EmployeeList = () => {
     const [modalMode, setModalMode] = useState<"add" | "edit">("add");
     const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] =
         useState(false);
-    const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+    const [selectedEmployeeLocal, setSelectedEmployeeLocal] =
+        useState<any>(null);
+    const [originalEmployeeData, setOriginalEmployeeData] =
+        useState<EmployeeData | null>(null);
     const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
     const [snackbarAction, setSnackbarAction] = useState<
         "add" | "edit" | "update" | null
@@ -93,9 +97,12 @@ const EmployeeList = () => {
         setIsModalOpen(true);
     };
 
-    const openEditEmployee = (employee: any) => {
+    const openEditEmployee = (employee: EmployeeData) => {
         setModalMode("edit");
-        setSelectedEmployee(employee);
+        // Transform the employee data to form format
+        const transformedData = transformEmployeeToFormData(employee);
+        setSelectedEmployeeLocal(transformedData);
+        setOriginalEmployeeData(employee);
         setIsModalOpen(true);
     };
 
@@ -417,11 +424,17 @@ const EmployeeList = () => {
                         isOpen={isModalOpen}
                         onClose={() => {
                             setIsModalOpen(false);
-                            setSelectedEmployee(null);
+                            setSelectedEmployeeLocal(null);
+                            setOriginalEmployeeData(null);
                         }}
                         mode={modalMode}
                         addEmployeeData={
                             modalMode === "edit" ? selectedEmployee : undefined
+                        }
+                        employeeId={
+                            modalMode === "edit" && originalEmployeeData
+                                ? originalEmployeeData.employee_ID
+                                : undefined
                         }
                         onSubmitSuccess={() => handleSubmitSuccess(modalMode)}
                     />

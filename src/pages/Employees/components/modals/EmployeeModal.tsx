@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Modal, Inputs, Dropdown, Avatar, SnackbarAlert, CustomDatePicker } from "enterprisze-global-components";
-import { InfoCircle } from "iconsax-reactjs";
+import { useState, useEffect } from "react";
+import { Inputs, Modal, Dropdown, CustomDatePicker } from "enterprisze-global-components";
+// import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
+// import { Trash, Calendar } from "iconsax-reactjs";
 import EmployeeConfirmationModal from "./EmployeeConfirmationModal";
+import EmployeeUpdateConfirmationModal from "./EmployeeUpdateConfirmationModal";
 
 import SZOfficialLogo from "../../../assets/SZ Official Logo_circle.png";
 
@@ -59,8 +61,9 @@ interface EmployeeModalProps {
     onSubmitSuccess?: () => void;
     addEmployeeData?: addEmployeeData;
     mode: "add" | "edit";
+    employeeId?: string; // For edit mode
 }
-const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode }: EmployeeModalProps) => {
+const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode, employeeId }: EmployeeModalProps) => {
     const [formData, setFormData] = useState<addEmployeeData>({
         fullName: {
             lastName: "",
@@ -110,6 +113,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
     });
 
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+    const [showUpdateConfirmationModal, setShowUpdateConfirmationModal] = useState(false);
     const [currentAddEmployeeData, setCurrentAddEmployeeData] = useState<addEmployeeData | null>(
         mode === "edit" && addEmployeeData ? addEmployeeData : null
     );
@@ -172,6 +176,13 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
     };
     // const [profileImg, setProfileImg] = useState<string | undefined>();
 
+    // Populate form data when in edit mode
+    useEffect(() => {
+        if (mode === "edit" && addEmployeeData) {
+            setFormData(addEmployeeData);
+        }
+    }, [mode, addEmployeeData]);
+
     const handleConfirmationClose = () => {
         setShowConfirmationModal(false);
         setCurrentAddEmployeeData(null);
@@ -179,7 +190,11 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
 
     const handleProceed = () => {
         setCurrentAddEmployeeData(formData);
-        setShowConfirmationModal(true);
+        if (mode === "edit") {
+            setShowUpdateConfirmationModal(true);
+        } else {
+            setShowConfirmationModal(true);
+        }
     };
 
     // Handle input changes for form fields
@@ -865,6 +880,13 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                 isOpen={showConfirmationModal}
                 onClose={handleConfirmationClose}
                 addEmployeeData={currentAddEmployeeData ? [currentAddEmployeeData] : []}
+                onSubmitSuccess={onSubmitSuccess}
+            />
+            <EmployeeUpdateConfirmationModal
+                isOpen={showUpdateConfirmationModal}
+                onClose={() => setShowUpdateConfirmationModal(false)}
+                updateEmployeeData={currentAddEmployeeData ? [currentAddEmployeeData] : []}
+                employeeId={employeeId || ""}
                 onSubmitSuccess={onSubmitSuccess}
             />
         </div>

@@ -1,33 +1,30 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// Update employee request interface - matches backend structure
+// Update employee request interface
 export interface UpdateEmployeeRequest {
-    employee_ID: string; // Consistent with backend using employee_ID
-    employee?: {
-        current_position_ID?: string;
-        position_status_ID?: string;
-        employee_status_ID?: string;
-        hire_date?: string;
-        work_email?: string;
-        salary_frequency?: string;
-        sched_type?: string;
-        has_atm?: number;
-        is_agency?: number;
-        is_confidential?: number;
-        is_leave_earned?: number;
-        e_sig_url?: string;
-        qr_code_url?: string;
-        separation_date?: string;
-        reason_for_leaving?: string;
-        not_for_rehire?: number;
-        is_archived?: number;
-    };
+    employee_ID: string;
+    work_email?: string;
+    current_position_ID?: string;
+    sched_type?: string;
+    hire_date?: string;
+    has_atm?: number;
+    salary_frequency?: string;
+    is_agency?: number;
+    is_confidential?: number;
+    is_leave_earned?: number;
+    e_sig_url?: string;
+    qr_code_url?: string;
+    separation_date?: string;
+    reason_for_leaving?: string;
+    not_for_rehire?: number;
+    is_archived?: number;
     profile?: {
         first_name?: string;
         last_name?: string;
         middle_name?: string;
         name_ext?: string;
         preferred_name?: string;
+        profile_image?: string;
         gender?: string;
         pronoun?: string;
         date_of_birth?: string;
@@ -41,7 +38,6 @@ export interface UpdateEmployeeRequest {
         educational_attainment_ID?: string;
     };
     permanent_address?: {
-        address_ID?: string; // Address ID for update operations
         address_line_1?: string;
         address_line_2?: string;
         country_ID?: number;
@@ -55,7 +51,6 @@ export interface UpdateEmployeeRequest {
         entity?: string;
     };
     present_address?: {
-        address_ID?: string; // Address ID for update operations
         address_line_1?: string;
         address_line_2?: string;
         country_ID?: number;
@@ -68,11 +63,6 @@ export interface UpdateEmployeeRequest {
         address_type_ID?: number;
         entity?: string;
     };
-}
-
-// Get employee by ID request
-export interface GetEmployeeByIdRequest {
-    employee_ID: string; // Consistent with backend using employee_ID
 }
 
 const baseUrl = import.meta.env.VITE_EMPLOYMENT_SERVICE || 'http://localhost:3000';
@@ -94,14 +84,7 @@ export const employeeUpdateAPI = createApi({
                 body: employeeData,
             }),
         }),
-        getEmployeeById: builder.mutation<any, GetEmployeeByIdRequest>({
-            query: (request) => ({
-                url: '/employee/get-by-id',
-                method: 'POST',
-                body: request,
-            }),
-        }),
     }),
 });
 
-export const { useUpdateEmployeeMutation, useGetEmployeeByIdMutation } = employeeUpdateAPI; 
+export const { useUpdateEmployeeMutation } = employeeUpdateAPI; 
