@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Button,
     Inputs,
@@ -27,6 +27,7 @@ export interface EducationalDataType {
     id: string;
     level: string;
     "school name": string;
+    "denormalized_school_name"?: string;
     degree: string;
     course: string;
     "year started": string;
@@ -236,6 +237,53 @@ const InputContainer: React.FC<InputContainerProps> = ({
     </div>
 );
 
+// Types for pending operations
+interface PendingCreateOperation {
+    type: "create";
+    data: {
+        profile_ID: string;
+        education_level_ID: string;
+        school_ID: string;
+        school_name?: string;
+        degree?: string;
+        course?: string;
+        year_started?: number;
+        year_left?: number;
+        honors_received?: string;
+        user_type: string;
+    };
+}
+
+interface PendingUpdateOperation {
+    type: "update";
+    data: {
+        educ_ID: string;
+        profile_ID: string;
+        education_level_ID: string;
+        school_ID: string;
+        school_name?: string;
+        degree?: string;
+        course?: string;
+        year_started?: number;
+        year_left?: number;
+        honors_received?: string;
+    };
+}
+
+interface PendingDeleteOperation {
+    type: "delete";
+    data: {
+        educ_ID: string;
+        profile_ID: string;
+        user_type: string;
+    };
+}
+
+type PendingOperation =
+    | PendingCreateOperation
+    | PendingUpdateOperation
+    | PendingDeleteOperation;
+
 const EducationalModal: React.FC<EducationalModalProps> = ({
     isOpen,
     onClose,
@@ -255,7 +303,20 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
         useState(false);
     const [educationalLevel, setEducationalLevel] =
         useState("Educational Level");
-    // const [educationLevelId, setEducationLevelId] = useState<string | null>(null);
+
+    // Store pending operations
+    const [pendingOperations, setPendingOperations] = useState<
+        PendingOperation[]
+    >([]);
+
+    // Local state to track current educational data including pending changes
+    const [currentEducationalData, setCurrentEducationalData] =
+        useState<EducationalDataType[]>(educationalData);
+
+    // Update local state when prop changes
+    useEffect(() => {
+        setCurrentEducationalData(educationalData);
+    }, [educationalData]);
 
     // Form state for adding/editing education
     const [formData, setFormData] = useState({
@@ -276,6 +337,10 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
     const [snackbarType, setSnackbarType] = useState<
         "success" | "warning" | "error"
     >("success");
+
+    // Helper function to generate temporary ID for new records
+    const generateTempId = () =>
+        `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // For Adding Education
     const handleAddEducationClick = () => {
@@ -326,21 +391,43 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                 ? bufferToHex(foundEducationLevel.education_level_ID)
                 : "00000000000000000000000000000000";
 
-            await createEducation({
-                profile_ID: selectedEmployee.profile_ID,
-                education_level_ID: educationLevelId,
-                school_ID: "77777777000000000000000000000001",
-                degree: formData.degree || undefined,
-                course: formData.course || undefined,
-                year_started: formData.yearStarted
-                    ? parseInt(formData.yearStarted)
-                    : undefined,
-                year_left: formData.yearLeft
-                    ? parseInt(formData.yearLeft)
-                    : undefined,
-                honors_received: formData.honorsReceived || undefined,
-                user_type: "employee",
-            });
+            // Create temporary education record for immediate UI update
+            const tempEducationRecord: EducationalDataType = {
+                id: generateTempId(),
+                level: educationalLevel,
+                "school name": formData.schoolName,
+                degree: formData.degree,
+                course: formData.course,
+                "year started": formData.yearStarted,
+                "year left": formData.yearLeft,
+                "honors received": formData.honorsReceived,
+            };
+
+            // Update local state immediately
+            setCurrentEducationalData((prev) => [...prev, tempEducationRecord]);
+
+            // Store create operation instead of executing immediately
+            const createOperation: PendingCreateOperation = {
+                type: "create",
+                data: {
+                    profile_ID: selectedEmployee.profile_ID,
+                    education_level_ID: educationLevelId,
+                    school_ID: "77777777000000000000000000000001",
+                    school_name: formData.schoolName,
+                    degree: formData.degree || undefined,
+                    course: formData.course || undefined,
+                    year_started: formData.yearStarted
+                        ? parseInt(formData.yearStarted)
+                        : undefined,
+                    year_left: formData.yearLeft
+                        ? parseInt(formData.yearLeft)
+                        : undefined,
+                    honors_received: formData.honorsReceived || undefined,
+                    user_type: "employee",
+                },
+            };
+
+            setPendingOperations((prev) => [...prev, createOperation]);
 
             setShowInputContainer(false);
             setEducationalLevel("Educational Level");
@@ -348,21 +435,16 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
 
             // Show success message
             setSnackbarOpen(true);
-            setSnackbarMessage("Education record created successfully");
+            setSnackbarMessage("Education record added to pending operations");
             setSnackbarType("success");
-
-            // Call success callback
-            if (onSubmitSuccess) {
-                onSubmitSuccess();
-            }
         } catch (error) {
-            console.error("Error creating education:", error);
+            console.error("Error preparing education creation:", error);
         }
     };
 
     // For Editing Education
     const handleEditClick = (index: number) => {
-        const education = educationalData[index];
+        const education = currentEducationalData[index];
         setEducationalLevel(
             education.level
                 .split(" ")
@@ -406,7 +488,25 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                     return;
                 }
 
-                const education = educationalData[editingIndex];
+                const education = currentEducationalData[editingIndex];
+
+                // Update local state immediately
+                const updatedEducation: EducationalDataType = {
+                    ...education,
+                    level: educationalLevel,
+                    "school name": formData.schoolName,
+                    degree: formData.degree,
+                    course: formData.course,
+                    "year started": formData.yearStarted,
+                    "year left": formData.yearLeft,
+                    "honors received": formData.honorsReceived,
+                };
+
+                setCurrentEducationalData((prev) =>
+                    prev.map((item, idx) =>
+                        idx === editingIndex ? updatedEducation : item
+                    )
+                );
 
                 // Map educational level to education level ID
                 const foundEducationLevel = educationLevels.data.find(
@@ -419,21 +519,28 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                     ? bufferToHex(foundEducationLevel.education_level_ID)
                     : "00000000000000000000000000000000";
 
-                await updateEducation({
-                    educ_ID: bufferToHex(education.id),
-                    profile_ID: selectedEmployee?.profile_ID || "",
-                    education_level_ID: educationLevelId,
-                    school_ID: "77777777000000000000000000000001",
-                    degree: formData.degree || undefined,
-                    course: formData.course || undefined,
-                    year_started: formData.yearStarted
-                        ? parseInt(formData.yearStarted)
-                        : undefined,
-                    year_left: formData.yearLeft
-                        ? parseInt(formData.yearLeft)
-                        : undefined,
-                    honors_received: formData.honorsReceived || undefined,
-                });
+                // Store update operation instead of executing immediately
+                const updateOperation: PendingUpdateOperation = {
+                    type: "update",
+                    data: {
+                        educ_ID: bufferToHex(education.id),
+                        profile_ID: selectedEmployee?.profile_ID || "",
+                        education_level_ID: educationLevelId,
+                        school_ID: "77777777000000000000000000000001",
+                        school_name: formData.schoolName,
+                        degree: formData.degree || undefined,
+                        course: formData.course || undefined,
+                        year_started: formData.yearStarted
+                            ? parseInt(formData.yearStarted)
+                            : undefined,
+                        year_left: formData.yearLeft
+                            ? parseInt(formData.yearLeft)
+                            : undefined,
+                        honors_received: formData.honorsReceived || undefined,
+                    },
+                };
+
+                setPendingOperations((prev) => [...prev, updateOperation]);
 
                 setShowInputContainer(false);
                 setEducationalLevel("Educational Level");
@@ -441,28 +548,59 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
 
                 // Show success message
                 setSnackbarOpen(true);
-                setSnackbarMessage("Education record updated successfully");
+                setSnackbarMessage(
+                    "Education record updated in pending operations"
+                );
                 setSnackbarType("success");
-
-                // Call success callback
-                if (onSubmitSuccess) {
-                    onSubmitSuccess();
-                }
             } catch (error) {
-                console.error("Error updating education:", error);
+                console.error("Error preparing education update:", error);
                 setSnackbarOpen(true);
-                setSnackbarMessage("Error updating education record");
+                setSnackbarMessage("Error preparing education update");
                 setSnackbarType("error");
             }
         }
     };
 
-    const handleSubmit = () => {
-        onClose();
+    const handleSubmit = async () => {
+        try {
+            // Execute all pending operations
+            for (const operation of pendingOperations) {
+                switch (operation.type) {
+                    case "create":
+                        await createEducation(operation.data);
+                        break;
+                    case "update":
+                        await updateEducation(operation.data);
+                        break;
+                    case "delete":
+                        await deleteEducation(operation.data);
+                        break;
+                }
+            }
 
-        // Call success callback if provided
-        if (onSubmitSuccess) {
-            onSubmitSuccess();
+            // Clear pending operations
+            setPendingOperations([]);
+
+            // Show success message
+            setSnackbarOpen(true);
+            setSnackbarMessage("All education changes saved successfully");
+            setSnackbarType("success");
+            setShowInputContainer(false);
+            setIsEditMode(false);
+            setEditingIndex(null);
+            setEducationalLevel("Educational Level");
+
+            // Call success callback
+            if (onSubmitSuccess) {
+                onSubmitSuccess();
+            }
+
+            onClose();
+        } catch (error) {
+            console.error("Error executing pending operations:", error);
+            setSnackbarOpen(true);
+            setSnackbarMessage("Error saving education changes");
+            setSnackbarType("error");
         }
     };
 
@@ -474,23 +612,36 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
     const handleDeleteConfirm = async () => {
         if (editingIndex !== null && selectedEmployee?.profile_ID) {
             try {
-                const education = educationalData[editingIndex];
+                const education = currentEducationalData[editingIndex];
                 const profileId = selectedEmployee.profile_ID;
 
-                await deleteEducation({
-                    educ_ID: bufferToHex(education.id),
-                    profile_ID: profileId,
-                    user_type: "employee", // Replace with actual user type
-                });
+                // Remove from local state immediately
+                setCurrentEducationalData((prev) =>
+                    prev.filter((_, idx) => idx !== editingIndex)
+                );
+
+                // Store delete operation instead of executing immediately
+                const deleteOperation: PendingDeleteOperation = {
+                    type: "delete",
+                    data: {
+                        educ_ID: bufferToHex(education.id),
+                        profile_ID: profileId,
+                        user_type: "employee",
+                    },
+                };
+
+                setPendingOperations((prev) => [...prev, deleteOperation]);
 
                 setIsDeleteModalOpen(false);
 
-                // Call success callback
-                if (onSubmitSuccess) {
-                    onSubmitSuccess();
-                }
+                // Show success message
+                setSnackbarOpen(true);
+                setSnackbarMessage(
+                    "Education record added to pending deletions"
+                );
+                setSnackbarType("success");
             } catch (error) {
-                console.error("Error deleting education:", error);
+                console.error("Error preparing education deletion:", error);
             }
         }
     };
@@ -501,6 +652,12 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                 isOpen={isOpen}
                 onClose={() => {
                     onClose();
+                    setShowInputContainer(false);
+                    setIsEditMode(false);
+                    setEditingIndex(null);
+                    setEducationalLevel("Educational Level");
+                    setPendingOperations([]); // Clear pending operations on close
+                    setCurrentEducationalData(educationalData); // Reset to original data
                     setShowInputContainer(false);
                     setIsEditMode(false);
                     setEditingIndex(null);
@@ -523,6 +680,8 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                             setIsEditMode(false);
                             setEditingIndex(null);
                             setEducationalLevel("Educational Level");
+                            setPendingOperations([]); // Clear pending operations
+                            setCurrentEducationalData(educationalData); // Reset to original data
                             onClose();
                         },
                         size: "medium",
@@ -532,11 +691,6 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                         variant: "primary",
                         onClick: () => {
                             handleSubmit();
-                            setShowInputContainer(false);
-                            setIsEditMode(false);
-                            setEditingIndex(null);
-                            setEducationalLevel("Educational Level");
-                            onClose();
                         },
                         size: "medium",
                     },
@@ -565,7 +719,7 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                         )}
                         <section className="mt-[12px]">
                             <div className="flex flex-col gap-[24px] ">
-                                {educationalData.map(
+                                {currentEducationalData.map(
                                     (educationalData, index) => (
                                         <div
                                             key={index}
@@ -586,11 +740,7 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
                                                         <TextContent
                                                             header="school name"
-                                                            text={
-                                                                educationalData[
-                                                                    "school name"
-                                                                ]
-                                                            }
+                                                            text={educationalData.denormalized_school_name}
                                                         />
                                                         <TextContent
                                                             header="degree"
