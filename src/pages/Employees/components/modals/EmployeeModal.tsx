@@ -58,10 +58,11 @@ interface EmployeeModalProps {
     onClose: () => void;
     onSubmitSuccess?: () => void;
     addEmployeeData?: addEmployeeData;
+    originalEmployeeData?: any; // Original employee data from API
     mode: "add" | "edit";
     employeeId?: string; // For edit mode
 }
-const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode, employeeId }: EmployeeModalProps) => {
+const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, originalEmployeeData, mode, employeeId }: EmployeeModalProps) => {
     const [formData, setFormData] = useState<addEmployeeData>({
         fullName: {
             lastName: "",
@@ -110,11 +111,14 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
         },
     });
 
+
+
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [showUpdateConfirmationModal, setShowUpdateConfirmationModal] = useState(false);
     const [currentAddEmployeeData, setCurrentAddEmployeeData] = useState<addEmployeeData | null>(
         mode === "edit" && addEmployeeData ? addEmployeeData : null
     );
+
     const [setAsPresentAddress, setSetAsPresentAddress] = useState(false);
 
     // Positions state
@@ -174,12 +178,115 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
     };
     // const [profileImg, setProfileImg] = useState<string | undefined>();
 
+    // Separate state for present address
+    const [presentAddress, setPresentAddress] = useState({
+        region: "",
+        province: "",
+        cityMunicipality: "",
+        barangay: "",
+        streetHouseNoLot: "",
+        postalCode: "",
+        country: "",
+    });
+
+    // Position service for fetching positions
+    const positionService = usePositionService();
+    const [positions, setPositions] = useState<any[]>([]);
+    const [isLoadingPositions, setIsLoadingPositions] = useState(false);
+    
+    // Debug: Log the environment variable
+    console.log("VITE_TEAM_AND_POSITION_SERVICE:", import.meta.env.VITE_TEAM_AND_POSITION_SERVICE);
+
     // Populate form data when in edit mode
     useEffect(() => {
         if (mode === "edit" && addEmployeeData) {
+            console.log("Setting form data for edit mode:", addEmployeeData);
             setFormData(addEmployeeData);
         }
-    }, [mode, addEmployeeData]);
+    }, [mode, addEmployeeData, isOpen]);
+
+    // Handle "Set as present address" checkbox effect
+    useEffect(() => {
+        if (setAsPresentAddress) {
+            // Copy permanent address to present address
+            setPresentAddress({
+                ...formData.address,
+            });
+        }
+    }, [setAsPresentAddress, formData.address]);
+
+    // Fetch positions when modal opens
+    useEffect(() => {
+        const fetchPositions = async () => {
+            if (isOpen) {
+                setIsLoadingPositions(true);
+                try {
+                    // Use the direct API URL you provided
+                    const response = await fetch('https://erp-team-and-position-api-dev.supportzebra.net/api/v1/position/getPositions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            is_archived: 0,
+                            offset: 0,
+                            limit: 1000,
+                        })
+                    });
+                    
+                    console.log("API Response status:", response.status);
+                    console.log("API Response headers:", response.headers);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log("API Response data:", data);
+                        
+                        if (data.positions && Array.isArray(data.positions)) {
+                            setPositions(data.positions);
+                            console.log("Successfully set positions:", data.positions.length, "positions");
+                        } else {
+                            console.log("No positions array found in response:", data);
+                        }
+                    } else {
+                        console.error("API request failed:", response.status, response.statusText);
+                        const errorText = await response.text();
+                        console.error("Error response:", errorText);
+                    }
+                } catch (error) {
+                    console.error("Error fetching positions:", error);
+                } finally {
+                    setIsLoadingPositions(false);
+                }
+            }
+        };
+
+        fetchPositions();
+    }, [isOpen]);
+
+    // Transform positions to dropdown options
+    const positionOptions = useMemo(() => {
+        console.log("Transforming positions:", positions);
+        return positions.map((position) => ({
+            label: position.position_name || position.position_code || "Unknown Position",
+            value: position.position_ID || "",
+        }));
+    }, [positions]);
+
+    // Religion options
+    const religionOptions = useMemo(() => [
+        { label: "Judaism", value: "judaism" },
+        { label: "Buddhism", value: "buddhism" },
+        { label: "Sikhism", value: "sikhism" },
+        { label: "Born Again", value: "born again" },
+        { label: "Iglesia sa Dios", value: "iglesia sa dios" },
+        { label: "Christian", value: "christian" },
+        { label: "Roman Catholic", value: "roman catholic" },
+        { label: "Iglesia ni Cristo", value: "iglesia ni cristo" },
+        { label: "Islam", value: "islam" },
+        { label: "Hinduism", value: "hinduism" },
+        { label: "Seventh Day Adventist", value: "seventh day adventist" },
+    ], []);
 
     const handleConfirmationClose = () => {
         setShowConfirmationModal(false);
@@ -187,10 +294,21 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
     };
 
     const handleProceed = () => {
-        setCurrentAddEmployeeData(formData);
+        // For edit mode, include present address data
         if (mode === "edit") {
+            const formDataWithPresentAddress = {
+                ...formData,
+                address: {
+                    ...formData.address,
+                    // Include present address data if checkbox is checked
+                    ...(setAsPresentAddress ? presentAddress : {})
+                }
+            };
+            console.log("Edit mode - formData being passed to confirmation:", formDataWithPresentAddress);
+            setCurrentAddEmployeeData(formDataWithPresentAddress);
             setShowUpdateConfirmationModal(true);
         } else {
+            setCurrentAddEmployeeData(formData);
             setShowConfirmationModal(true);
         }
     };
@@ -252,7 +370,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                             <div className="flex justify-between">
                                 <h6 className="text-h6 font-semibold text-szPrimary700">Name and Birthday</h6>
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] items-center">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] items-center relative z-50">
                                 <Inputs 
                                     label="LAST NAME *" 
                                     value={formData.fullName.lastName || ""} 
@@ -294,10 +412,17 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                 <h6 className="text-h6 font-semibold text-szPrimary700">Others</h6>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] items-center">
-                                <Inputs 
-                                    label="RELIGION" 
-                                    value={formData.others.religion || ""} 
-                                    onChange={(e: any) => handleNestedInputChange('others', 'religion', e.target.value)}
+                                <Dropdown
+                                    label="RELIGION"
+                                    placeholder="Select religion"
+                                    options={religionOptions}
+                                    onSelectionChange={(selected: any) => handleNestedInputChange('others', 'religion', selected?.value || '')}
+                                    value={formData.others.religion ? { 
+                                        label: religionOptions.find(option => option.value === formData.others.religion)?.label || formData.others.religion,
+                                        value: formData.others.religion 
+                                    } : undefined}
+                                    usePortal={true}
+                                    size="small"
                                 />
                                 <Dropdown
                                     label="GENDER"
@@ -874,19 +999,24 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                     </div>
                 }
             />
-            <EmployeeConfirmationModal
-                isOpen={showConfirmationModal}
-                onClose={handleConfirmationClose}
-                addEmployeeData={currentAddEmployeeData ? [currentAddEmployeeData] : []}
-                onSubmitSuccess={onSubmitSuccess}
-            />
-            <EmployeeUpdateConfirmationModal
-                isOpen={showUpdateConfirmationModal}
-                onClose={() => setShowUpdateConfirmationModal(false)}
-                updateEmployeeData={currentAddEmployeeData ? [currentAddEmployeeData] : []}
-                employeeId={employeeId || ""}
-                onSubmitSuccess={onSubmitSuccess}
-            />
+            {showConfirmationModal && (
+                <EmployeeConfirmationModal
+                    isOpen={showConfirmationModal}
+                    onClose={handleConfirmationClose}
+                    addEmployeeData={currentAddEmployeeData ? [currentAddEmployeeData] : []}
+                    onSubmitSuccess={onSubmitSuccess}
+                />
+            )}
+            {showUpdateConfirmationModal && (
+                <EmployeeUpdateConfirmationModal
+                    isOpen={showUpdateConfirmationModal}
+                    onClose={() => setShowUpdateConfirmationModal(false)}
+                    updateEmployeeData={currentAddEmployeeData ? [currentAddEmployeeData] : []}
+                    originalEmployeeData={originalEmployeeData}
+                    employeeId={employeeId || ""}
+                    onSubmitSuccess={onSubmitSuccess}
+                />
+            )}
         </div>
     );
 };

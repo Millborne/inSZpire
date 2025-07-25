@@ -133,7 +133,7 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
     ] : [];
 
     // Get employee full name for display
-    const employeeFullName = employeeData ? 
+    const employeeFullName = employeeData && employeeData.fullName ? 
         `${employeeData.fullName.firstName || ""} ${employeeData.fullName.middleName || ""} ${employeeData.fullName.lastName || ""}`.trim() : 
         "Employee Name";
 
@@ -184,7 +184,7 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                                      employeeData.others.civilStatus === "D" ? "divorced" : 
                                      employeeData.others.civilStatus === "W" ? "widowed" : 
                                      employeeData.others.civilStatus === "SEP" ? "separated" : "single",
-                        religion_ID: "0c3b8bd02fa111f0b6b802dcb324866b", // Default value
+                        religion_ID: employeeData.others.religion ? getReligionId(employeeData.others.religion) : "0c3b8bd02fa111f0b6b802dcb324866b", // Convert religion name to ID
                         blood_type: employeeData.others.bloodType || "",
                         telephone_number: employeeData.others.telephoneNumber || "",
                         mobile_number: employeeData.others.mobileNumber || "",

@@ -93,7 +93,8 @@ const EmployeeList = () => {
         setIsModalOpen(true);
     };
 
-    const openEditEmployee = (employee: EmployeeData) => {
+    const openEditEmployee = async (employee: EmployeeData) => {
+        console.log("Opening edit for employee:", employee);
         setModalMode("edit");
         setSelectedEmployee(employee);
         setIsModalOpen(true);
@@ -388,20 +389,7 @@ const EmployeeList = () => {
                                 onRowClick={handleRowClick}
                             />
                         </div>
-                        <div className="flex justify-end">
-                            <Pagination
-                                currentPage={
-                                    Math.floor(
-                                        pagination.offset / pagination.limit
-                                    ) + 1
-                                }
-                                totalPages={Math.ceil(
-                                    pagination.total / pagination.limit
-                                )}
-                                visiblePages={5}
-                                onChange={handlePageChange}
-                            />
-                        </div>
+                        {/* Removed pagination for now */}
                     </div>
 
                     <EmployeeFilterModal
