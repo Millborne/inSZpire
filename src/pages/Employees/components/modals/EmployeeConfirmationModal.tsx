@@ -4,6 +4,8 @@ import { InfoCircle, Warning2 } from "iconsax-reactjs";
 import { useCreateEmployeeMutation } from "../../../../services/employee/create/employeeCreateAPI";
 import { addEmployeeData } from "./EmployeeModal";
 import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
+import { useCreateEmployeeMutation } from "../../../../services/employee/create/employeeCreateAPI";
+import { getReligionId } from "../../../../utils/employeeTransformers";
 
 interface EmployeeConfirmationModalProps {
     isOpen: boolean;
@@ -123,17 +125,46 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
         }
     };
 
-    const addressData = employeeData ? [
-        { label: "Region", value: getDisplayLabel(employeeData.permanentAddress.region || "", "region") },
-        { label: "Province", value: getDisplayLabel(employeeData.permanentAddress.province || "", "province") },
-        { label: "City / Municipality", value: getDisplayLabel(employeeData.permanentAddress.cityMunicipality || "", "city") },
-        { label: "Barangay", value: getDisplayLabel(employeeData.permanentAddress.barangay || "", "barangay") },
-        { label: "Street / House Number / Lot", value: employeeData.permanentAddress.streetHouseNoLot || "" },
-        { label: "Postal Code", value: employeeData.permanentAddress.postalCode || "" },
+    // Convert form data to display format
+    const nameAndBirthdayData = employeeData && employeeData.fullName ? [
+        { label: "Extension", value: employeeData.fullName.extension || "" },
+        { label: "First Name", value: employeeData.fullName.firstName || "" },
+        { label: "Middle Name", value: employeeData.fullName.middleName || "" },
+        { label: "Last Name", value: employeeData.fullName.lastName || "" },
+        { label: "Nickname", value: employeeData.fullName.nickname || "" },
+        { label: "Date of Birth", value: employeeData.fullName.dateOfBirth || "" },
+    ] : [];
+
+    const workData = employeeData && employeeData.work ? [
+        { label: "Date Hired", value: employeeData.work.dateHired || "" },
+        { label: "Position", value: getDisplayLabel(employeeData.work.position || "", "position") },
+        { label: "Position Status", value: getDisplayLabel(employeeData.work.positionStatus || "", "positionStatus") },
+        { label: "Employment Status", value: getDisplayLabel(employeeData.work.employmentStatus || "", "employmentStatus") },
+        { label: "Work Email", value: employeeData.work.workEmail || "" },
+    ] : [];
+
+    const otherData = employeeData && employeeData.others ? [
+        { label: "Religion", value: employeeData.others.religion || "" },
+        { label: "Gender", value: getDisplayLabel(employeeData.others.gender || "", "gender") },
+        { label: "Civil Status", value: getDisplayLabel(employeeData.others.civilStatus || "", "civilStatus") },
+        { label: "Pronouns", value: employeeData.others.pronouns || "" },
+        { label: "Blood Type", value: employeeData.others.bloodType || "" },
+        { label: "Birth Address", value: employeeData.others.birthAddress || "" },
+        { label: "Telephone Number", value: employeeData.others.telephoneNumber || "" },
+        { label: "Mobile Number", value: employeeData.others.mobileNumber || "" },
+    ] : [];
+
+    const addressData = employeeData && employeeData.address ? [
+        { label: "Region", value: getDisplayLabel(employeeData.address.region || "", "region") },
+        { label: "Province", value: getDisplayLabel(employeeData.address.province || "", "province") },
+        { label: "City / Municipality", value: getDisplayLabel(employeeData.address.cityMunicipality || "", "city") },
+        { label: "Barangay", value: getDisplayLabel(employeeData.address.barangay || "", "barangay") },
+        { label: "Street / House Number / Lot", value: employeeData.address.streetHouseNoLot || "" },
+        { label: "Postal Code", value: employeeData.address.postalCode || "" },
     ] : [];
 
     // Get employee full name for display
-    const employeeFullName = employeeData ? 
+    const employeeFullName = employeeData && employeeData.fullName ? 
         `${employeeData.fullName.firstName || ""} ${employeeData.fullName.middleName || ""} ${employeeData.fullName.lastName || ""}`.trim() : 
         "Employee Name";
 
@@ -184,7 +215,7 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                                      employeeData.others.civilStatus === "D" ? "divorced" : 
                                      employeeData.others.civilStatus === "W" ? "widowed" : 
                                      employeeData.others.civilStatus === "SEP" ? "separated" : "single",
-                        religion_ID: "0c3b8bd02fa111f0b6b802dcb324866b", // Default value
+                        religion_ID: employeeData.others.religion ? getReligionId(employeeData.others.religion) : "0c3b8bd02fa111f0b6b802dcb324866b", // Convert religion name to ID
                         blood_type: employeeData.others.bloodType || "",
                         telephone_number: employeeData.others.telephoneNumber || "",
                         mobile_number: employeeData.others.mobileNumber || "",
