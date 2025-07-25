@@ -44,8 +44,8 @@ const Education = () => {
         educationData?.data?.map((education: any, index: number) => ({
             id: education.educ_ID,
             level: education.education_level || "Unknown Level",
-            "school name": education.school_name || "Unknown School",
-            "denormalized_school_name": education.denormalized_school_name || "Unknown School",
+            "school name": education.denormalized_school_name || "Unknown School",
+            // "denormalized_school_name": education.denormalized_school_name || "Unknown School",
             degree: education.degree || "-",
             course: education.course || "-",
             "year started": education.year_started?.toString() || "-",
@@ -96,7 +96,7 @@ const Education = () => {
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
                                             <TextContent
                                                 header="school name"
-                                                text={education["denormalized_school_name"]}
+                                                text={education["school name"]}
                                             />
                                             <TextContent
                                                 header="degree"

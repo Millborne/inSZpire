@@ -27,7 +27,7 @@ export interface EducationalDataType {
     id: string;
     level: string;
     "school name": string;
-    "denormalized_school_name"?: string;
+    denormalized_school_name?: string;
     degree: string;
     course: string;
     "year started": string;
@@ -460,7 +460,7 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
 
         // Populate form with existing data
         setFormData({
-            schoolName: education["school name"],
+            schoolName: education["school name"] || "Unknown School",
             degree: education.degree,
             course: education.course,
             yearStarted: education["year started"],
@@ -563,6 +563,12 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
 
     const handleSubmit = async () => {
         try {
+            if (pendingOperations.length === 0) {
+                setSnackbarOpen(true);
+                setSnackbarMessage("Please make changes to educational background before proceeding");
+                setSnackbarType("warning");
+                return;
+            }
             // Execute all pending operations
             for (const operation of pendingOperations) {
                 switch (operation.type) {
@@ -693,6 +699,7 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                             handleSubmit();
                         },
                         size: "medium",
+                        disabled: pendingOperations.length === 0,
                     },
                 ]}
                 content={
@@ -740,7 +747,11 @@ const EducationalModal: React.FC<EducationalModalProps> = ({
                                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
                                                         <TextContent
                                                             header="school name"
-                                                            text={educationalData.denormalized_school_name}
+                                                            text={
+                                                                educationalData[
+                                                                    "school name"
+                                                                ]
+                                                            }
                                                         />
                                                         <TextContent
                                                             header="degree"
