@@ -130,8 +130,6 @@ const BasicInfo = () => {
                 limit: 2000,
             });
 
-            console.log(municipalitiesResult.data?.data);
-
             if (municipalitiesResult.data?.data) {
                 setLocationData((prev) => ({
                     ...prev,
@@ -207,9 +205,6 @@ const BasicInfo = () => {
             address.region_state_ID,
             locationData.regions
         );
-
-        console.log(address.city_municipality_ID,
-            locationData.municipalities);
 
         // console.log(barangay, municipality, province, region);
 
