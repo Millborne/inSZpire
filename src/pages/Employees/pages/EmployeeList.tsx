@@ -26,6 +26,7 @@ import {
 } from "../../../services/employee/list/use-employee";
 import { setSelectedEmployee } from "../../../reducers/employeeSlice";
 import type { AppDispatch } from "../../../reducers/store";
+import { transformEmployeeToFormData } from "../../../utils/employeeTransformers";
 // Components
 import EmployeeFilterModal from "../components/modals/EmployeeFilterModal";
 import EmployeeModal from "../components/modals/EmployeeModal";
@@ -61,6 +62,8 @@ const EmployeeList = () => {
         useState(false);
     const [selectedEmployeeLocal, setSelectedEmployeeLocal] =
         useState<any>(null);
+    const [originalEmployeeData, setOriginalEmployeeData] =
+        useState<EmployeeData | null>(null);
     const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
     const [snackbarAction, setSnackbarAction] = useState<
         "add" | "edit" | "update" | null
@@ -203,9 +206,12 @@ const EmployeeList = () => {
         setIsModalOpen(true);
     };
 
-    const openEditEmployee = (employee: any) => {
+    const openEditEmployee = (employee: EmployeeData) => {
         setModalMode("edit");
-        setSelectedEmployeeLocal(employee);
+        // Transform the employee data to form format
+        const transformedData = transformEmployeeToFormData(employee);
+        setSelectedEmployeeLocal(transformedData);
+        setOriginalEmployeeData(employee);
         setIsModalOpen(true);
     };
 
@@ -525,11 +531,17 @@ const EmployeeList = () => {
                         onClose={() => {
                             setIsModalOpen(false);
                             setSelectedEmployeeLocal(null);
+                            setOriginalEmployeeData(null);
                         }}
                         mode={modalMode}
                         addEmployeeData={
                             modalMode === "edit"
                                 ? selectedEmployeeLocal
+                                : undefined
+                        }
+                        employeeId={
+                            modalMode === "edit" && originalEmployeeData
+                                ? originalEmployeeData.employee_ID
                                 : undefined
                         }
                         onSubmitSuccess={() => handleSubmitSuccess(modalMode)}
