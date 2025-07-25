@@ -5,6 +5,7 @@ import BasicInfoPendingModal from "./BasicInfoPendingModal";
 import { addEmployeeData } from "./EmployeeModal";
 import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
 import { useCreateEmployeeMutation } from "../../../../services/employee/create/employeeCreateAPI";
+import { getReligionId } from "../../../../utils/employeeTransformers";
 
 interface EmployeeConfirmationModalProps {
     isOpen: boolean;
@@ -50,7 +51,7 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
     };
 
     // Convert form data to display format
-    const nameAndBirthdayData = employeeData ? [
+    const nameAndBirthdayData = employeeData && employeeData.fullName ? [
         { label: "Extension", value: employeeData.fullName.extension || "" },
         { label: "First Name", value: employeeData.fullName.firstName || "" },
         { label: "Middle Name", value: employeeData.fullName.middleName || "" },
@@ -59,7 +60,7 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
         { label: "Date of Birth", value: employeeData.fullName.dateOfBirth || "" },
     ] : [];
 
-    const workData = employeeData ? [
+    const workData = employeeData && employeeData.work ? [
         { label: "Date Hired", value: employeeData.work.dateHired || "" },
         { label: "Position", value: getDisplayLabel(employeeData.work.position || "", "position") },
         { label: "Position Status", value: getDisplayLabel(employeeData.work.positionStatus || "", "positionStatus") },
@@ -67,7 +68,7 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
         { label: "Work Email", value: employeeData.work.workEmail || "" },
     ] : [];
 
-    const otherData = employeeData ? [
+    const otherData = employeeData && employeeData.others ? [
         { label: "Religion", value: employeeData.others.religion || "" },
         { label: "Gender", value: getDisplayLabel(employeeData.others.gender || "", "gender") },
         { label: "Civil Status", value: getDisplayLabel(employeeData.others.civilStatus || "", "civilStatus") },
@@ -78,7 +79,7 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
         { label: "Mobile Number", value: employeeData.others.mobileNumber || "" },
     ] : [];
 
-    const addressData = employeeData ? [
+    const addressData = employeeData && employeeData.address ? [
         { label: "Region", value: getDisplayLabel(employeeData.address.region || "", "region") },
         { label: "Province", value: getDisplayLabel(employeeData.address.province || "", "province") },
         { label: "City / Municipality", value: getDisplayLabel(employeeData.address.cityMunicipality || "", "city") },
@@ -88,12 +89,12 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
     ] : [];
 
     // Get employee full name for display
-    const employeeFullName = employeeData ? 
+    const employeeFullName = employeeData && employeeData.fullName ? 
         `${employeeData.fullName.firstName || ""} ${employeeData.fullName.middleName || ""} ${employeeData.fullName.lastName || ""}`.trim() : 
         "Employee Name";
 
     // Get employee position for display
-    const employeePosition = employeeData ? getDisplayLabel(employeeData.work.position || "", "position") : "Position";
+    const employeePosition = employeeData && employeeData.work ? getDisplayLabel(employeeData.work.position || "", "position") : "Position";
 
     const handlePendingCheck = async () => {
         // setIsBasicInfoPendingModalOpen(true);
@@ -152,11 +153,11 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                                      employeeData.others.civilStatus === "D" ? "divorced" : 
                                      employeeData.others.civilStatus === "W" ? "widowed" : 
                                      employeeData.others.civilStatus === "SEP" ? "separated" : "single",
-                        religion_ID: "0c3b8bd02fa111f0b6b802dcb324866b", // Default value
+                        religion_ID: employeeData.others.religion ? getReligionId(employeeData.others.religion) : "0c3b8bd02fa111f0b6b802dcb324866b", // Convert religion name to ID
                         blood_type: employeeData.others.bloodType || "",
                         telephone_number: employeeData.others.telephoneNumber || "",
                         mobile_number: employeeData.others.mobileNumber || "",
-                        personal_email: "fortestinglang@example.com", // Required field with valid email format
+                        personal_email: "fortestinglangupdate@example.com", // Required field with valid email format
                         educational_attainment_ID: "7cbd3ea82b1111f0b6b802dcb324866b" // Default value
                     },
                     permanent_address: {
