@@ -93,7 +93,7 @@ const EmployeeList = () => {
         setIsModalOpen(true);
     };
 
-    const openEditEmployee = (employee: any) => {
+    const openEditEmployee = (employee: EmployeeData) => {
         setModalMode("edit");
         setSelectedEmployee(employee);
         setIsModalOpen(true);
