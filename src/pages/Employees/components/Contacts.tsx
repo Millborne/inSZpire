@@ -136,7 +136,7 @@ const Contacts = () => {
             <div>Loading...</div>
           ) : error ? (
             <div className="text-red-500">{error}</div>
-          ) : emergencyContacts.length === 0 ? (
+          ) : emergencyContacts.filter(contact => (contact.is_emergency_contact === 1)).length === 0 ? (
             <div>No emergency contacts found.</div>
           ) : (
             emergencyContacts

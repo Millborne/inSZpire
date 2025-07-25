@@ -22,8 +22,12 @@ import DeleteConfirmation from "../../../../components/DeleteConfirmation";
 import { useBasicInfoService } from "../../../../services/employee-profile/personal/basic-info/use-basic-info";
 
 // Redux
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../../../reducers/store";
+
+import { useEmployeeService} from "../../../../services/employee/list/use-employee";
+import type { AppDispatch } from "../../../../reducers/store";
+import { resetAndFetchEmployee } from "../../../../reducers/employeeSlice";
 
 const relationshipOptions = [
   "Mother",
@@ -88,6 +92,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
 
   // Basic info service for updating mobile number and personal email
   const { updateBasicInfo, actionIsLoading: basicInfoLoading } = useBasicInfoService();
+
+  const dispatch = useDispatch<AppDispatch>();
 
   // Get selected employee from Redux store
   const selectedEmployee = useSelector(
@@ -220,6 +226,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
       }
 
       onClose();
+      resetAndFetchEmployee(dispatch, selectedEmployee, useEmployeeService);
       onSubmitSuccess && onSubmitSuccess("Contact information updated successfully");
     } catch (err) {
       onError && onError("Failed to update contact information");
