@@ -1,7 +1,5 @@
 import { EmployeeData } from "../services/employee/list/use-employee";
 import { addEmployeeData } from "../pages/Employees/components/modals/EmployeeModal";
-<<<<<<< HEAD
-import { safeFormatDateForBackend } from "./index";
 
 // Transform fetched employee data to form format
 export const transformEmployeeToFormData = (employee: any): addEmployeeData => {
@@ -37,37 +35,20 @@ export const transformEmployeeToFormData = (employee: any): addEmployeeData => {
     // Map position status from employee data
     let positionStatus = "";
     if (employeeData.position_status_ID) {
-        console.log("=== POSITION STATUS TRANSFORMATION ===");
-        console.log("Original position_status_ID:", employeeData.position_status_ID);
-        console.log("Original position_status_ID type:", typeof employeeData.position_status_ID);
-        
-        // Map position status IDs to display values based on actual database
+        // Map position status IDs to display values
         switch (employeeData.position_status_ID) {
             case "1a23aec4526211f0b6b802dcb324866b": // Active
                 positionStatus = "ACTIVE";
-                console.log("Mapped to ACTIVE (Active ID)");
                 break;
-            case "1a23b074526211f0b6b802dcb324866b": // Training
-                positionStatus = "TRAINING";
-                console.log("Mapped to TRAINING (Training ID)");
+            case "1a23b100526211f0b6b802dcb324866b": // Training
+                positionStatus = "TRAINEE";
                 break;
-            case "1a23b100526211f0b6b802dcb324866b": // Promoted
-                positionStatus = "PROMOTED";
-                console.log("Mapped to PROMOTED");
-                break;
-            case "1a23b128526211f0b6b802dcb324866b": // Transferred
-                positionStatus = "TRANSFERRED";
-                console.log("Mapped to TRANSFERRED");
-                break;
-            case "1a23b14a526211f0b6b802dcb324866b": // Closed
-                positionStatus = "CLOSED";
-                console.log("Mapped to CLOSED");
+            case "1a23b074526211f0b6b802dcb324866b": // Promoted
+                positionStatus = "REGULAR";
                 break;
             default:
                 positionStatus = "ACTIVE"; // Default
-                console.log("Mapped to ACTIVE (default)");
         }
-        console.log("Final positionStatus:", positionStatus);
     }
     
     // Map employment status from employee data
@@ -138,10 +119,10 @@ export const transformEmployeeToFormData = (employee: any): addEmployeeData => {
             middleName: profileData.middle_name || "",
             nickname: profileData.preferred_name || "",
             extension: profileData.name_ext || "",
-            dateOfBirth: safeFormatDateForBackend(profileData.date_of_birth),
+            dateOfBirth: profileData.date_of_birth ? new Date(profileData.date_of_birth).toISOString().split('T')[0] : "",
         },
         work: {
-            dateHired: safeFormatDateForBackend(employeeData.hire_date),
+            dateHired: employeeData.hire_date ? new Date(employeeData.hire_date).toISOString().split('T')[0] : "",
             position: employeeData.current_position_ID || "", // Use current_position_ID for edit mode
             positionStatus: positionStatus,
             employmentStatus: employmentStatus,
@@ -174,48 +155,6 @@ export const getEmployeeById = async (employeeId: string, getEmployeeByIdMutatio
         console.error('Error fetching employee by ID:', error);
         throw error;
     }
-=======
-
-// Transform fetched employee data to form format
-export const transformEmployeeToFormData = (employee: EmployeeData): addEmployeeData => {
-    return {
-        fullName: {
-            lastName: employee.last_name || "",
-            firstName: employee.first_name || "",
-            middleName: employee.middle_name || "",
-            nickname: employee.preferred_name || "",
-            extension: employee.name_ext || "",
-            dateOfBirth: employee.date_of_birth || "",
-        },
-        work: {
-            dateHired: employee.hire_date || "",
-            position: employee.position_code || "",
-            positionStatus: "", // This might need to be fetched separately
-            employmentStatus: employee.employment_status || "",
-            workEmail: employee.work_email || "",
-        },
-        address: {
-            region: "", // These might need to be parsed from address strings
-            province: "",
-            cityMunicipality: "",
-            barangay: "",
-            streetHouseNoLot: "",
-            postalCode: "",
-            country: "",
-        },
-        others: {
-            religion: employee.religion || "",
-            sex: "",
-            civilStatus: employee.marital_status || "",
-            gender: employee.gender || "",
-            pronouns: employee.pronoun || "",
-            bloodType: employee.blood_type || "",
-            birthAddress: employee.birth_address || "",
-            telephoneNumber: "", // Not available in current data
-            mobileNumber: employee.mobile_number || "",
-        },
-    };
->>>>>>> 200eb3e (All goods)
 };
 
 // Helper function to convert position codes to display names
@@ -257,7 +196,6 @@ export const getCivilStatusDisplayName = (status: string): string => {
         case "separated": return "SEP";
         default: return status || "";
     }
-<<<<<<< HEAD
 }; 
 
 // Helper function to convert religion ID to name
@@ -294,6 +232,4 @@ export const getReligionId = (religionName: string): string => {
         case "seventh day adventist": return "fa3d4f312cce11f0b6b802dcb324866b";
         default: return religionName || "";
     }
-=======
->>>>>>> 200eb3e (All goods)
 }; 

@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Inputs, Modal, Dropdown, CustomDatePicker } from "enterprisze-global-components";
 // import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
 // import { Trash, Calendar } from "iconsax-reactjs";
 import EmployeeConfirmationModal from "./EmployeeConfirmationModal";
 import EmployeeUpdateConfirmationModal from "./EmployeeUpdateConfirmationModal";
+import { usePositionService } from "../../../../services/settings/positions/list/use-positions";
+import { getReligionName } from "../../../../utils/employeeTransformers";
 
 export interface addEmployeeData {
     fullName: {
@@ -49,10 +51,11 @@ interface EmployeeModalProps {
     onClose: () => void;
     onSubmitSuccess?: () => void;
     addEmployeeData?: addEmployeeData;
+    originalEmployeeData?: any; // Original employee data from API
     mode: "add" | "edit";
     employeeId?: string; // For edit mode
 }
-const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode, employeeId }: EmployeeModalProps) => {
+const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, originalEmployeeData, mode, employeeId }: EmployeeModalProps) => {
     const [formData, setFormData] = useState<addEmployeeData>({
         fullName: {
             lastName: "",
@@ -92,76 +95,126 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
         },
     });
 
+
+
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [showUpdateConfirmationModal, setShowUpdateConfirmationModal] = useState(false);
     const [currentAddEmployeeData, setCurrentAddEmployeeData] = useState<addEmployeeData | null>(
         mode === "edit" && addEmployeeData ? addEmployeeData : null
     );
+
     const [setAsPresentAddress, setSetAsPresentAddress] = useState(false);
-
-    // Positions state
-    const [positions, setPositions] = useState<Array<{ label: string; value: string }>>([]);
-    const [isLoadingPositions, setIsLoadingPositions] = useState(false);
-
-    // Fetch positions from API
-    const fetchPositions = async () => {
-        setIsLoadingPositions(true);
-        try {
-            const response = await fetch('https://erp-team-and-position-api-dev.supportzebra.net/api/v1/position/getPositions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({}),
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                if (data.positions) {
-                    const transformedPositions = data.positions.map((position: any) => ({
-                        label: `${position.position_name} - ${position.position_code}`,
-                        value: position.position_ID,
-                    }));
-                    setPositions(transformedPositions);
-                }
-            } else {
-                console.error('Failed to fetch positions');
-            }
-        } catch (error) {
-            console.error('Error fetching positions:', error);
-        } finally {
-            setIsLoadingPositions(false);
-        }
-    };
-
-    // Load positions when modal opens
-    useEffect(() => {
-        if (isOpen) {
-            fetchPositions();
-        }
-    }, [isOpen]);
-
-    // Handle "Set as present address" checkbox effect
-    const handleSetAsPresentAddressChange = (checked: boolean) => {
-        setSetAsPresentAddress(checked);
-        if (checked) {
-                    // Copy address to present address (if needed)
-        setFormData(prev => ({
-            ...prev,
-            address: {
-                ...prev.address
-            }
-        }));
-        }
-    };
     // const [profileImg, setProfileImg] = useState<string | undefined>();
+
+    // Separate state for present address
+    const [presentAddress, setPresentAddress] = useState({
+        region: "",
+        province: "",
+        cityMunicipality: "",
+        barangay: "",
+        streetHouseNoLot: "",
+        postalCode: "",
+        country: "",
+    });
+
+    // Position service for fetching positions
+    const positionService = usePositionService();
+    const [positions, setPositions] = useState<any[]>([]);
+    const [isLoadingPositions, setIsLoadingPositions] = useState(false);
+    
+    // Debug: Log the environment variable
+    console.log("VITE_TEAM_AND_POSITION_SERVICE:", import.meta.env.VITE_TEAM_AND_POSITION_SERVICE);
 
     // Populate form data when in edit mode
     useEffect(() => {
         if (mode === "edit" && addEmployeeData) {
+            console.log("Setting form data for edit mode:", addEmployeeData);
             setFormData(addEmployeeData);
         }
-    }, [mode, addEmployeeData]);
+    }, [mode, addEmployeeData, isOpen]);
+
+    // Handle "Set as present address" checkbox effect
+    useEffect(() => {
+        if (setAsPresentAddress) {
+            // Copy permanent address to present address
+            setPresentAddress({
+                ...formData.address,
+            });
+        }
+    }, [setAsPresentAddress, formData.address]);
+
+    // Fetch positions when modal opens
+    useEffect(() => {
+        const fetchPositions = async () => {
+            if (isOpen) {
+                setIsLoadingPositions(true);
+                try {
+                    // Use the direct API URL you provided
+                    const response = await fetch('https://erp-team-and-position-api-dev.supportzebra.net/api/v1/position/getPositions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            is_archived: 0,
+                            offset: 0,
+                            limit: 1000,
+                        })
+                    });
+                    
+                    console.log("API Response status:", response.status);
+                    console.log("API Response headers:", response.headers);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log("API Response data:", data);
+                        
+                        if (data.positions && Array.isArray(data.positions)) {
+                            setPositions(data.positions);
+                            console.log("Successfully set positions:", data.positions.length, "positions");
+                        } else {
+                            console.log("No positions array found in response:", data);
+                        }
+                    } else {
+                        console.error("API request failed:", response.status, response.statusText);
+                        const errorText = await response.text();
+                        console.error("Error response:", errorText);
+                    }
+                } catch (error) {
+                    console.error("Error fetching positions:", error);
+                } finally {
+                    setIsLoadingPositions(false);
+                }
+            }
+        };
+
+        fetchPositions();
+    }, [isOpen]);
+
+    // Transform positions to dropdown options
+    const positionOptions = useMemo(() => {
+        console.log("Transforming positions:", positions);
+        return positions.map((position) => ({
+            label: position.position_name || position.position_code || "Unknown Position",
+            value: position.position_ID || "",
+        }));
+    }, [positions]);
+
+    // Religion options
+    const religionOptions = useMemo(() => [
+        { label: "Judaism", value: "judaism" },
+        { label: "Buddhism", value: "buddhism" },
+        { label: "Sikhism", value: "sikhism" },
+        { label: "Born Again", value: "born again" },
+        { label: "Iglesia sa Dios", value: "iglesia sa dios" },
+        { label: "Christian", value: "christian" },
+        { label: "Roman Catholic", value: "roman catholic" },
+        { label: "Iglesia ni Cristo", value: "iglesia ni cristo" },
+        { label: "Islam", value: "islam" },
+        { label: "Hinduism", value: "hinduism" },
+        { label: "Seventh Day Adventist", value: "seventh day adventist" },
+    ], []);
 
     const handleConfirmationClose = () => {
         setShowConfirmationModal(false);
@@ -169,10 +222,21 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
     };
 
     const handleProceed = () => {
-        setCurrentAddEmployeeData(formData);
+        // For edit mode, include present address data
         if (mode === "edit") {
+            const formDataWithPresentAddress = {
+                ...formData,
+                address: {
+                    ...formData.address,
+                    // Include present address data if checkbox is checked
+                    ...(setAsPresentAddress ? presentAddress : {})
+                }
+            };
+            console.log("Edit mode - formData being passed to confirmation:", formDataWithPresentAddress);
+            setCurrentAddEmployeeData(formDataWithPresentAddress);
             setShowUpdateConfirmationModal(true);
         } else {
+            setCurrentAddEmployeeData(formData);
             setShowConfirmationModal(true);
         }
     };
@@ -234,7 +298,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                             <div className="flex justify-between">
                                 <h6 className="text-h6 font-semibold text-szPrimary700">Name and Birthday</h6>
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] items-center">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] items-center relative z-50">
                                 <Inputs 
                                     label="LAST NAME *" 
                                     value={formData.fullName.lastName || ""} 
@@ -260,13 +324,11 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                     value={formData.fullName.nickname || ""} 
                                     onChange={(e: any) => handleNestedInputChange('fullName', 'nickname', e.target.value)}
                                 />
-                                <div className="relative z-50">
-                                    <CustomDatePicker 
-                                        label="BIRTHDATE" 
-                                        value={formData.fullName.dateOfBirth || ""} 
-                                        onChange={(value: Date) => handleNestedInputChange('fullName', 'dateOfBirth', value.toISOString())}
-                                    />
-                                </div>
+                                <CustomDatePicker 
+                                    label="BIRTHDATE" 
+                                    value={formData.fullName.dateOfBirth || ""} 
+                                    onChange={(value: Date) => handleNestedInputChange('fullName', 'dateOfBirth', value.toLocaleDateString('en-CA'))}
+                                />
                             </div>
                         </div>
 
@@ -276,10 +338,17 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                 <h6 className="text-h6 font-semibold text-szPrimary700">Others</h6>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] items-center">
-                                <Inputs 
-                                    label="RELIGION" 
-                                    value={formData.others.religion || ""} 
-                                    onChange={(e: any) => handleNestedInputChange('others', 'religion', e.target.value)}
+                                <Dropdown
+                                    label="RELIGION"
+                                    placeholder="Select religion"
+                                    options={religionOptions}
+                                    onSelectionChange={(selected: any) => handleNestedInputChange('others', 'religion', selected?.value || '')}
+                                    value={formData.others.religion ? { 
+                                        label: religionOptions.find(option => option.value === formData.others.religion)?.label || formData.others.religion,
+                                        value: formData.others.religion 
+                                    } : undefined}
+                                    usePortal={true}
+                                    size="small"
                                 />
                                 <Dropdown
                                     label="GENDER"
@@ -422,22 +491,22 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                             { label: "Misamis Occidental", value: "1016" },
                                             { label: "Misamis Oriental", value: "1017" }
                                         ]} 
-                                        onSelectionChange={(selected: any) => handleNestedInputChange('permanentAddress', 'province', selected?.value || '')}
-                                        value={formData.permanentAddress.province ? { 
-                                            label: formData.permanentAddress.province === "1182" ? "Davao del Sur" :
-                                                   formData.permanentAddress.province === "1183" ? "Davao del Norte" :
-                                                   formData.permanentAddress.province === "1184" ? "Davao Oriental" :
-                                                   formData.permanentAddress.province === "1186" ? "Davao de Oro" :
-                                                   formData.permanentAddress.province === "1187" ? "Davao Occidental" :
-                                                   formData.permanentAddress.province === "0972" ? "Zamboanga del Sur" :
-                                                   formData.permanentAddress.province === "0971" ? "Zamboanga del Norte" :
-                                                   formData.permanentAddress.province === "0973" ? "Zamboanga Sibugay" :
-                                                   formData.permanentAddress.province === "1013" ? "Bukidnon" :
-                                                   formData.permanentAddress.province === "1014" ? "Camiguin" :
-                                                   formData.permanentAddress.province === "1015" ? "Lanao del Norte" :
-                                                   formData.permanentAddress.province === "1016" ? "Misamis Occidental" :
-                                                   formData.permanentAddress.province === "1017" ? "Misamis Oriental" : formData.permanentAddress.province,
-                                            value: formData.permanentAddress.province 
+                                        onSelectionChange={(selected: any) => handleNestedInputChange('address', 'province', selected?.value || '')}
+                                        value={formData.address.province ? { 
+                                            label: formData.address.province === "1182" ? "Davao del Sur" :
+                                                   formData.address.province === "1183" ? "Davao del Norte" :
+                                                   formData.address.province === "1184" ? "Davao Oriental" :
+                                                   formData.address.province === "1186" ? "Davao de Oro" :
+                                                   formData.address.province === "1187" ? "Davao Occidental" :
+                                                   formData.address.province === "0972" ? "Zamboanga del Sur" :
+                                                   formData.address.province === "0971" ? "Zamboanga del Norte" :
+                                                   formData.address.province === "0973" ? "Zamboanga Sibugay" :
+                                                   formData.address.province === "1013" ? "Bukidnon" :
+                                                   formData.address.province === "1014" ? "Camiguin" :
+                                                   formData.address.province === "1015" ? "Lanao del Norte" :
+                                                   formData.address.province === "1016" ? "Misamis Occidental" :
+                                                   formData.address.province === "1017" ? "Misamis Oriental" : formData.address.province,
+                                            value: formData.address.province 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -463,25 +532,25 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                             { label: "Maco", value: "1186009" },
                                             { label: "Maragusan", value: "1186011" }
                                         ]} 
-                                        onSelectionChange={(selected: any) => handleNestedInputChange('permanentAddress', 'cityMunicipality', selected?.value || '')}
-                                        value={formData.permanentAddress.cityMunicipality ? { 
-                                            label: formData.permanentAddress.cityMunicipality === "1182022" ? "Davao City" :
-                                                   formData.permanentAddress.cityMunicipality === "1182064" ? "Digos City" :
-                                                   formData.permanentAddress.cityMunicipality === "1183024" ? "Tagum City" :
-                                                   formData.permanentAddress.cityMunicipality === "1183019" ? "Panabo City" :
-                                                   formData.permanentAddress.cityMunicipality === "1183023" ? "Island Garden City of Samal" :
-                                                   formData.permanentAddress.cityMunicipality === "1184037" ? "Mati City" :
-                                                   formData.permanentAddress.cityMunicipality === "1186017" ? "Nabunturan" :
-                                                   formData.permanentAddress.cityMunicipality === "1186012" ? "Mawab" :
-                                                   formData.permanentAddress.cityMunicipality === "1186008" ? "Monkayo" :
-                                                   formData.permanentAddress.cityMunicipality === "1186004" ? "Compostela" :
-                                                   formData.permanentAddress.cityMunicipality === "1186015" ? "New Bataan" :
-                                                   formData.permanentAddress.cityMunicipality === "1186007" ? "Laak" :
-                                                   formData.permanentAddress.cityMunicipality === "1186014" ? "Montevista" :
-                                                   formData.permanentAddress.cityMunicipality === "1186020" ? "Pantukan" :
-                                                   formData.permanentAddress.cityMunicipality === "1186009" ? "Maco" :
-                                                   formData.permanentAddress.cityMunicipality === "1186011" ? "Maragusan" : formData.permanentAddress.cityMunicipality,
-                                            value: formData.permanentAddress.cityMunicipality 
+                                        onSelectionChange={(selected: any) => handleNestedInputChange('address', 'cityMunicipality', selected?.value || '')}
+                                        value={formData.address.cityMunicipality ? { 
+                                            label: formData.address.cityMunicipality === "1182022" ? "Davao City" :
+                                                   formData.address.cityMunicipality === "1182064" ? "Digos City" :
+                                                   formData.address.cityMunicipality === "1183024" ? "Tagum City" :
+                                                   formData.address.cityMunicipality === "1183019" ? "Panabo City" :
+                                                   formData.address.cityMunicipality === "1183023" ? "Island Garden City of Samal" :
+                                                   formData.address.cityMunicipality === "1184037" ? "Mati City" :
+                                                   formData.address.cityMunicipality === "1186017" ? "Nabunturan" :
+                                                   formData.address.cityMunicipality === "1186012" ? "Mawab" :
+                                                   formData.address.cityMunicipality === "1186008" ? "Monkayo" :
+                                                   formData.address.cityMunicipality === "1186004" ? "Compostela" :
+                                                   formData.address.cityMunicipality === "1186015" ? "New Bataan" :
+                                                   formData.address.cityMunicipality === "1186007" ? "Laak" :
+                                                   formData.address.cityMunicipality === "1186014" ? "Montevista" :
+                                                   formData.address.cityMunicipality === "1186020" ? "Pantukan" :
+                                                   formData.address.cityMunicipality === "1186009" ? "Maco" :
+                                                   formData.address.cityMunicipality === "1186011" ? "Maragusan" : formData.address.cityMunicipality,
+                                            value: formData.address.cityMunicipality 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -513,31 +582,31 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                             { label: "10-A", value: "021" },
                                             { label: "10-B", value: "022" }
                                         ]} 
-                                        onSelectionChange={(selected: any) => handleNestedInputChange('permanentAddress', 'barangay', selected?.value || '')}
-                                        value={formData.permanentAddress.barangay ? { 
-                                            label: formData.permanentAddress.barangay === "001" ? "1-A" :
-                                                   formData.permanentAddress.barangay === "002" ? "1-B" :
-                                                   formData.permanentAddress.barangay === "003" ? "1-C" :
-                                                   formData.permanentAddress.barangay === "004" ? "2-A" :
-                                                   formData.permanentAddress.barangay === "005" ? "2-B" :
-                                                   formData.permanentAddress.barangay === "006" ? "2-C" :
-                                                   formData.permanentAddress.barangay === "007" ? "3-A" :
-                                                   formData.permanentAddress.barangay === "008" ? "3-B" :
-                                                   formData.permanentAddress.barangay === "009" ? "4-A" :
-                                                   formData.permanentAddress.barangay === "010" ? "4-B" :
-                                                   formData.permanentAddress.barangay === "011" ? "5-A" :
-                                                   formData.permanentAddress.barangay === "012" ? "5-B" :
-                                                   formData.permanentAddress.barangay === "013" ? "6-A" :
-                                                   formData.permanentAddress.barangay === "014" ? "6-B" :
-                                                   formData.permanentAddress.barangay === "015" ? "7-A" :
-                                                   formData.permanentAddress.barangay === "016" ? "7-B" :
-                                                   formData.permanentAddress.barangay === "017" ? "8-A" :
-                                                   formData.permanentAddress.barangay === "018" ? "8-B" :
-                                                   formData.permanentAddress.barangay === "019" ? "9-A" :
-                                                   formData.permanentAddress.barangay === "020" ? "9-B" :
-                                                   formData.permanentAddress.barangay === "021" ? "10-A" :
-                                                   formData.permanentAddress.barangay === "022" ? "10-B" : formData.permanentAddress.barangay,
-                                            value: formData.permanentAddress.barangay 
+                                        onSelectionChange={(selected: any) => handleNestedInputChange('address', 'barangay', selected?.value || '')}
+                                        value={formData.address.barangay ? { 
+                                            label: formData.address.barangay === "001" ? "1-A" :
+                                                   formData.address.barangay === "002" ? "1-B" :
+                                                   formData.address.barangay === "003" ? "1-C" :
+                                                   formData.address.barangay === "004" ? "2-A" :
+                                                   formData.address.barangay === "005" ? "2-B" :
+                                                   formData.address.barangay === "006" ? "2-C" :
+                                                   formData.address.barangay === "007" ? "3-A" :
+                                                   formData.address.barangay === "008" ? "3-B" :
+                                                   formData.address.barangay === "009" ? "4-A" :
+                                                   formData.address.barangay === "010" ? "4-B" :
+                                                   formData.address.barangay === "011" ? "5-A" :
+                                                   formData.address.barangay === "012" ? "5-B" :
+                                                   formData.address.barangay === "013" ? "6-A" :
+                                                   formData.address.barangay === "014" ? "6-B" :
+                                                   formData.address.barangay === "015" ? "7-A" :
+                                                   formData.address.barangay === "016" ? "7-B" :
+                                                   formData.address.barangay === "017" ? "8-A" :
+                                                   formData.address.barangay === "018" ? "8-B" :
+                                                   formData.address.barangay === "019" ? "9-A" :
+                                                   formData.address.barangay === "020" ? "9-B" :
+                                                   formData.address.barangay === "021" ? "10-A" :
+                                                   formData.address.barangay === "022" ? "10-B" : formData.address.barangay,
+                                            value: formData.address.barangay 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -547,15 +616,15 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                     <div className="sm:col-span-4 col-span-1">
                                         <Inputs 
                                             label="STREET / HOUSE NUMBER / LOT" 
-                                            value={formData.permanentAddress.streetHouseNoLot || ""} 
-                                            onChange={(e: any) => handleNestedInputChange('permanentAddress', 'streetHouseNoLot', e.target.value)}
+                                            value={formData.address.streetHouseNoLot || ""} 
+                                            onChange={(e: any) => handleNestedInputChange('address', 'streetHouseNoLot', e.target.value)}
                                         />
                                     </div>
                                     <div className="sm:col-span-1 col-span-2">
                                         <Inputs 
                                             label="POSTAL CODE" 
-                                            value={formData.permanentAddress.postalCode || ""} 
-                                            onChange={(e: any) => handleNestedInputChange('permanentAddress', 'postalCode', e.target.value)}
+                                            value={formData.address.postalCode || ""} 
+                                            onChange={(e: any) => handleNestedInputChange('address', 'postalCode', e.target.value)}
                                         />
                                     </div>
                                 </div>
@@ -599,23 +668,23 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                                                                     { label: "Region VII (Central Visayas)", value: "08" },
                                             { label: "Region VIII (Eastern Visayas)", value: "09" }
                                     ]} 
-                                    onSelectionChange={(selected: any) => handleNestedInputChange('presentAddress', 'region', selected?.value || '')}
-                                                                            value={formData.presentAddress.region ? { 
-                                            label: formData.presentAddress.region === "09" ? "Region IX (Zamboanga Peninsula)" :
-                                                   formData.presentAddress.region === "10" ? "Region X (Northern Mindanao)" :
-                                                   formData.presentAddress.region === "11" ? "Region XI (Davao Region)" :
-                                                   formData.presentAddress.region === "12" ? "Region XII (SOCCSKSARGEN)" :
-                                                   formData.presentAddress.region === "13" ? "National Capital Region (NCR)" :
-                                                   formData.presentAddress.region === "14" ? "Cordillera Administrative Region (CAR)" :
-                                                   formData.presentAddress.region === "01" ? "Region I (Ilocos Region)" :
-                                                   formData.presentAddress.region === "02" ? "Region II (Cagayan Valley)" :
-                                                   formData.presentAddress.region === "03" ? "Region III (Central Luzon)" :
-                                                   formData.presentAddress.region === "04" ? "Region IV-A (CALABARZON)" :
-                                                   formData.presentAddress.region === "05" ? "Region IV-B (MIMAROPA)" :
-                                                   formData.presentAddress.region === "06" ? "Region VI (Western Visayas)" :
-                                                   formData.presentAddress.region === "07" ? "Region VII (Central Visayas)" :
-                                                   formData.presentAddress.region === "08" ? "Region VIII (Eastern Visayas)" : formData.presentAddress.region,
-                                            value: formData.presentAddress.region 
+                                    onSelectionChange={(selected: any) => setPresentAddress(prev => ({ ...prev, region: selected?.value || '' }))}
+                                                                            value={presentAddress.region ? { 
+                                            label: presentAddress.region === "09" ? "Region IX (Zamboanga Peninsula)" :
+                                                   presentAddress.region === "10" ? "Region X (Northern Mindanao)" :
+                                                   presentAddress.region === "11" ? "Region XI (Davao Region)" :
+                                                   presentAddress.region === "12" ? "Region XII (SOCCSKSARGEN)" :
+                                                   presentAddress.region === "13" ? "National Capital Region (NCR)" :
+                                                   presentAddress.region === "14" ? "Cordillera Administrative Region (CAR)" :
+                                                   presentAddress.region === "01" ? "Region I (Ilocos Region)" :
+                                                   presentAddress.region === "02" ? "Region II (Cagayan Valley)" :
+                                                   presentAddress.region === "03" ? "Region III (Central Luzon)" :
+                                                   presentAddress.region === "04" ? "Region IV-A (CALABARZON)" :
+                                                   presentAddress.region === "05" ? "Region IV-B (MIMAROPA)" :
+                                                   presentAddress.region === "06" ? "Region VI (Western Visayas)" :
+                                                   presentAddress.region === "07" ? "Region VII (Central Visayas)" :
+                                                   presentAddress.region === "08" ? "Region VIII (Eastern Visayas)" : presentAddress.region,
+                                            value: presentAddress.region 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -638,22 +707,22 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                         { label: "Misamis Occidental", value: "1016" },
                                         { label: "Misamis Oriental", value: "1017" }
                                     ]} 
-                                    onSelectionChange={(selected: any) => handleNestedInputChange('presentAddress', 'province', selected?.value || '')}
-                                                                            value={formData.presentAddress.province ? { 
-                                            label: formData.presentAddress.province === "1182" ? "Davao del Sur" :
-                                                   formData.presentAddress.province === "1183" ? "Davao del Norte" :
-                                                   formData.presentAddress.province === "1184" ? "Davao Oriental" :
-                                                   formData.presentAddress.province === "1186" ? "Davao de Oro" :
-                                                   formData.presentAddress.province === "1187" ? "Davao Occidental" :
-                                                   formData.presentAddress.province === "0972" ? "Zamboanga del Sur" :
-                                                   formData.presentAddress.province === "0971" ? "Zamboanga del Norte" :
-                                                   formData.presentAddress.province === "0973" ? "Zamboanga Sibugay" :
-                                                   formData.presentAddress.province === "1013" ? "Bukidnon" :
-                                                   formData.presentAddress.province === "1014" ? "Camiguin" :
-                                                   formData.presentAddress.province === "1015" ? "Lanao del Norte" :
-                                                   formData.presentAddress.province === "1016" ? "Misamis Occidental" :
-                                                   formData.presentAddress.province === "1017" ? "Misamis Oriental" : formData.presentAddress.province,
-                                            value: formData.presentAddress.province 
+                                    onSelectionChange={(selected: any) => setPresentAddress(prev => ({ ...prev, province: selected?.value || '' }))}
+                                                                            value={presentAddress.province ? { 
+                                            label: presentAddress.province === "1182" ? "Davao del Sur" :
+                                                   presentAddress.province === "1183" ? "Davao del Norte" :
+                                                   presentAddress.province === "1184" ? "Davao Oriental" :
+                                                   presentAddress.province === "1186" ? "Davao de Oro" :
+                                                   presentAddress.province === "1187" ? "Davao Occidental" :
+                                                   presentAddress.province === "0972" ? "Zamboanga del Sur" :
+                                                   presentAddress.province === "0971" ? "Zamboanga del Norte" :
+                                                   presentAddress.province === "0973" ? "Zamboanga Sibugay" :
+                                                   presentAddress.province === "1013" ? "Bukidnon" :
+                                                   presentAddress.province === "1014" ? "Camiguin" :
+                                                   presentAddress.province === "1015" ? "Lanao del Norte" :
+                                                   presentAddress.province === "1016" ? "Misamis Occidental" :
+                                                   presentAddress.province === "1017" ? "Misamis Oriental" : presentAddress.province,
+                                            value: presentAddress.province 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -679,25 +748,25 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                         { label: "Maco", value: "1186009" },
                                         { label: "Maragusan", value: "1186011" }
                                     ]} 
-                                    onSelectionChange={(selected: any) => handleNestedInputChange('presentAddress', 'cityMunicipality', selected?.value || '')}
-                                                                            value={formData.presentAddress.cityMunicipality ? { 
-                                            label: formData.presentAddress.cityMunicipality === "1182022" ? "Davao City" :
-                                                   formData.presentAddress.cityMunicipality === "1182064" ? "Digos City" :
-                                                   formData.presentAddress.cityMunicipality === "1183024" ? "Tagum City" :
-                                                   formData.presentAddress.cityMunicipality === "1183019" ? "Panabo City" :
-                                                   formData.presentAddress.cityMunicipality === "1183023" ? "Island Garden City of Samal" :
-                                                   formData.presentAddress.cityMunicipality === "1184037" ? "Mati City" :
-                                                   formData.presentAddress.cityMunicipality === "1186017" ? "Nabunturan" :
-                                                   formData.presentAddress.cityMunicipality === "1186012" ? "Mawab" :
-                                                   formData.presentAddress.cityMunicipality === "1186008" ? "Monkayo" :
-                                                   formData.presentAddress.cityMunicipality === "1186004" ? "Compostela" :
-                                                   formData.presentAddress.cityMunicipality === "1186015" ? "New Bataan" :
-                                                   formData.presentAddress.cityMunicipality === "1186007" ? "Laak" :
-                                                   formData.presentAddress.cityMunicipality === "1186014" ? "Montevista" :
-                                                   formData.presentAddress.cityMunicipality === "1186020" ? "Pantukan" :
-                                                   formData.presentAddress.cityMunicipality === "1186009" ? "Maco" :
-                                                   formData.presentAddress.cityMunicipality === "1186011" ? "Maragusan" : formData.presentAddress.cityMunicipality,
-                                            value: formData.presentAddress.cityMunicipality 
+                                    onSelectionChange={(selected: any) => setPresentAddress(prev => ({ ...prev, cityMunicipality: selected?.value || '' }))}
+                                                                            value={presentAddress.cityMunicipality ? { 
+                                            label: presentAddress.cityMunicipality === "1182022" ? "Davao City" :
+                                                   presentAddress.cityMunicipality === "1182064" ? "Digos City" :
+                                                   presentAddress.cityMunicipality === "1183024" ? "Tagum City" :
+                                                   presentAddress.cityMunicipality === "1183019" ? "Panabo City" :
+                                                   presentAddress.cityMunicipality === "1183023" ? "Island Garden City of Samal" :
+                                                   presentAddress.cityMunicipality === "1184037" ? "Mati City" :
+                                                   presentAddress.cityMunicipality === "1186017" ? "Nabunturan" :
+                                                   presentAddress.cityMunicipality === "1186012" ? "Mawab" :
+                                                   presentAddress.cityMunicipality === "1186008" ? "Monkayo" :
+                                                   presentAddress.cityMunicipality === "1186004" ? "Compostela" :
+                                                   presentAddress.cityMunicipality === "1186015" ? "New Bataan" :
+                                                   presentAddress.cityMunicipality === "1186007" ? "Laak" :
+                                                   presentAddress.cityMunicipality === "1186014" ? "Montevista" :
+                                                   presentAddress.cityMunicipality === "1186020" ? "Pantukan" :
+                                                   presentAddress.cityMunicipality === "1186009" ? "Maco" :
+                                                   presentAddress.cityMunicipality === "1186011" ? "Maragusan" : presentAddress.cityMunicipality,
+                                            value: presentAddress.cityMunicipality 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -729,31 +798,31 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                         { label: "10-A", value: "021" },
                                         { label: "10-B", value: "022" }
                                     ]} 
-                                    onSelectionChange={(selected: any) => handleNestedInputChange('presentAddress', 'barangay', selected?.value || '')}
-                                                                            value={formData.presentAddress.barangay ? { 
-                                            label: formData.presentAddress.barangay === "001" ? "1-A" :
-                                                   formData.presentAddress.barangay === "002" ? "1-B" :
-                                                   formData.presentAddress.barangay === "003" ? "1-C" :
-                                                   formData.presentAddress.barangay === "004" ? "2-A" :
-                                                   formData.presentAddress.barangay === "005" ? "2-B" :
-                                                   formData.presentAddress.barangay === "006" ? "2-C" :
-                                                   formData.presentAddress.barangay === "007" ? "3-A" :
-                                                   formData.presentAddress.barangay === "008" ? "3-B" :
-                                                   formData.presentAddress.barangay === "009" ? "4-A" :
-                                                   formData.presentAddress.barangay === "010" ? "4-B" :
-                                                   formData.presentAddress.barangay === "011" ? "5-A" :
-                                                   formData.presentAddress.barangay === "012" ? "5-B" :
-                                                   formData.presentAddress.barangay === "013" ? "6-A" :
-                                                   formData.presentAddress.barangay === "014" ? "6-B" :
-                                                   formData.presentAddress.barangay === "015" ? "7-A" :
-                                                   formData.presentAddress.barangay === "016" ? "7-B" :
-                                                   formData.presentAddress.barangay === "017" ? "8-A" :
-                                                   formData.presentAddress.barangay === "018" ? "8-B" :
-                                                   formData.presentAddress.barangay === "019" ? "9-A" :
-                                                   formData.presentAddress.barangay === "020" ? "9-B" :
-                                                   formData.presentAddress.barangay === "021" ? "10-A" :
-                                                   formData.presentAddress.barangay === "022" ? "10-B" : formData.presentAddress.barangay,
-                                            value: formData.presentAddress.barangay 
+                                    onSelectionChange={(selected: any) => setPresentAddress(prev => ({ ...prev, barangay: selected?.value || '' }))}
+                                                                            value={presentAddress.barangay ? { 
+                                            label: presentAddress.barangay === "001" ? "1-A" :
+                                                   presentAddress.barangay === "002" ? "1-B" :
+                                                   presentAddress.barangay === "003" ? "1-C" :
+                                                   presentAddress.barangay === "004" ? "2-A" :
+                                                   presentAddress.barangay === "005" ? "2-B" :
+                                                   presentAddress.barangay === "006" ? "2-C" :
+                                                   presentAddress.barangay === "007" ? "3-A" :
+                                                   presentAddress.barangay === "008" ? "3-B" :
+                                                   presentAddress.barangay === "009" ? "4-A" :
+                                                   presentAddress.barangay === "010" ? "4-B" :
+                                                   presentAddress.barangay === "011" ? "5-A" :
+                                                   presentAddress.barangay === "012" ? "5-B" :
+                                                   presentAddress.barangay === "013" ? "6-A" :
+                                                   presentAddress.barangay === "014" ? "6-B" :
+                                                   presentAddress.barangay === "015" ? "7-A" :
+                                                   presentAddress.barangay === "016" ? "7-B" :
+                                                   presentAddress.barangay === "017" ? "8-A" :
+                                                   presentAddress.barangay === "018" ? "8-B" :
+                                                   presentAddress.barangay === "019" ? "9-A" :
+                                                   presentAddress.barangay === "020" ? "9-B" :
+                                                   presentAddress.barangay === "021" ? "10-A" :
+                                                   presentAddress.barangay === "022" ? "10-B" : presentAddress.barangay,
+                                            value: presentAddress.barangay 
                                         } : undefined}
                                         usePortal={true}
                                         size="small"
@@ -763,15 +832,15 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                 <div className="sm:col-span-4 col-span-1">
                                     <Inputs 
                                         label="STREET / HOUSE NUMBER / LOT" 
-                                        value={formData.presentAddress.streetHouseNoLot || ""} 
-                                        onChange={(e: any) => handleNestedInputChange('presentAddress', 'streetHouseNoLot', e.target.value)}
+                                        value={presentAddress.streetHouseNoLot || ""} 
+                                        onChange={(e: any) => setPresentAddress(prev => ({ ...prev, streetHouseNoLot: e.target.value }))}
                                     />
                                 </div>
                                 <div className="sm:col-span-1 col-span-2">
                                     <Inputs 
                                         label="POSTAL CODE" 
-                                        value={formData.presentAddress.postalCode || ""} 
-                                        onChange={(e: any) => handleNestedInputChange('presentAddress', 'postalCode', e.target.value)}
+                                        value={presentAddress.postalCode || ""} 
+                                        onChange={(e: any) => setPresentAddress(prev => ({ ...prev, postalCode: e.target.value }))}
                                     />
                                 </div>
                             </div>
@@ -783,24 +852,21 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                 <h6 className="text-h6 font-semibold text-szPrimary700">Work</h6>
                             </div>
                             <div className="flex flex-col w-full gap-[16px]">
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-[16px] items-center">
-                                    <div className="relative z-50">
-                                        <CustomDatePicker 
-                                            label="DATE HIRED" 
-                                            value={formData.work.dateHired || ""} 
-                                            onChange={(value: Date) => handleNestedInputChange('work', 'dateHired', value.toISOString())}
-                                        />
-                                    </div>
-                                                                    <Dropdown 
-                                    label="POSITION" 
-                                    placeholder={isLoadingPositions ? "Loading positions..." : "Select position"}
-                                    options={positions}
-                                    onSelectionChange={(selected: any) => handleNestedInputChange('work', 'position', selected?.value || '')}
-                                    value={formData.work.position ? positions.find(p => p.value === formData.work.position) : undefined}
-                                    usePortal={true}
-                                    size="small"
-                                    disabled={isLoadingPositions}
-                                />
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-[16px] items-center relative z-50">
+                                    <CustomDatePicker 
+                                        label="DATE HIRED" 
+                                        value={formData.work.dateHired || ""} 
+                                        onChange={(value: Date) => handleNestedInputChange('work', 'dateHired', value.toLocaleDateString('en-CA'))}
+                                    />
+                                    <Dropdown
+                                        label="POSITION"
+                                        placeholder={isLoadingPositions ? "Loading positions..." : "Select position"}
+                                        options={positionOptions}
+                                        onSelectionChange={(selected: any) => handleNestedInputChange('work', 'position', selected?.value || '')}
+                                        value={formData.work.position ? positionOptions.find(option => option.value === formData.work.position) : undefined}
+                                        usePortal={true}
+                                        size="small"
+                                    />
                                     <Dropdown
                                         label="POSITION STATUS"
                                         placeholder="Select position status"
@@ -856,19 +922,24 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                     </div>
                 }
             />
-            <EmployeeConfirmationModal
-                isOpen={showConfirmationModal}
-                onClose={handleConfirmationClose}
-                addEmployeeData={currentAddEmployeeData ? [currentAddEmployeeData] : []}
-                onSubmitSuccess={onSubmitSuccess}
-            />
-            <EmployeeUpdateConfirmationModal
-                isOpen={showUpdateConfirmationModal}
-                onClose={() => setShowUpdateConfirmationModal(false)}
-                updateEmployeeData={currentAddEmployeeData ? [currentAddEmployeeData] : []}
-                employeeId={employeeId || ""}
-                onSubmitSuccess={onSubmitSuccess}
-            />
+            {showConfirmationModal && (
+                <EmployeeConfirmationModal
+                    isOpen={showConfirmationModal}
+                    onClose={handleConfirmationClose}
+                    addEmployeeData={currentAddEmployeeData ? [currentAddEmployeeData] : []}
+                    onSubmitSuccess={onSubmitSuccess}
+                />
+            )}
+            {showUpdateConfirmationModal && (
+                <EmployeeUpdateConfirmationModal
+                    isOpen={showUpdateConfirmationModal}
+                    onClose={() => setShowUpdateConfirmationModal(false)}
+                    updateEmployeeData={currentAddEmployeeData ? [currentAddEmployeeData] : []}
+                    originalEmployeeData={originalEmployeeData}
+                    employeeId={employeeId || ""}
+                    onSubmitSuccess={onSubmitSuccess}
+                />
+            )}
         </div>
     );
 };

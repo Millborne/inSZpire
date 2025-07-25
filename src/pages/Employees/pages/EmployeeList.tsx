@@ -27,6 +27,7 @@ import {
 import { setSelectedEmployee } from "../../../reducers/employeeSlice";
 import type { AppDispatch } from "../../../reducers/store";
 import { transformEmployeeToFormData } from "../../../utils/employeeTransformers";
+import { useGetEmployeeByIdMutation } from "../../../services/employee/update/employeeUpdateAPI";
 // Components
 import EmployeeFilterModal from "../components/modals/EmployeeFilterModal";
 import EmployeeModal from "../components/modals/EmployeeModal";
@@ -36,148 +37,58 @@ const EmployeeList = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
     const employeeService = useEmployeeService();
+    const [getEmployeeById] = useGetEmployeeByIdMutation();
 
     // State management
     const [employees, setEmployees] = useState<EmployeeData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [filters, setFilters] = useState<ViewEmployeesRequest>({
-        is_archived: 0,
-        offset: 0,
-        limit: 10,
-    });
-
-    // Pagination state
-    const [pagination, setPagination] = useState({
-        total: 0,
-        offset: 0,
-        limit: 10,
-        hasMore: false,
-    });
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<"add" | "edit">("add");
-    const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] =
-        useState(false);
     const [selectedEmployeeLocal, setSelectedEmployeeLocal] =
         useState<any>(null);
     const [originalEmployeeData, setOriginalEmployeeData] =
         useState<EmployeeData | null>(null);
-    const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
-    const [snackbarAction, setSnackbarAction] = useState<
-        "add" | "edit" | "update" | null
-    >(null);
-    const [openFilter, setOpenFilter] = useState(false);
+
+    // Load employees function
+    const loadData = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+
+            console.log("Loading employee list...");
+            const employeesResponse = await employeeService.listEmployees({
+                is_archived: 0,
+                offset: 0,
+                limit: 10,
+            });
+            console.log("Employees response:", employeesResponse);
+
+            if (employeesResponse.data?.success && employeesResponse.data?.data?.employees) {
+                const responseData = employeesResponse.data.data;
+                setEmployees(responseData.employees || []);
+            } else {
+                console.error("No employee data received");
+                setEmployees([]);
+            }
+        } catch (err) {
+            console.error("Error loading employees:", err);
+            setError("Failed to load employees. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // Load employees on component mount
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                setIsLoading(true);
-                setError(null);
-
-                // Load employees using vw_employee view
-                console.log("Sending request with filters:", filters);
-                const employeesResponse = await employeeService.listEmployees(
-                    filters
-                );
-                console.log("Employees response:", employeesResponse);
-
-                // Handle different response structures
-                if (
-                    employeesResponse.data?.success &&
-                    employeesResponse.data?.data?.employees
-                ) {
-                    // Response structure: { success: true, data: { employees: [...], pagination: {...} } }
-                    const responseData = employeesResponse.data.data;
-                    setEmployees(responseData.employees || []);
-                    setPagination(
-                        responseData.pagination || {
-                            total: 0,
-                            offset: 0,
-                            limit: 10,
-                            hasMore: false,
-                        }
-                    );
-                } else if (
-                    employeesResponse.data?.success &&
-                    employeesResponse.data?.employees
-                ) {
-                    // Direct response structure: { success: true, employees: [...], pagination: {...} }
-                    const responseData = employeesResponse.data;
-                    setEmployees(responseData.employees || []);
-                    setPagination(
-                        responseData.pagination || {
-                            total: 0,
-                            offset: 0,
-                            limit: 10,
-                            hasMore: false,
-                        }
-                    );
-                } else {
-                    console.error(
-                        "No employee data received - response structure:",
-                        employeesResponse.data
-                    );
-                    setEmployees([]);
-                    setPagination({
-                        total: 0,
-                        offset: 0,
-                        limit: 10,
-                        hasMore: false,
-                    });
-                }
-            } catch (err) {
-                console.error("Error loading data:", err);
-
-                // Check if it's a CORS error
-                if (err && typeof err === "object" && "status" in err) {
-                    const error = err as any;
-                    if (
-                        error.status === "FETCH_ERROR" ||
-                        error.status === "CORS_ERROR"
-                    ) {
-                        setError(
-                            "CORS Error: Backend needs to allow requests from frontend. Please check backend CORS configuration."
-                        );
-                    } else {
-                        setError(
-                            `Failed to load employees. Status: ${error.status}`
-                        );
-                    }
-                } else {
-                    setError("Failed to load employees. Please try again.");
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         loadData();
-    }, [filters]);
+    }, []);
 
-    // Handle search
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            setFilters((prev) => ({
-                ...prev,
-                search: searchTerm,
-                offset: 0,
-            }));
-        }, 500);
-
-        return () => clearTimeout(timeoutId);
-    }, [searchTerm]);
+    // Removed search functionality for now
 
     // Handle page change
-    const handlePageChange = (page: number) => {
-        const newOffset = (page - 1) * pagination.limit;
-        setFilters((prev) => ({
-            ...prev,
-            offset: newOffset,
-        }));
-    };
+    // Removed pagination for now
 
     const handleRowClick = (index: number) => {
         console.log("Row clicked:", index);
@@ -186,9 +97,9 @@ const EmployeeList = () => {
             dispatch(setSelectedEmployee({ 
                 ...selectedEmployee, 
                 filters: {
-                    is_archived: filters.is_archived || 0,
-                    offset: filters.offset || 0,
-                    limit: filters.limit || 10
+                    is_archived: 0,
+                    offset: 0,
+                    limit: 10
                 }
             }));
             navigate(`${selectedEmployee.employee_ID}/summary`);
@@ -196,8 +107,12 @@ const EmployeeList = () => {
     };
 
     const handleSubmitSuccess = (action: "add" | "edit" | "update") => {
-        setSnackbarAction(action);
-        setIsSnackbarOpen(true);
+        console.log("Action completed:", action);
+        
+        // Refresh the employee list after any successful action
+        if (action === "add" || action === "edit" || action === "update") {
+            loadData();
+        }
     };
 
     const openAddEmployee = () => {
@@ -206,13 +121,33 @@ const EmployeeList = () => {
         setIsModalOpen(true);
     };
 
-    const openEditEmployee = (employee: EmployeeData) => {
+    const openEditEmployee = async (employee: EmployeeData) => {
+        console.log("Opening edit for employee:", employee);
         setModalMode("edit");
-        // Transform the employee data to form format
-        const transformedData = transformEmployeeToFormData(employee);
-        setSelectedEmployeeLocal(transformedData);
-        setOriginalEmployeeData(employee);
-        setIsModalOpen(true);
+        
+        try {
+            // Fetch complete employee data using get-by-id endpoint
+            const requestBody = { 
+                employee_ID: employee.employee_ID
+            };
+            const response = await getEmployeeById(requestBody).unwrap();
+            
+            // Pass the entire response to the transformation function
+            // It will handle the nested structure internally
+            const transformedData = transformEmployeeToFormData(response);
+            
+            setSelectedEmployeeLocal(transformedData);
+            setOriginalEmployeeData(response);
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching complete employee data:", error);
+            
+            // Fallback to original employee data if API call fails
+            const transformedData = transformEmployeeToFormData(employee);
+            setSelectedEmployeeLocal(transformedData);
+            setOriginalEmployeeData(employee);
+            setIsModalOpen(true);
+        }
     };
 
     // Get employee full name
@@ -400,14 +335,7 @@ const EmployeeList = () => {
             icon: <Edit2 />,
             onClick: (index: number) => openEditEmployee(employees[index]),
         },
-        {
-            label: "Update Position",
-            icon: <Briefcase />,
-            onClick: (index: number) => {
-                setSelectedEmployeeLocal(employees[index]);
-                setIsUpdatePositionModalOpen(true);
-            },
-        },
+        // Removed Update Position for now
     ];
 
     // Loading state
@@ -461,24 +389,7 @@ const EmployeeList = () => {
                         />
                     </div>
 
-                    <div className="flex gap-4">
-                        <div className="w-full max-w-[355px]">
-                            <Inputs
-                                placeholder="Search by Name, ID, Job Title, or Team"
-                                icon={SearchNormal}
-                                value={searchTerm}
-                                onChange={(e: any) =>
-                                    setSearchTerm(e.target.value)
-                                }
-                            />
-                        </div>
-                        <ButtonsIcon
-                            icon={<Filter />}
-                            variant="ghost"
-                            size="large"
-                            onClick={() => setOpenFilter(true)}
-                        />
-                    </div>
+                    {/* Removed search and filter for now */}
 
                     <div className="h-full">
                         <div className="hidden lg:block">
@@ -499,69 +410,35 @@ const EmployeeList = () => {
                                 onRowClick={handleRowClick}
                             />
                         </div>
-                        <div className="flex justify-end">
-                            <Pagination
-                                currentPage={
-                                    Math.floor(
-                                        pagination.offset / pagination.limit
-                                    ) + 1
-                                }
-                                totalPages={Math.ceil(
-                                    pagination.total / pagination.limit
-                                )}
-                                visiblePages={5}
-                                onChange={handlePageChange}
-                            />
-                        </div>
+                        {/* Removed pagination for now */}
                     </div>
 
-                    <EmployeeFilterModal
-                        isOpen={openFilter}
-                        onClose={() => setOpenFilter(false)}
-                    />
+                    {/* Only render EmployeeModal when needed */}
+                    {isModalOpen && (
+                        <EmployeeModal
+                            isOpen={isModalOpen}
+                            onClose={() => {
+                                setIsModalOpen(false);
+                                setSelectedEmployeeLocal(null);
+                                setOriginalEmployeeData(null);
+                            }}
+                            mode={modalMode}
+                            addEmployeeData={
+                                modalMode === "edit"
+                                    ? selectedEmployeeLocal
+                                    : undefined
+                            }
+                            originalEmployeeData={originalEmployeeData}
+                            employeeId={
+                                modalMode === "edit" && originalEmployeeData
+                                    ? (originalEmployeeData as any).data?.employee?.employee_ID || originalEmployeeData.employee_ID
+                                    : undefined
+                            }
+                            onSubmitSuccess={() => handleSubmitSuccess(modalMode)}
+                        />
+                    )}
 
-                    <EmployeeModal
-                        isOpen={isModalOpen}
-                        onClose={() => {
-                            setIsModalOpen(false);
-                            setSelectedEmployeeLocal(null);
-                            setOriginalEmployeeData(null);
-                        }}
-                        mode={modalMode}
-                        addEmployeeData={
-                            modalMode === "edit"
-                                ? selectedEmployeeLocal
-                                : undefined
-                        }
-                        employeeId={
-                            modalMode === "edit" && originalEmployeeData
-                                ? originalEmployeeData.employee_ID
-                                : undefined
-                        }
-                        onSubmitSuccess={() => handleSubmitSuccess(modalMode)}
-                    />
-
-                    <EmployeePositionModal
-                        isOpen={isUpdatePositionModalOpen}
-                        onClose={() => setIsUpdatePositionModalOpen(false)}
-                        employeePositionData={selectedEmployeeLocal}
-                        onSubmitSuccess={() => handleSubmitSuccess("update")}
-                    />
-
-                    <SnackbarAlert
-                        isOpen={isSnackbarOpen}
-                        onClose={() => setIsSnackbarOpen(false)}
-                        showCloseButton={true}
-                        type="success"
-                        title={
-                            snackbarAction === "edit"
-                                ? "Successfully edited employee"
-                                : snackbarAction === "update"
-                                ? "Successfully updated position"
-                                : "Successfully added employee"
-                        }
-                        animation="slide-up"
-                    />
+                    {/* Removed SnackbarAlert for now */}
                 </div>
             }
         />
