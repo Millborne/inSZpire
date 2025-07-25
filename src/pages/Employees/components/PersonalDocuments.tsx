@@ -28,10 +28,7 @@ const PersonalDocuments = () => {
 
     console.log(selectedEmployee);
 
-    const { docMap, isUploading, isDeleting, upload, deleteDocument, deleteDocumentByEmployee } = usePersonalDocuments(
-        selectedEmployee?.employee_ID || "",
-        applicationDocuments
-    );
+    const { docMap, upload, deleteDocumentByEmployee } = usePersonalDocuments(selectedEmployee?.employee_ID || "", applicationDocuments);
 
     const handleUploadDocument = async (fileObj: any, docTypeId: string) => {
         // Convert the file object to a proper File object
