@@ -6,6 +6,7 @@ import EmployeeConfirmationModal from "./EmployeeConfirmationModal";
 import EmployeeUpdateConfirmationModal from "./EmployeeUpdateConfirmationModal";
 import { usePositionService } from "../../../../services/settings/positions/list/use-positions";
 import { getReligionName } from "../../../../utils/employeeTransformers";
+import { formatDateForBackend, parseDateForDatePicker } from "../../../../utils";
 
 export interface addEmployeeData {
     fullName: {
@@ -324,8 +325,16 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
                                 />
                                 <CustomDatePicker 
                                     label="BIRTHDATE" 
-                                    value={formData.fullName.dateOfBirth || ""} 
-                                    onChange={(value: Date) => handleNestedInputChange('fullName', 'dateOfBirth', value.toLocaleDateString('en-CA'))}
+                                    value={parseDateForDatePicker(formData.fullName.dateOfBirth)} 
+                                    onChange={(value: Date) => {
+                                        const formattedDate = formatDateForBackend(value);
+                                        console.log("Date picker change:", {
+                                            selectedDate: value.toDateString(),
+                                            formattedForBackend: formattedDate,
+                                            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                                        });
+                                        handleNestedInputChange('fullName', 'dateOfBirth', formattedDate);
+                                    }}
                                 />
                             </div>
                         </div>
@@ -846,8 +855,16 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-[16px] items-center relative z-50">
                                     <CustomDatePicker 
                                         label="DATE HIRED" 
-                                        value={formData.work.dateHired || ""} 
-                                        onChange={(value: Date) => handleNestedInputChange('work', 'dateHired', value.toLocaleDateString('en-CA'))}
+                                        value={parseDateForDatePicker(formData.work.dateHired)} 
+                                        onChange={(value: Date) => {
+                                            const formattedDate = formatDateForBackend(value);
+                                            console.log("Hire date picker change:", {
+                                                selectedDate: value.toDateString(),
+                                                formattedForBackend: formattedDate,
+                                                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                                            });
+                                            handleNestedInputChange('work', 'dateHired', formattedDate);
+                                        }}
                                     />
                                     <Dropdown
                                         label="POSITION"
@@ -862,21 +879,19 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
                                         label="POSITION STATUS"
                                         placeholder="Select position status"
                                         options={[
-                                            { label: "Trainee", value: "TRAINEE" },
-                                            { label: "Probationary", value: "PROBATIONARY" },
-                                            { label: "Regular", value: "REGULAR" },
-                                            { label: "Contract", value: "CONTRACT" },
-                                            { label: "Part-time", value: "PART_TIME" },
-                                            { label: "Intern", value: "INTERN" }
+                                            { label: "Active", value: "ACTIVE" },
+                                            { label: "Training", value: "TRAINING" },
+                                            { label: "Promoted", value: "PROMOTED" },
+                                            { label: "Transferred", value: "TRANSFERRED" },
+                                            { label: "Closed", value: "CLOSED" }
                                         ]}
                                         onSelectionChange={(selected: any) => handleNestedInputChange('work', 'positionStatus', selected?.value || '')}
                                         value={getDropdownValue(formData.work.positionStatus, [
-                                            { label: "Trainee", value: "TRAINEE" },
-                                            { label: "Probationary", value: "PROBATIONARY" },
-                                            { label: "Regular", value: "REGULAR" },
-                                            { label: "Contract", value: "CONTRACT" },
-                                            { label: "Part-time", value: "PART_TIME" },
-                                            { label: "Intern", value: "INTERN" }
+                                            { label: "Active", value: "ACTIVE" },
+                                            { label: "Training", value: "TRAINING" },
+                                            { label: "Promoted", value: "PROMOTED" },
+                                            { label: "Transferred", value: "TRANSFERRED" },
+                                            { label: "Closed", value: "CLOSED" }
                                         ])}
                                     />
                                 </div>
@@ -929,6 +944,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
                     originalEmployeeData={originalEmployeeData}
                     employeeId={employeeId || ""}
                     onSubmitSuccess={onSubmitSuccess}
+                    onCloseParent={onClose}
                 />
             )}
         </div>
