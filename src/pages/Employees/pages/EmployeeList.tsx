@@ -68,6 +68,10 @@ const EmployeeList = () => {
         useState<any>(null);
     const [originalEmployeeData, setOriginalEmployeeData] =
         useState<EmployeeData | null>(null);
+    
+    // Success message state
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
 
     // Load employees function
     const loadData = async () => {

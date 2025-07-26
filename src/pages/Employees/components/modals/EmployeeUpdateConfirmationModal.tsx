@@ -5,6 +5,7 @@ import { addEmployeeData } from "./EmployeeModal";
 import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
 import { useUpdateEmployeeMutation } from "../../../../services/employee/update/employeeUpdateAPI";
 import { getReligionId, getReligionName } from "../../../../utils/employeeTransformers";
+import { safeFormatDateForBackend, parseDateFromBackend } from "../../../../utils";
 
 interface EmployeeUpdateConfirmationModalProps {
     isOpen: boolean;
@@ -13,6 +14,7 @@ interface EmployeeUpdateConfirmationModalProps {
     originalEmployeeData: any; // Original employee data from API
     employeeId: string;
     onSubmitSuccess?: () => void;
+    onCloseParent?: () => void; // Callback to close the parent modal
 }
 
 const EmployeeUpdateConfirmationModal: React.FC<EmployeeUpdateConfirmationModalProps> = ({ 
@@ -21,7 +23,8 @@ const EmployeeUpdateConfirmationModal: React.FC<EmployeeUpdateConfirmationModalP
     updateEmployeeData, 
     originalEmployeeData,
     employeeId,
-    onSubmitSuccess 
+    onSubmitSuccess,
+    onCloseParent 
 }) => {
     const [profileImg, setProfileImg] = useState<string | undefined>();
     const [showSnackbar, setShowSnackbar] = useState(false);
@@ -92,12 +95,11 @@ const EmployeeUpdateConfirmationModal: React.FC<EmployeeUpdateConfirmationModalP
     // Helper function to convert position status display name to ID
     const getPositionStatusID = (status: string): string => {
         switch (status) {
-            case "TRAINEE": return "1a23b074526211f0b6b802dcb324866b"; // Training
-            case "PROBATIONARY": return "1a23aec4526211f0b6b802dcb324866b"; // Active
-            case "REGULAR": return "1a23aec4526211f0b6b802dcb324866b"; // Active
-            case "CONTRACT": return "1a23b100526211f0b6b802dcb324866b"; // Promoted
-            case "PART_TIME": return "1a23b128526211f0b6b802dcb324866b"; // Transferred
-            case "INTERN": return "1a23b14a526211f0b6b802dcb324866b"; // Closed
+            case "ACTIVE": return "1a23aec4526211f0b6b802dcb324866b"; // Active
+            case "TRAINING": return "1a23b074526211f0b6b802dcb324866b"; // Training
+            case "PROMOTED": return "1a23b100526211f0b6b802dcb324866b"; // Promoted
+            case "TRANSFERRED": return "1a23b128526211f0b6b802dcb324866b"; // Transferred
+            case "CLOSED": return "1a23b14a526211f0b6b802dcb324866b"; // Closed
             default: return "1a23aec4526211f0b6b802dcb324866b"; // Default to Active
         }
     };
@@ -147,7 +149,7 @@ const EmployeeUpdateConfirmationModal: React.FC<EmployeeUpdateConfirmationModalP
             case 'position':
                 return value === "SE001" ? "Software Engineer" : value === "SSE001" ? "Senior Software Engineer" : value === "TL001" ? "Team Lead" : value === "PM001" ? "Project Manager" : value === "BA001" ? "Business Analyst" : value === "QA001" ? "Quality Assurance Engineer" : value === "UX001" ? "UI/UX Designer" : value === "DE001" ? "DevOps Engineer" : value === "DA001" ? "Data Analyst" : value === "PDM001" ? "Product Manager" : value === "SM001" ? "Scrum Master" : value === "TW001" ? "Technical Writer" : value;
             case 'positionStatus':
-                return value === "TRAINEE" ? "Trainee" : value === "PROBATIONARY" ? "Probationary" : value === "REGULAR" ? "Regular" : value === "CONTRACT" ? "Contract" : value === "PART_TIME" ? "Part-time" : value === "INTERN" ? "Intern" : value;
+                return value === "ACTIVE" ? "Active" : value === "TRAINING" ? "Training" : value === "PROMOTED" ? "Promoted" : value === "TRANSFERRED" ? "Transferred" : value === "CLOSED" ? "Closed" : value;
             case 'employmentStatus':
                 return value === "ACTIVE" ? "Active" : value === "INACTIVE" ? "Inactive" : value === "TERMINATED" ? "Terminated" : value === "RESIGNED" ? "Resigned" : value === "RETIRED" ? "Retired" : value === "SUSPENDED" ? "Suspended" : value;
             case 'region':
@@ -219,6 +221,15 @@ const EmployeeUpdateConfirmationModal: React.FC<EmployeeUpdateConfirmationModalP
         const originalEmployee = originalData?.data?.employee || {};
         const originalAddresses = originalData?.data?.addresses || [];
         
+        // Debug: Log the original data to see what we're working with
+        console.log("=== ORIGINAL DATA DEBUG ===");
+        console.log("Original profile data:", originalProfile);
+        console.log("Original employee data:", originalEmployee);
+        console.log("Original date_of_birth:", originalProfile.date_of_birth);
+        console.log("Original hire_date:", originalEmployee.hire_date);
+        console.log("Original position_status_ID:", originalEmployee.position_status_ID);
+        console.log("Original position_status_ID (hex):", originalEmployee.position_status_ID);
+        
         // Find permanent address from original data
         const originalPermanentAddress = originalAddresses.find((addr: any) => addr.address_type_ID === 1) || {};
         
@@ -237,16 +248,20 @@ const EmployeeUpdateConfirmationModal: React.FC<EmployeeUpdateConfirmationModalP
                 createComparisonItem("Last Name", originalProfile.last_name, updatedData.fullName.lastName, originalProfile.last_name !== updatedData.fullName.lastName),
                 createComparisonItem("Nickname", originalProfile.preferred_name, updatedData.fullName.nickname, originalProfile.preferred_name !== updatedData.fullName.nickname),
                 createComparisonItem("Date of Birth", 
-                    originalProfile.date_of_birth ? new Date(originalProfile.date_of_birth).toLocaleDateString('en-CA') : "", 
-                    updatedData.fullName.dateOfBirth ? new Date(updatedData.fullName.dateOfBirth).toLocaleDateString('en-CA') : "", 
-                    originalProfile.date_of_birth !== updatedData.fullName.dateOfBirth
+                    originalProfile.date_of_birth && originalProfile.date_of_birth !== "null" && originalProfile.date_of_birth !== "undefined" && originalProfile.date_of_birth.trim() !== ""
+                        ? parseDateFromBackend(originalProfile.date_of_birth).toLocaleDateString() 
+                        : "N/A", 
+                    safeFormatDateForBackend(updatedData.fullName.dateOfBirth), 
+                    safeFormatDateForBackend(originalProfile.date_of_birth) !== safeFormatDateForBackend(updatedData.fullName.dateOfBirth)
                 )
             ],
             work: [
                 createComparisonItem("Date Hired", 
-                    originalEmployee.hire_date ? new Date(originalEmployee.hire_date).toLocaleDateString('en-CA') : "", 
-                    updatedData.work.dateHired ? new Date(updatedData.work.dateHired).toLocaleDateString('en-CA') : "", 
-                    originalEmployee.hire_date !== updatedData.work.dateHired
+                    originalEmployee.hire_date && originalEmployee.hire_date !== "null" && originalEmployee.hire_date !== "undefined" && originalEmployee.hire_date.trim() !== ""
+                        ? parseDateFromBackend(originalEmployee.hire_date).toLocaleDateString() 
+                        : "N/A", 
+                    safeFormatDateForBackend(updatedData.work.dateHired), 
+                    safeFormatDateForBackend(originalEmployee.hire_date) !== safeFormatDateForBackend(updatedData.work.dateHired)
                 ),
                 createComparisonItem("Position", 
                     getPositionDisplayName(originalEmployee.current_position_ID || ""), 
@@ -354,9 +369,12 @@ const EmployeeUpdateConfirmationModal: React.FC<EmployeeUpdateConfirmationModalP
     const handleUpdateEmployee = async () => {
         try {
             if (employeeData) {
-                console.log("Starting employee update...");
+                console.log("=== STARTING EMPLOYEE UPDATE ===");
                 console.log("Employee data to update:", employeeData);
                 console.log("Employee ID being used:", employeeId);
+                console.log("Date of birth in form:", employeeData.fullName.dateOfBirth);
+                console.log("Hire date in form:", employeeData.work.dateHired);
+                console.log("Position status in form:", employeeData.work.positionStatus);
 
                 // Transform data to match backend API structure
                 const transformedData: any = {
@@ -378,14 +396,27 @@ const EmployeeUpdateConfirmationModal: React.FC<EmployeeUpdateConfirmationModalP
                 if (employeeData.work.position || employeeData.work.positionStatus || employeeData.work.employmentStatus || employeeData.work.dateHired || employeeData.work.workEmail) {
                     console.log("Processing hire_date:", {
                         originalDate: employeeData.work.dateHired,
-                        processedDate: employeeData.work.dateHired ? new Date(employeeData.work.dateHired).toISOString().replace('T', ' ').replace('.000Z', '') : undefined
+                        processedDate: safeFormatDateForBackend(employeeData.work.dateHired)
                     });
+                    
+                    const positionStatusID = employeeData.work.positionStatus ? getPositionStatusID(employeeData.work.positionStatus) : undefined;
+                    console.log("=== POSITION STATUS DEBUG ===");
+                    console.log("Selected position status:", employeeData.work.positionStatus);
+                    console.log("Mapped to ID:", positionStatusID);
+                    console.log("Mapping function result:", getPositionStatusID(employeeData.work.positionStatus));
+                    console.log("All possible mappings:");
+                    console.log("  TRAINEE ->", getPositionStatusID("TRAINEE"));
+                    console.log("  PROBATIONARY ->", getPositionStatusID("PROBATIONARY"));
+                    console.log("  REGULAR ->", getPositionStatusID("REGULAR"));
+                    console.log("  CONTRACT ->", getPositionStatusID("CONTRACT"));
+                    console.log("  PART_TIME ->", getPositionStatusID("PART_TIME"));
+                    console.log("  INTERN ->", getPositionStatusID("INTERN"));
                     
                     transformedData.employee = {
                         current_position_ID: employeeData.work.position || undefined,
-                        position_status_ID: employeeData.work.positionStatus ? getPositionStatusID(employeeData.work.positionStatus) : undefined,
+                        position_status_ID: positionStatusID,
                         employee_status_ID: employeeData.work.employmentStatus ? getEmploymentStatusID(employeeData.work.employmentStatus) : undefined,
-                        hire_date: employeeData.work.dateHired ? new Date(employeeData.work.dateHired).toLocaleDateString('en-CA') : undefined,
+                        hire_date: safeFormatDateForBackend(employeeData.work.dateHired),
                         work_email: employeeData.work.workEmail || undefined,
                         salary_frequency: "monthly", // Default value
                         sched_type: "flexible", // Default value
@@ -419,7 +450,7 @@ const EmployeeUpdateConfirmationModal: React.FC<EmployeeUpdateConfirmationModalP
                                employeeData.others.gender === "F" ? "female" : 
                                employeeData.others.gender === "O" ? "other" : undefined,
                         pronoun: employeeData.others.pronouns || undefined,
-                        date_of_birth: employeeData.fullName.dateOfBirth ? new Date(employeeData.fullName.dateOfBirth).toLocaleDateString('en-CA') : undefined,
+                        date_of_birth: safeFormatDateForBackend(employeeData.fullName.dateOfBirth),
                         birth_address: employeeData.others.birthAddress || undefined,
                         marital_status: employeeData.others.civilStatus === "S" ? "single" : 
                                      employeeData.others.civilStatus === "M" ? "married" : 
@@ -490,43 +521,48 @@ const EmployeeUpdateConfirmationModal: React.FC<EmployeeUpdateConfirmationModalP
                     }
                 });
 
-                console.log("Transformed data for API:", transformedData);
+                console.log("=== API UPDATE DEBUG ===");
+                console.log("Employee ID:", transformedData.employee_ID);
+                console.log("Profile data:", transformedData.profile);
+                console.log("Employee data:", transformedData.employee);
+                console.log("Date of birth being sent:", transformedData.profile?.date_of_birth);
+                console.log("Hire date being sent:", transformedData.employee?.hire_date);
+                console.log("Position status being sent:", transformedData.employee?.position_status_ID);
+                console.log("Full transformed data:", transformedData);
                 console.log("Calling update endpoint: /employee/update");
-                console.log("Employee ID in transformed data:", transformedData.employee_ID);
 
                 const result = await updateEmployee(transformedData).unwrap();
                 console.log("Update successful:", result);
                 
-                // Show success message immediately
-                setSnackbarMessage("Employee updated successfully!");
-                setSnackbarType("success");
-                setShowSnackbar(true);
+                // Employee update successful
+                console.log("=== SUCCESS MESSAGE DEBUG ===");
+                console.log("Employee update successful!");
                 
-                // Call success callback first
+                // Call success callback first (this will show the success message on the main page)
                 if (onSubmitSuccess) {
                     onSubmitSuccess();
                 }
                 
-                // Keep modal open longer to show success message clearly
-                setTimeout(() => {
-                    setShowSnackbar(false); // Hide snackbar first
-                    setTimeout(() => {
-                        onClose(); // Then close modal
-                    }, 500);
-                }, 4000);
+                // Close confirmation modal
+                onClose();
+                
+                // Close parent modal if callback is provided
+                if (onCloseParent) {
+                    onCloseParent();
+                }
             }
         } catch (error) {
             console.error('Error updating employee:', error);
             console.error('Full error details:', JSON.stringify(error, null, 2));
             
-            // Show error message
-            let errorMessage = "An error occurred while updating the employee";
+            // Show enhanced error message
+            let errorMessage = "❌ Failed to update employee information. Please try again.";
             if (error && typeof error === 'object' && 'data' in error) {
                 const errorData = (error as any).data;
                 if (errorData?.message) {
-                    errorMessage = errorData.message;
+                    errorMessage = `❌ ${errorData.message}`;
                 } else if (errorData?.error) {
-                    errorMessage = errorData.error;
+                    errorMessage = `❌ ${errorData.error}`;
                 }
             }
             
@@ -559,10 +595,11 @@ const EmployeeUpdateConfirmationModal: React.FC<EmployeeUpdateConfirmationModalP
                         size: "medium",
                     },
                     {
-                        label: "Update",
+                        label: isLoading ? "Updating..." : "Update",
                         variant: "primary",
                         onClick: handleUpdateEmployee,
                         size: "medium",
+                        disabled: isLoading,
                     },
                 ]}
                 content={
@@ -604,12 +641,21 @@ const EmployeeUpdateConfirmationModal: React.FC<EmployeeUpdateConfirmationModalP
             />
             <SnackbarAlert
                 isOpen={showSnackbar}
-                onClose={() => setShowSnackbar(false)}
+                onClose={() => {
+                    console.log("Snackbar onClose triggered");
+                    setShowSnackbar(false);
+                }}
                 showCloseButton={true}
                 type={snackbarType}
                 title={snackbarMessage}
                 animation="slide-up"
             />
+            {/* Debug info */}
+            {console.log("SnackbarAlert props:", {
+                isOpen: showSnackbar,
+                type: snackbarType,
+                title: snackbarMessage
+            })}
         </>
     );
 };
