@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Cookies from "js-cookie";
 
-const { VITE_EMPLOYMENT_SERVICE } = import.meta.env;
+const { VITE_IDENTITY_SERVICE } = import.meta.env;
 
 interface generalProps {
     queryParameters: string;
@@ -12,7 +12,7 @@ interface generalProps {
 export const religionAPI = createApi({
     reducerPath: "religion",
     baseQuery: fetchBaseQuery({
-        baseUrl: VITE_EMPLOYMENT_SERVICE || "http://localhost:8000",
+        baseUrl: VITE_IDENTITY_SERVICE || "http://localhost:8000",
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 
