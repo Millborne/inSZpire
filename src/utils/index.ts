@@ -28,23 +28,36 @@ export const parseDateFromBackend = (dateString: string | null | undefined): Dat
         return new Date();
     }
     
-    // Check if it's a valid date format
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-        console.warn("Invalid date format:", dateString);
-        return new Date();
+    // Handle ISO date strings (e.g., "2025-07-24T16:00:00.000Z")
+    if (dateString.includes('T') || dateString.includes('Z')) {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            console.warn("Invalid ISO date format:", dateString);
+            return new Date();
+        }
+        // Extract just the date part (YYYY-MM-DD) to avoid timezone issues
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1; // getMonth() returns 0-11
+        const day = date.getDate();
+        return new Date(year, month - 1, day); // Create date in local timezone
     }
     
-    // Split the date string and create a date in local timezone
-    const [year, month, day] = dateString.split('-').map(Number);
-    
-    // Validate the parsed values
-    if (isNaN(year) || isNaN(month) || isNaN(day)) {
-        console.warn("Invalid date components:", { year, month, day, original: dateString });
-        return new Date();
+    // Handle YYYY-MM-DD format
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        const [year, month, day] = dateString.split('-').map(Number);
+        
+        // Validate the parsed values
+        if (isNaN(year) || isNaN(month) || isNaN(day)) {
+            console.warn("Invalid date components:", { year, month, day, original: dateString });
+            return new Date();
+        }
+        
+        // Create date in local timezone to avoid timezone conversion issues
+        return new Date(year, month - 1, day); // month is 0-indexed in Date constructor
     }
     
-    // Create date in local timezone to avoid timezone conversion issues
-    return new Date(year, month - 1, day); // month is 0-indexed in Date constructor
+    console.warn("Unsupported date format:", dateString);
+    return new Date();
 };
 
 /**
@@ -65,6 +78,14 @@ export const safeFormatDateForBackend = (dateInput: Date | string | null | undef
         return dateInput;
     }
     
+    // If it's an ISO date string, handle it properly
+    if (typeof dateInput === 'string' && (dateInput.includes('T') || dateInput.includes('Z'))) {
+        const date = new Date(dateInput);
+        if (!isNaN(date.getTime())) {
+            return formatDateForBackend(date);
+        }
+    }
+    
     // If it's a string that needs parsing, parse it first
     const date = parseDateFromBackend(dateInput);
     return formatDateForBackend(date);
@@ -79,6 +100,19 @@ export const safeFormatDateForBackend = (dateInput: Date | string | null | undef
  */
 export const parseDateForDatePicker = (dateString: string | null | undefined): Date | undefined => {
     if (!dateString || dateString.trim() === '') return undefined;
+    
+    // Handle ISO date strings (e.g., "2025-07-24T16:00:00.000Z")
+    if (dateString.includes('T') || dateString.includes('Z')) {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            return undefined;
+        }
+        // Extract just the date part (YYYY-MM-DD) to avoid timezone issues
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1; // getMonth() returns 0-11
+        const day = date.getDate();
+        return new Date(year, month - 1, day); // Create date in local timezone
+    }
     
     // If it's already a valid date string, parse it in local timezone
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
