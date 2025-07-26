@@ -19,6 +19,7 @@ import { BasicInfoData } from "../../../services/employee-profile/personal/basic
 import { useLocationsService } from "../../../services/locations-options/use-locations";
 import { RootState } from "../../../reducers/store";
 import { useSelector } from "react-redux";
+import { parseDateFromBackend } from "../../../utils";
 
 const BasicInfo = () => {
     // Employee RTK State
@@ -303,7 +304,7 @@ const BasicInfo = () => {
                         header="date of birth"
                         text={
                             basicInfoData.profile.date_of_birth
-                                ? new Date(
+                                ? parseDateFromBackend(
                                       basicInfoData.profile.date_of_birth
                                   ).toLocaleDateString()
                                 : "N/A"
@@ -315,7 +316,7 @@ const BasicInfo = () => {
                             basicInfoData.profile.date_of_birth
                                 ? Math.floor(
                                       (new Date().getTime() -
-                                          new Date(
+                                          parseDateFromBackend(
                                               basicInfoData.profile.date_of_birth
                                           ).getTime()) /
                                           (1000 * 60 * 60 * 24 * 365.25)

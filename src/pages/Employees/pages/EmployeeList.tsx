@@ -50,6 +50,10 @@ const EmployeeList = () => {
         useState<any>(null);
     const [originalEmployeeData, setOriginalEmployeeData] =
         useState<EmployeeData | null>(null);
+    
+    // Success message state
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
 
     // Load employees function
     const loadData = async () => {
@@ -108,6 +112,25 @@ const EmployeeList = () => {
 
     const handleSubmitSuccess = (action: "add" | "edit" | "update") => {
         console.log("Action completed:", action);
+        
+        // Show success message based on action
+        if (action === "edit" || action === "update") {
+            setSuccessMessage("✅ Employee information has been successfully updated!");
+            setShowSuccessMessage(true);
+            
+            // Auto-hide success message after 4 seconds
+            setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 4000);
+        } else if (action === "add") {
+            setSuccessMessage("✅ Employee has been successfully added!");
+            setShowSuccessMessage(true);
+            
+            // Auto-hide success message after 4 seconds
+            setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 4000);
+        }
         
         // Refresh the employee list after any successful action
         if (action === "add" || action === "edit" || action === "update") {
@@ -443,7 +466,15 @@ const EmployeeList = () => {
                         />
                     )}
 
-                    {/* Removed SnackbarAlert for now */}
+                    {/* Success Message */}
+                    <SnackbarAlert
+                        isOpen={showSuccessMessage}
+                        onClose={() => setShowSuccessMessage(false)}
+                        showCloseButton={true}
+                        type="success"
+                        title={successMessage}
+                        animation="slide-up"
+                    />
                 </div>
             }
         />
