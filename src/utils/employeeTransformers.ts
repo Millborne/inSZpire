@@ -1,5 +1,6 @@
 import { EmployeeData } from "../services/employee/list/use-employee";
 import { addEmployeeData } from "../pages/Employees/components/modals/EmployeeModal";
+import { safeFormatDateForBackend } from "./index";
 
 // Transform fetched employee data to form format
 export const transformEmployeeToFormData = (employee: any): addEmployeeData => {
@@ -35,20 +36,37 @@ export const transformEmployeeToFormData = (employee: any): addEmployeeData => {
     // Map position status from employee data
     let positionStatus = "";
     if (employeeData.position_status_ID) {
-        // Map position status IDs to display values
+        console.log("=== POSITION STATUS TRANSFORMATION ===");
+        console.log("Original position_status_ID:", employeeData.position_status_ID);
+        console.log("Original position_status_ID type:", typeof employeeData.position_status_ID);
+        
+        // Map position status IDs to display values based on actual database
         switch (employeeData.position_status_ID) {
             case "1a23aec4526211f0b6b802dcb324866b": // Active
                 positionStatus = "ACTIVE";
+                console.log("Mapped to ACTIVE (Active ID)");
                 break;
-            case "1a23b100526211f0b6b802dcb324866b": // Training
-                positionStatus = "TRAINEE";
+            case "1a23b074526211f0b6b802dcb324866b": // Training
+                positionStatus = "TRAINING";
+                console.log("Mapped to TRAINING (Training ID)");
                 break;
-            case "1a23b074526211f0b6b802dcb324866b": // Promoted
-                positionStatus = "REGULAR";
+            case "1a23b100526211f0b6b802dcb324866b": // Promoted
+                positionStatus = "PROMOTED";
+                console.log("Mapped to PROMOTED");
+                break;
+            case "1a23b128526211f0b6b802dcb324866b": // Transferred
+                positionStatus = "TRANSFERRED";
+                console.log("Mapped to TRANSFERRED");
+                break;
+            case "1a23b14a526211f0b6b802dcb324866b": // Closed
+                positionStatus = "CLOSED";
+                console.log("Mapped to CLOSED");
                 break;
             default:
                 positionStatus = "ACTIVE"; // Default
+                console.log("Mapped to ACTIVE (default)");
         }
+        console.log("Final positionStatus:", positionStatus);
     }
     
     // Map employment status from employee data
@@ -119,10 +137,10 @@ export const transformEmployeeToFormData = (employee: any): addEmployeeData => {
             middleName: profileData.middle_name || "",
             nickname: profileData.preferred_name || "",
             extension: profileData.name_ext || "",
-            dateOfBirth: profileData.date_of_birth ? new Date(profileData.date_of_birth).toISOString().split('T')[0] : "",
+            dateOfBirth: safeFormatDateForBackend(profileData.date_of_birth),
         },
         work: {
-            dateHired: employeeData.hire_date ? new Date(employeeData.hire_date).toISOString().split('T')[0] : "",
+            dateHired: safeFormatDateForBackend(employeeData.hire_date),
             position: employeeData.current_position_ID || "", // Use current_position_ID for edit mode
             positionStatus: positionStatus,
             employmentStatus: employmentStatus,

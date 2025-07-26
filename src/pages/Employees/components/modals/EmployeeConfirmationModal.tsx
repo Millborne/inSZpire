@@ -8,7 +8,11 @@ import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
 =======
 import { useCreateEmployeeMutation } from "../../../../services/employee/create/employeeCreateAPI";
 import { getReligionId } from "../../../../utils/employeeTransformers";
+<<<<<<< HEAD
 >>>>>>> 2bf7467 (Will work on later)
+=======
+import { safeFormatDateForBackend } from "../../../../utils";
+>>>>>>> 36171db (all goods now)
 
 interface EmployeeConfirmationModalProps {
     isOpen: boolean;
@@ -205,7 +209,7 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                     work_email: employeeData.work.workEmail || "",
                     current_position_ID: employeeData.work.position || "", // Use the actual position_ID from the dropdown
                     sched_type: "flexible", // Default value
-                    hire_date: employeeData.work.dateHired ? new Date(employeeData.work.dateHired).toISOString().split('T')[0] : "",
+                    hire_date: safeFormatDateForBackend(employeeData.work.dateHired),
                     has_atm: 1,
                     salary_frequency: "monthly", // Default value
                     is_agency: 0,
@@ -226,7 +230,7 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                         profile_image: "https://example.com/profiles/alice.jpg",
                         gender: employeeData.others.gender === "M" ? "male" : employeeData.others.gender === "F" ? "female" : "other",
                         pronoun: employeeData.others.pronouns || "",
-                        date_of_birth: employeeData.fullName.dateOfBirth ? new Date(employeeData.fullName.dateOfBirth).toISOString().split('T')[0] : "",
+                        date_of_birth: safeFormatDateForBackend(employeeData.fullName.dateOfBirth),
                         birth_address: employeeData.others.birthAddress || "London, England", // Use form value or default
                         marital_status: employeeData.others.civilStatus === "S" ? "single" : 
                                      employeeData.others.civilStatus === "M" ? "married" : 
