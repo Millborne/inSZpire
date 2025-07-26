@@ -22,6 +22,9 @@ import {
   SearchNormal,
 } from "iconsax-reactjs";
 
+// assets
+import archiveConfirmation from "../../../assets/archive_confirmation.png";
+
 // components
 import TagsModal, {
   TagsDataType,
@@ -495,7 +498,7 @@ const Tags: React.FC<TagsPageProps> = ({ mode }) => {
           setTagToArchive(null);
         }}
         onClick={handleArchiveConfirm}
-        image="/src/assets/archive_confirmation.png"
+        image={archiveConfirmation}
         description="Are you sure you want to archive this tag?"
         buttonLabel="Archive"
         buttonFooterIcon={<ArchiveBox />}

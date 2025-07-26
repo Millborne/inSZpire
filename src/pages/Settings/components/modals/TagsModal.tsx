@@ -11,6 +11,11 @@ import { ArchiveBox, Edit2 } from "iconsax-reactjs";
 import ConfirmationModal from "../../../../components/ConfirmationModal";
 import { capitalizeFirst } from "../../../../utils";
 
+// assets
+import tagsConfirmation from "../../../../assets/tags_confirmation.png";
+import archiveConfirmation from "../../../../assets/archive_confirmation.png";
+import updateConfirmation from "../../../../assets/update_confirmation.png";
+
 export interface TagsDataType {
   id: string;
   name: string;
@@ -192,13 +197,13 @@ const TagsModal: React.FC<TagsModalProps> = ({
     switch (confirmationAction) {
       case "add":
         return {
-          image: "/src/assets/tags_confirmation.png",
+          image: tagsConfirmation,
           description: `Are you sure to add this tag?`,
           buttonLabel: "Add Tag",
         };
       case "archive":
         return {
-          image: "/src/assets/archive_confirmation.png",
+          image: archiveConfirmation,
           description: `Are you sure you want to archive this tag?`,
           buttonLabel: "Archive",
           buttonFooterIcon: <ArchiveBox />,
@@ -206,7 +211,7 @@ const TagsModal: React.FC<TagsModalProps> = ({
       case "update":
       default:
         return {
-          image: "/src/assets/update_confirmation.png",
+          image: updateConfirmation,
           description: `Are you sure you want to update this tag?`,
           buttonLabel: "Update Tag",
         };
