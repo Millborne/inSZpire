@@ -67,6 +67,7 @@ export interface EmployeeData {
     employment_status: string;
     employee_status_ID: string;
     employee_status: "Active" | "On Leave" | "Suspended" | "AWOL" | "Terminated";
+    position_status_ID?: string; // Added for position status
     first_name: string;
     last_name: string;
     middle_name?: string;
@@ -80,6 +81,7 @@ export interface EmployeeData {
     birth_address?: string;
     blood_type?: string;
     mobile_number?: string;
+    telephone_number?: string; // Added for telephone number
     personal_email?: string;
     religion?: string;
     religion_ID?: string;

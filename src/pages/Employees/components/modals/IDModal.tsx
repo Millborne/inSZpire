@@ -13,7 +13,7 @@ import {
 } from "enterprisze-global-components";
 
 // utils
-import { sanitizeUUID } from "../../../../utils";
+import { sanitizeUUID, formatDateForBackend, parseDateForDatePicker } from "../../../../utils";
 
 // services
 import {
@@ -189,15 +189,7 @@ const IDModal: React.FC<IDModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  // Helper function to format date for backend
-  const formatDateForBackend = (date: Date | null): string => {
-    if (!date) return "";
-    // Format as YYYY-MM-DD for database compatibility, using local date to avoid timezone issues
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
+
 
   // Helper function to handle API errors
   const handleApiError = (result: any, defaultMessage: string) => {
@@ -407,7 +399,7 @@ const IDModal: React.FC<IDModalProps> = ({
 
               <CustomDatePicker
                 label="ISSUED DATE"
-                value={form.issuedDate ? new Date(form.issuedDate) : undefined}
+                value={form.issuedDate || undefined}
                 onChange={(v) => handleInputChange("issuedDate", v)}
                 disabled={currentMode === "view"}
                 error={!!errors.issuedDate}
@@ -415,7 +407,7 @@ const IDModal: React.FC<IDModalProps> = ({
 
               <CustomDatePicker
                 label="VALIDITY"
-                value={form.validity ? new Date(form.validity) : undefined}
+                value={form.validity || undefined}
                 onChange={(v) => handleInputChange("validity", v)}
                 disabled={currentMode === "view"}
                 error={!!errors.validity}
