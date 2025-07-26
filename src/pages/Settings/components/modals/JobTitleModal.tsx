@@ -10,7 +10,7 @@ import { ArchiveBox, Edit2 } from "iconsax-reactjs";
 import ConfirmationModal from "../../../../components/ConfirmationModal";
 
 // assets
-import jobTitleConfirmation from "../../../../assets/job_title_confirmation.png";
+import jobTitleConfirmation from "../../../../assets/jobtitle-confirmation.png";
 import archiveConfirmation from "../../../../assets/archive_confirmation.png";
 import updateConfirmation from "../../../../assets/update_confirmation.png";
 
