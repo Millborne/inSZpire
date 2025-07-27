@@ -24,10 +24,9 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
     
     const [createEmployee, { isLoading }] = useCreateEmployeeMutation();
 
-    // Get the first employee data (since we're adding one employee)
     const employeeData = addEmployeeData[0];
 
-    // Helper function to convert database codes to display labels
+    // Helper function to get display labels for dropdown values
     const getDisplayLabel = (value: string, type: string) => {
         switch (type) {
             case 'gender':
@@ -312,10 +311,11 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                         size: "medium",
                     },
                     {
-                        label: "Proceed",
+                        label: isLoading ? "Creating..." : "Proceed",
                         variant: "primary",
                         onClick: handlePendingCheck,
                         size: "medium",
+                        disabled: isLoading,
                     },
                 ]}
                 content={
