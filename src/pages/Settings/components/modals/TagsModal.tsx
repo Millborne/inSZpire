@@ -130,19 +130,28 @@ const TagsModal: React.FC<TagsModalProps> = ({
         }
 
         setErrors(newErrors);
-        // Check if any data has been entered
-        const hasData =
+        return Object.keys(newErrors).length === 0;
+    };
+
+    // Check if form has data (for add mode)
+    const hasFormData = (): boolean => {
+        return !!(
             formData.name?.trim() &&
             formData.type?.trim() &&
-            formData.description?.trim();
+            formData.description?.trim()
+        );
+    };
 
-        if (!hasData) {
-            setSnackbarMessage("Please fill all fields to proceed");
-            setSnackbarType("error");
-            setSnackbarOpen(true);
-            return false;
-        }
-        return Object.keys(newErrors).length === 0;
+    // Check if changes occurred (for edit mode)
+    const hasChanges = (): boolean => {
+        if (!selectedTag) return false;
+
+        return !!(
+            formData.name !== selectedTag.name ||
+            formData.type !== selectedTag.type ||
+            formData.description !== selectedTag.description ||
+            toggle !== (selectedTag.is_archived === 1)
+        );
     };
 
     // TODO: Backend Integration - Add validation before saving
@@ -175,22 +184,6 @@ const TagsModal: React.FC<TagsModalProps> = ({
             const isValid = validateForm();
             if (!isValid) {
                 return; // Don't open confirmation modal if validation fails
-            }
-        }
-
-        if (action === "update") {
-            // Check if any data has been updated
-            const hasChanges =
-                formData.name !== selectedTag?.name ||
-                formData.type !== selectedTag?.type ||
-                formData.description !== selectedTag?.description ||
-                toggle !== (selectedTag?.is_archived === 1);
-
-            if (!hasChanges) {
-                setSnackbarMessage("Please update the details to proceed");
-                setSnackbarType("error");
-                setSnackbarOpen(true);
-                return; // Exit if no changes detected
             }
         }
 
@@ -347,6 +340,7 @@ const TagsModal: React.FC<TagsModalProps> = ({
         variant: "ghost" | "primary";
         onClick: () => void;
         size: "medium";
+        disabled?: boolean;
     }> = [
         {
             label: "Cancel",
@@ -365,6 +359,7 @@ const TagsModal: React.FC<TagsModalProps> = ({
                     ? () => handleConfirmationOpen("update")
                     : () => handleConfirmationOpen("add"),
             size: "medium",
+            disabled: mode === "add" ? !hasFormData() : !hasChanges(),
         });
     }
 
@@ -469,14 +464,16 @@ const TagsModal: React.FC<TagsModalProps> = ({
                                         {/* TODO: Backend Integration - Use actual timestamps from API */}
                                         <p className="text-caption-all-caps text-szGrey500 uppercase">
                                             {/* Updated mar 23, 2025 08:06 AM */}
+                                            Updated{" "}
                                             {formatDateForDisplay(
                                                 formData.updated_at
-                                            )}
+                                            ) || "—"}
                                         </p>
                                         <p className="text-caption-all-caps text-szGrey500 uppercase">
+                                            Created{" "}
                                             {formatDateForDisplay(
                                                 formData.created_at
-                                            )}
+                                            ) || "—"}
                                         </p>
                                     </div>
                                 </>

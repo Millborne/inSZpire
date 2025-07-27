@@ -29,6 +29,7 @@ import JobTitleModal, {
   ModalMode,
 } from "../components/modals/JobTitleModal";
 import ConfirmationModal from "../../../components/ConfirmationModal";
+import { capitalizeFirst } from "../../../utils";
 
 // services
 import {
@@ -107,12 +108,14 @@ const JobTitle: React.FC<JobTitlePageProps> = ({ mode }) => {
   const transformJobTitlesToTableData = (jobTitles: JobTitleData[]) => {
     return jobTitles.map((jobTitle) => ({
       id: jobTitle.job_ID || "",
-      jobTitle: jobTitle.job_title,
-      description: jobTitle.job_description || "",
+      jobTitle: capitalizeFirst(jobTitle.job_title),
+      description: capitalizeFirst(jobTitle.job_description) || "",
       salary: jobTitle.basic_salary
         ? `₱ ${jobTitle.basic_salary.toLocaleString()}`
         : "₱ 0",
       status: jobTitle.status || "pending",
+      updated_at: jobTitle.updated_at || "",
+      created_at: jobTitle.created_at || "",
     }));
   };
 
