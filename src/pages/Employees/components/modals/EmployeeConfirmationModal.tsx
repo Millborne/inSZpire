@@ -3,6 +3,7 @@ import { Modal, Inputs, Dropdown, Avatar, SnackbarAlert, ConfirmationContent, Te
 import { InfoCircle, Warning2 } from "iconsax-reactjs";
 import { useCreateEmployeeMutation } from "../../../../services/employee/create/employeeCreateAPI";
 import { addEmployeeData } from "./EmployeeModal";
+import { useCreateEmployeeMutation } from "../../../../services/employee/create";
 import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
 import { useCreateEmployeeMutation } from "../../../../services/employee/create/employeeCreateAPI";
 import { getReligionId } from "../../../../utils/employeeTransformers";
@@ -314,7 +315,7 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                     {
                         label: isLoading ? "Creating..." : "Proceed",
                         variant: "primary",
-                        onClick: handlePendingCheck,
+                        onClick: handleProceed,
                         size: "medium",
                         disabled: isLoading,
                     },
