@@ -73,12 +73,6 @@ const Employees = () => {
 
     const [selected, setSelected] = useState("summary");
 
-    // const user = {
-    //     name: "John Smith B. Fernandez",
-    //     role: "Junior Developer",
-    //     department: "Business Innovations & Solutions",
-    // };
-
     const [user, setUser] = useState<{
         name: string;
         role: string;
