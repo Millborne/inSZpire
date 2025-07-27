@@ -43,7 +43,7 @@ import {
 
 import { SidebarContext } from "../index";
 import { useNavigate } from "react-router-dom";
-import { sanitizeUUID } from "../../../utils";
+import { capitalizeFirst, sanitizeUUID } from "../../../utils";
 
 //! for page mode
 type PositionPageMode = "all-positions" | "archived";
@@ -119,9 +119,9 @@ const Position: React.FC<PositionPageProps> = ({ mode }) => {
   ): PositionDataType[] => {
     return positions.map((position) => ({
       id: position.position_ID || "",
-      position: position.position_name,
-      team: position.team_name || "",
-      jobTitle: position.job_title || "",
+      position: capitalizeFirst(position.position_name),
+      team: capitalizeFirst(position.team_name) || "",
+      jobTitle: capitalizeFirst(position.job_title) || "",
       positionCode: position.position_code,
       basicSalary:
         typeof position.basic_salary === "string"
@@ -142,6 +142,8 @@ const Position: React.FC<PositionPageProps> = ({ mode }) => {
         : undefined,
       reports_to_position_ID: position.reports_to_position_ID || "",
       team_level: position.team_level || "",
+      updated_at: position.updated_at || "",
+      created_at: position.created_at || "",
     }));
   };
 

@@ -29,6 +29,7 @@ import AccountModal, {
   ModalMode,
 } from "../components/modals/AccountModal";
 import ConfirmationModal from "../../../components/ConfirmationModal";
+import { capitalizeFirst } from "../../../utils";
 
 // services
 import {
@@ -108,10 +109,12 @@ const Accounts: React.FC<AccountsPageProps> = ({ mode }) => {
   const transformAccountsToTableData = (accounts: AccountData[]) => {
     return accounts.map((account) => ({
       id: account.acc_ID || "",
-      account: account.acc_name,
+      account: capitalizeFirst(account.acc_name),
       code: account.acc_code,
       status: account.acc_status,
-      description: account.acc_description || "",
+      description: capitalizeFirst(account.acc_description) || "",
+      updated_at: account.updated_at || "",
+      created_at: account.created_at || "",
     }));
   };
 

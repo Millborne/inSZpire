@@ -93,9 +93,9 @@ const Tags: React.FC<TagsPageProps> = ({ mode }) => {
     const transformTagsToTableData = (tags: TagData[]) => {
         return tags.map((tag) => ({
             id: tag.tag_ID || "",
-            name: tag.tag_name,
-            description: tag.description || "",
-            type: tag.tag_type,
+            name: capitalizeFirst(tag.tag_name),
+            description: capitalizeFirst(tag.description) || "",
+            type: capitalizeFirst(tag.tag_type),
             updated_at: tag.updated_at || "",
             created_at: tag.created_at || "",
         }));
