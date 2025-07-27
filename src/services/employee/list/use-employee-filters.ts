@@ -1,169 +1,209 @@
-import { useState, useEffect } from 'react';
-import { useFetchAllFilterOptionsQuery } from './filterAPI';
-import { useEmployeeListView } from './use-employee';
+import { useState, useEffect, useCallback } from "react";
+import { useEmployeeService, type ViewEmployeesRequest } from "./use-employee";
+import { 
+    FrontendFilters, 
+    mapFiltersToBackend, 
+    cleanRequestBody, 
+    handleFilterChange as handleFilterChangeUtil,
+    hasActiveFilters,
+    getFilterCount,
+    FILTER_OPTIONS 
+} from "./filterAPI";
 
-export interface FilterState {
-    employmentStatuses: string[];
-    employeeStatuses: string[];
-    positionTypes: string[];
+export interface UseEmployeeFiltersReturn {
+    // State
+    employees: any[];
+    isLoading: boolean;
+    error: string | null;
+    filters: FrontendFilters;
+    searchText: string;
+    pagination: {
+        total: number;
+        offset: number;
+        limit: number;
+        hasMore: boolean;
+    };
+    
+    // Actions
+    setSearchText: (text: string) => void;
+    handleFilterChange: (category: keyof FrontendFilters, value: string, checked: boolean) => void;
+    applyFilters: () => void;
+    clearFilters: () => void;
+    handlePageChange: (page: number) => void;
+    
+    // Computed
+    hasActiveFilters: boolean;
+    filterCount: number;
+    filterOptions: typeof FILTER_OPTIONS;
 }
 
-export interface FilterOptions {
-    employment_statuses: Array<{
-        status_ID: string;
-        status_name: string;
-        status_description: string;
-    }>;
-    employee_statuses: Array<{
-        employee_status_ID: string;
-        emp_status_name: string;
-        emp_description: string;
-    }>;
-    position_types: Array<{
-        position_type_ID: string;
-        type_name: string;
-    }>;
-}
-
-export const useEmployeeFilters = () => {
-    const { data: filterOptions, isLoading: filterOptionsLoading } = useFetchAllFilterOptionsQuery();
-    const { fetchEmployeeListView, data: employeeData, isLoading: employeeLoading, error: employeeError } = useEmployeeListView();
-
-    const [filters, setFilters] = useState<FilterState>({
-        employmentStatuses: [],
-        employeeStatuses: [],
-        positionTypes: []
+export const useEmployeeFilters = (): UseEmployeeFiltersReturn => {
+    const employeeService = useEmployeeService();
+    
+    // State management
+    const [employees, setEmployees] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [searchText, setSearchText] = useState("");
+    const [filters, setFilters] = useState<FrontendFilters>({
+        class: [],
+        type: [],
+        status: []
     });
-
-    const [searchTerm, setSearchTerm] = useState('');
+    
+    // Pagination state
     const [pagination, setPagination] = useState({
+        total: 0,
         offset: 0,
         limit: 10,
-        total: 0,
         hasMore: false
     });
 
-    // Apply filters to backend
-    const applyFilters = async (newFilters: FilterState, search?: string, pageOffset?: number) => {
-        const requestBody: any = {
-            is_archived: 0,
-            offset: pageOffset || 0,
-            limit: pagination.limit,
-            include_supervisor: true
-        };
-
-        // Add search term
-        if (search) {
-            requestBody.search = search;
-        }
-
-        // Add employment status filters
-        if (newFilters.employmentStatuses.length > 0) {
-            requestBody.employment_status = newFilters.employmentStatuses;
-        }
-
-        // Add employee status filters
-        if (newFilters.employeeStatuses.length > 0) {
-            requestBody.employee_status = newFilters.employeeStatuses;
-        }
-
-        // Add position type filters
-        if (newFilters.positionTypes.length > 0) {
-            requestBody.position_status = newFilters.positionTypes;
-        }
-
+    // Apply filters function
+    const applyFilters = useCallback(async () => {
         try {
-            await fetchEmployeeListView({
-                queryParameters: "",
-                body: requestBody
-            });
-        } catch (error) {
-            console.error('Error applying filters:', error);
-            throw error;
+            setIsLoading(true);
+            setError(null);
+
+            // Map frontend filters to backend parameters
+            const backendFilters = mapFiltersToBackend(filters);
+            
+            // Create request body
+            const requestBody: ViewEmployeesRequest = {
+                ...backendFilters,
+                search: searchText,
+                offset: pagination.offset,
+                limit: pagination.limit
+            };
+
+            // Clean request body by removing empty arrays
+            const cleanedRequestBody = cleanRequestBody(requestBody);
+
+            console.log("Sending request with filters:", cleanedRequestBody);
+            
+            // Call the API
+            const response = await employeeService.listEmployees(cleanedRequestBody);
+            console.log("Employees response:", response);
+
+            // Handle different response structures
+            if (response.data?.success && response.data?.data?.employees) {
+                // Response structure: { success: true, data: { employees: [...], pagination: {...} } }
+                const responseData = response.data.data;
+                setEmployees(responseData.employees || []);
+                setPagination(responseData.pagination || {
+                    total: 0,
+                    offset: 0,
+                    limit: 10,
+                    hasMore: false
+                });
+            } else if (response.data?.success && response.data?.employees) {
+                // Direct response structure: { success: true, employees: [...], pagination: {...} }
+                const responseData = response.data;
+                setEmployees(responseData.employees || []);
+                setPagination(responseData.pagination || {
+                    total: 0,
+                    offset: 0,
+                    limit: 10,
+                    hasMore: false
+                });
+            } else {
+                console.error("No employee data received - response structure:", response.data);
+                setEmployees([]);
+                setPagination({
+                    total: 0,
+                    offset: 0,
+                    limit: 10,
+                    hasMore: false
+                });
+            }
+
+        } catch (err) {
+            console.error("Error applying filters:", err);
+            
+            // Check if it's a CORS error
+            if (err && typeof err === 'object' && 'status' in err) {
+                const error = err as any;
+                if (error.status === 'FETCH_ERROR' || error.status === 'CORS_ERROR') {
+                    setError("CORS Error: Backend needs to allow requests from frontend. Please check backend CORS configuration.");
+                } else {
+                    setError(`Failed to load employees. Status: ${error.status}`);
+                }
+            } else {
+                setError("Failed to load employees. Please try again.");
+            }
+        } finally {
+            setIsLoading(false);
         }
-    };
+    }, [filters, searchText, pagination.offset, pagination.limit]);
 
-    // Update filters and refetch data
-    const updateFilters = async (newFilters: FilterState) => {
-        setFilters(newFilters);
-        await applyFilters(newFilters, searchTerm, 0);
-    };
-
-    // Update search term and refetch data
-    const updateSearch = async (newSearchTerm: string) => {
-        setSearchTerm(newSearchTerm);
-        await applyFilters(filters, newSearchTerm, 0);
-    };
-
-    // Change page
-    const changePage = async (page: number) => {
-        const newOffset = (page - 1) * pagination.limit;
-        setPagination(prev => ({ ...prev, offset: newOffset }));
-        await applyFilters(filters, searchTerm, newOffset);
-    };
+    // Handle filter changes
+    const handleFilterChange = useCallback((category: keyof FrontendFilters, value: string, checked: boolean) => {
+        setFilters(prev => handleFilterChangeUtil(prev, category, value, checked));
+    }, []);
 
     // Clear all filters
-    const clearAllFilters = async () => {
-        const clearedFilters: FilterState = {
-            employmentStatuses: [],
-            employeeStatuses: [],
-            positionTypes: []
-        };
-        setFilters(clearedFilters);
-        await applyFilters(clearedFilters, searchTerm, 0);
-    };
+    const clearFilters = useCallback(() => {
+        setFilters({
+            class: [],
+            type: [],
+            status: []
+        });
+        setSearchText("");
+        setPagination(prev => ({ ...prev, offset: 0 }));
+    }, []);
 
-    // Get selected count for each category
-    const getSelectedCount = (category: keyof FilterState) => {
-        return filters[category].length;
-    };
+    // Handle page change
+    const handlePageChange = useCallback((page: number) => {
+        const newOffset = (page - 1) * pagination.limit;
+        setPagination(prev => ({ ...prev, offset: newOffset }));
+    }, [pagination.limit]);
 
-    // Get total count for each category
-    const getTotalCount = (category: keyof FilterState) => {
-        if (!filterOptions) return 0;
-        switch (category) {
-            case 'employmentStatuses':
-                return filterOptions.employment_statuses.length;
-            case 'employeeStatuses':
-                return filterOptions.employee_statuses.length;
-            case 'positionTypes':
-                return filterOptions.position_types.length;
-            default:
-                return 0;
+    // Initial load effect - only run once on mount
+    useEffect(() => {
+        applyFilters();
+    }, []); // Empty dependency array - only run once
+
+    // Debounced search effect
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setPagination(prev => ({ ...prev, offset: 0 }));
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchText]);
+
+    // Apply filters when dependencies change (but not on initial load)
+    useEffect(() => {
+        // Skip the initial load since we have a separate effect for that
+        const hasFilters = Object.values(filters).some(array => array.length > 0);
+        if (employees.length > 0 || hasFilters || searchText.length > 0) {
+            applyFilters();
         }
-    };
+    }, [filters, searchText, pagination.offset, pagination.limit]);
 
-    // Check if any filters are applied
-    const hasActiveFilters = () => {
-        return filters.employmentStatuses.length > 0 || 
-               filters.employeeStatuses.length > 0 || 
-               filters.positionTypes.length > 0 ||
-               searchTerm.length > 0;
-    };
+    // Computed values
+    const hasActiveFiltersComputed = hasActiveFilters(filters);
+    const filterCount = getFilterCount(filters);
 
     return {
         // State
+        employees,
+        isLoading,
+        error,
         filters,
-        searchTerm,
+        searchText,
         pagination,
-        filterOptions,
-        employeeData,
-        
-        // Loading states
-        filterOptionsLoading,
-        employeeLoading,
-        employeeError,
         
         // Actions
-        updateFilters,
-        updateSearch,
-        changePage,
-        clearAllFilters,
+        setSearchText,
+        handleFilterChange,
         applyFilters,
+        clearFilters,
+        handlePageChange,
         
-        // Utilities
-        getSelectedCount,
-        getTotalCount,
-        hasActiveFilters
+        // Computed
+        hasActiveFilters: hasActiveFiltersComputed,
+        filterCount,
+        filterOptions: FILTER_OPTIONS
     };
 }; 
