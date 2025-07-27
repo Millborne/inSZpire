@@ -399,7 +399,7 @@ const IDModal: React.FC<IDModalProps> = ({
 
               <CustomDatePicker
                 label="ISSUED DATE"
-                value={form.issuedDate || undefined}
+                value={form.issuedDate ? new Date(form.issuedDate) : undefined}
                 onChange={(v) => handleInputChange("issuedDate", v)}
                 disabled={currentMode === "view"}
                 error={!!errors.issuedDate}
@@ -407,7 +407,7 @@ const IDModal: React.FC<IDModalProps> = ({
 
               <CustomDatePicker
                 label="VALIDITY"
-                value={form.validity || undefined}
+                value={form.validity ? new Date(form.validity) : undefined}
                 onChange={(v) => handleInputChange("validity", v)}
                 disabled={currentMode === "view"}
                 error={!!errors.validity}

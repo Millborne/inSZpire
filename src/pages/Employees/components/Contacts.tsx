@@ -12,91 +12,110 @@ import { Edit2, Trash } from "iconsax-react";
 //components
 import ContactModal from "./modals/ContactModal";
 import { useState, useEffect } from "react";
-import { useContactService } from "../../../services/employee-profile/personal/contact/use-contact";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reducers/store";
+import {
+  useBasicInfoService,
+} from "../../../services/employee-profile/personal/basic-info/use-basic-info";
 
-// const PROFILE_ID = "11111111-0000-0000-0000-000000000002";
-
-
-
-const Contacts = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarType, setSnackbarType] = useState< "error" | "success" | "warning" | "info" | undefined>("success");
-  const [emergencyContacts, setEmergencyContacts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<String | null>(null);
-
-  const contactService = useContactService();
-
-  // Employee RTK State - commented out until employeeState is added to store
-  const selectedEmployee = useSelector(
-    (state: RootState) => state.employeeState.selectedEmployee
-  );
-  const PROFILE_ID = selectedEmployee?.profile_ID;
-
-   // Don't render if PROFILE_ID is not available
-   if (!PROFILE_ID) {
-    return <div>No employee selected</div>;
-}
-
-
-  // Fetch contact data
-  const fetchContacts = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await contactService.viewContact({ profile_ID: PROFILE_ID });
-      console.log("contact data", result.data.contacts)
-      if (result.data?.contacts) {
-        setEmergencyContacts(result.data.contacts);
-        console.log(emergencyContacts)
-      } else {
-        setEmergencyContacts([]);
-      }
-    } catch (err) {
-      setError("Failed to fetch emergency contacts");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchContacts();
-    // eslint-disable-next-line
-  }, [PROFILE_ID]);
-
-  const handleSubmitSuccess = (message = "Successfully updated Contact Information") => {
-    setSnackbarMessage(message);
-    setSnackbarType("success");
-    setIsSnackbarOpen(true);
-    fetchContacts();
-  };
-
-  const handleError = (message = "An error occurred") => {
-    setSnackbarMessage(message);
-    setSnackbarType("error");
-    setIsSnackbarOpen(true);
-  };
-
-  // Map API data to UI data structure
-  const mapContactData = (contact: any) => ({
-    id: contact.profile_family_ID,
-    lastName: contact.last_name,
-    firstName: contact.first_name,
-    middleName: contact.middle_name,
-    extensions: contact.name_ext,
-    contactNumber: contact.contact_number,
-    email: contact.email || "",
-    region: "Region X", // This would need to be parsed from address if structured
+const emergencyContacts = [
+  {
+    id: "1",
+    lastName: "Lee",
+    firstName: "Keith Lloyd",
+    middleName: "Ridgely",
+    extensions: "N/A",
+    contactNumber: "0955-021-1889",
+    email: "graciathefirst@gmail.com",
+    region: "Region X",
     province: "Misamis Oriental",
     city: "City of Cagayan de Oro",
     barangay: "Brgy. 26",
     street: "Blk 5 Lot 3, Villa Luz Subdivision",
     postalCode: "9000",
-  });
+  },
+  {
+    id: "2",
+    lastName: "Germannotta",
+    firstName: "Stephanie",
+    middleName: "Ridgely",
+    extensions: "N/A",
+    contactNumber: "0955-021-1888",
+    email: "freddyhill@gmail.com",
+    region: "Region X",
+    province: "Misamis Oriental",
+    city: "City of Cagayan de Oro",
+    barangay: "Brgy. 26",
+    street: "Blk 5 Lot 3, Villa Luz Subdivision",
+    postalCode: "9000",
+  },
+  {
+    id: "3",
+    lastName: "Lee",
+    firstName: "Stephanie",
+    middleName: "Ridgely",
+    extensions: "N/A",
+    contactNumber: "0955-021-1887",
+    email: "sibling@gmail.com",
+    region: "Region X",
+    province: "Misamis Oriental",
+    city: "City of Cagayan de Oro",
+    barangay: "Brgy. 26",
+    street: "Blk 5 Lot 3, Villa Luz Subdivision",
+    postalCode: "9000",
+  },
+];
+
+const Contacts = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+  const [contactData, setContactData] = useState<{
+    mobile_number?: string;
+    personal_email?: string;
+  } | null>(null);
+
+  // Employee RTK State
+  const selectedEmployee = useSelector(
+    (state: RootState) => state.employeeState.selectedEmployee
+  );
+
+  const {
+    getById,
+    actionIsLoading,
+    actionIsError,
+    actionError,
+  } = useBasicInfoService();
+
+  const fetchContactData = async () => {
+    if (!selectedEmployee?.employee_ID) return;
+    
+    try {
+      const result = await getById({
+        employeeId: selectedEmployee.employee_ID,
+      });
+      
+      if (result.data?.data?.profile) {
+        setContactData({
+          mobile_number: result.data.data.profile.mobile_number,
+          personal_email: result.data.data.profile.personal_email,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching contact data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedEmployee) {
+      fetchContactData();
+    }
+  }, [selectedEmployee]);
+
+  const handleSubmitSuccess = () => {
+    setIsSnackbarOpen(true);
+    // Refresh contact data after successful update
+    fetchContactData();
+  };
 
   return (
     <div className="flex flex-col w-full">
@@ -114,16 +133,19 @@ const Contacts = () => {
             onClose={() => setIsModalOpen(false)}
             emergencyContacts={emergencyContacts}
             onSubmitSuccess={handleSubmitSuccess}
-            onError={handleError}
-            contactService={contactService}
-            profileId={PROFILE_ID}
-            employeeId={selectedEmployee?.employee_ID || ""}
+            currentContactData={contactData}
           />
         </div>
 
         <div className="grid grid-cols-2 pb-4 gap-4 items-start max-w-2xl flex-grow">
-          <TextContent header="contact number" text={selectedEmployee?.mobile_number} />
-          <TextContent header="personal emails" text={selectedEmployee?.personal_email} />
+          <TextContent 
+            header="contact number" 
+            text={contactData?.mobile_number || "N/A"} 
+          />
+          <TextContent 
+            header="personal emails" 
+            text={contactData?.personal_email || "N/A"} 
+          />
         </div>
       </div>
       <Divider />
