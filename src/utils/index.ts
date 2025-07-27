@@ -1,5 +1,6 @@
 export * from "./uuid";
 export * from "./textFormatting";
+export * from "./formatDateForDisplay";
 
 /**
  * Converts a Date object to YYYY-MM-DD format without timezone issues
