@@ -46,53 +46,11 @@ const EmployeeList = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<"add" | "edit">("add");
-    const [selectedEmployeeLocal, setSelectedEmployeeLocal] =
-        useState<any>(null);
-    const [originalEmployeeData, setOriginalEmployeeData] =
-        useState<EmployeeData | null>(null);
-    
-    // Success message state
-    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-    const [successMessage, setSuccessMessage] = useState("");
-
-    // Load employees function
-    const loadData = async () => {
-        try {
-            setIsLoading(true);
-            setError(null);
-
-            console.log("Loading employee list...");
-            const employeesResponse = await employeeService.listEmployees({
-                is_archived: 0,
-                offset: 0,
-                limit: 10,
-            });
-            console.log("Employees response:", employeesResponse);
-
-            if (employeesResponse.data?.success && employeesResponse.data?.data?.employees) {
-                const responseData = employeesResponse.data.data;
-                setEmployees(responseData.employees || []);
-            } else {
-                console.error("No employee data received");
-                setEmployees([]);
-            }
-        } catch (err) {
-            console.error("Error loading employees:", err);
-            setError("Failed to load employees. Please try again.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Load employees on component mount
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    // Removed search functionality for now
-
-    // Handle page change
-    // Removed pagination for now
+    const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] = useState(false);
+    const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+    const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+    const [snackbarAction, setSnackbarAction] = useState<"add" | "edit" | "update" | null>(null);
+    const [openFilter, setOpenFilter] = useState(false);
 
     const handleRowClick = (index: number) => {
         console.log("Row clicked:", index);
@@ -111,66 +69,20 @@ const EmployeeList = () => {
     };
 
     const handleSubmitSuccess = (action: "add" | "edit" | "update") => {
-        console.log("Action completed:", action);
-        
-        // Show success message based on action
-        if (action === "edit" || action === "update") {
-            setSuccessMessage("✅ Employee information has been successfully updated!");
-            setShowSuccessMessage(true);
-            
-            // Auto-hide success message after 4 seconds
-            setTimeout(() => {
-                setShowSuccessMessage(false);
-            }, 4000);
-        } else if (action === "add") {
-            setSuccessMessage("✅ Employee has been successfully added!");
-            setShowSuccessMessage(true);
-            
-            // Auto-hide success message after 4 seconds
-            setTimeout(() => {
-                setShowSuccessMessage(false);
-            }, 4000);
-        }
-        
-        // Refresh the employee list after any successful action
-        if (action === "add" || action === "edit" || action === "update") {
-            loadData();
-        }
+        setSnackbarAction(action);
+        setIsSnackbarOpen(true);
     };
 
     const openAddEmployee = () => {
         setModalMode("add");
-        setSelectedEmployeeLocal(null);
+        setSelectedEmployee(null);
         setIsModalOpen(true);
     };
 
-    const openEditEmployee = async (employee: EmployeeData) => {
-        console.log("Opening edit for employee:", employee);
+    const openEditEmployee = (employee: any) => {
         setModalMode("edit");
-        
-        try {
-            // Fetch complete employee data using get-by-id endpoint
-            const requestBody = { 
-                employee_ID: employee.employee_ID
-            };
-            const response = await getEmployeeById(requestBody).unwrap();
-            
-            // Pass the entire response to the transformation function
-            // It will handle the nested structure internally
-            const transformedData = transformEmployeeToFormData(response);
-            
-            setSelectedEmployeeLocal(transformedData);
-            setOriginalEmployeeData(response);
-            setIsModalOpen(true);
-        } catch (error) {
-            console.error("Error fetching complete employee data:", error);
-            
-            // Fallback to original employee data if API call fails
-            const transformedData = transformEmployeeToFormData(employee);
-            setSelectedEmployeeLocal(transformedData);
-            setOriginalEmployeeData(employee);
-            setIsModalOpen(true);
-        }
+        setSelectedEmployee(employee);
+        setIsModalOpen(true);
     };
 
     // Get employee full name
@@ -252,32 +164,22 @@ const EmployeeList = () => {
                     <InfoCircle className="w-4 h-4 text-szBlack700 hover:text-szPrimary700 transition-colors duration-200 cursor-help" />
                     <div className="absolute z-10 invisible group-hover:visible bg-white shadow-lg rounded-lg p-2 w-[97px] -left-20 top-6">
                         <div className="flex flex-col gap-2 w-full items-start">
-                            <span className="text-body-small-reg text-szBlack800">
-                                Legends:
-                            </span>
+                            <span className="text-body-small-reg text-szBlack800">Legends:</span>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-success700 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Active
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Active</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-szGrey300 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Inactive
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Inactive</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-info500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Floating
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Floating</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-warning500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Clearance
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Clearance</span>
                             </div>
                         </div>
                     </div>
@@ -312,32 +214,22 @@ const EmployeeList = () => {
                     <InfoCircle className="w-4 h-4 text-szBlack700 hover:text-szPrimary700 transition-colors duration-200 cursor-help" />
                     <div className="absolute z-10 invisible group-hover:visible bg-white shadow-lg rounded-lg p-2 w-[97px] -left-20 top-6">
                         <div className="flex flex-col gap-2 w-full items-start">
-                            <span className="text-body-small-reg text-szBlack800">
-                                Legends:
-                            </span>
+                            <span className="text-body-small-reg text-szBlack800">Legends:</span>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-success700 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Active
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Active</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-szGrey300 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Inactive
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Inactive</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-info500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Floating
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Floating</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-warning500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Clearance
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Clearance</span>
                             </div>
                         </div>
                     </div>
@@ -403,16 +295,8 @@ const EmployeeList = () => {
                         <PopoverMenu
                             size="small"
                             items={[
-                                {
-                                    label: "Add Employee",
-                                    icon: <Add />,
-                                    onClick: openAddEmployee,
-                                },
-                                {
-                                    label: "Export",
-                                    icon: <ExportCurve />,
-                                    onClick: () => {},
-                                },
+                                { label: "Add Employee", icon: <Add />, onClick: openAddEmployee },
+                                { label: "Export", icon: <ExportCurve />, onClick: () => {} },
                             ]}
                         />
                     </div>
@@ -468,11 +352,17 @@ const EmployeeList = () => {
 
                     {/* Success Message */}
                     <SnackbarAlert
-                        isOpen={showSuccessMessage}
-                        onClose={() => setShowSuccessMessage(false)}
+                        isOpen={isSnackbarOpen}
+                        onClose={() => setIsSnackbarOpen(false)}
                         showCloseButton={true}
                         type="success"
-                        title={successMessage}
+                        title={
+                            snackbarAction === "edit"
+                                ? "Successfully edited employee"
+                                : snackbarAction === "update"
+                                ? "Successfully updated position"
+                                : "Successfully added employee"
+                        }
                         animation="slide-up"
                     />
                 </div>
