@@ -52,6 +52,7 @@ export interface addEmployeeData {
         birthAddress: string;
         telephoneNumber: string;
         mobileNumber: string;
+        personalEmail: string;
     };
 }
 
@@ -109,6 +110,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
             birthAddress: "",
             telephoneNumber: "",
             mobileNumber: "",
+            personalEmail: "",
         },
     });
 
@@ -121,6 +123,48 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
     );
 
     const [setAsPresentAddress, setSetAsPresentAddress] = useState(false);
+
+    // Positions state
+    const [positions, setPositions] = useState<Array<{ label: string; value: string }>>([]);
+    const [isLoadingPositions, setIsLoadingPositions] = useState(false);
+
+    // Fetch positions from API
+    const fetchPositions = async () => {
+        setIsLoadingPositions(true);
+        try {
+            const response = await fetch('https://erp-team-and-position-api-dev.supportzebra.net/api/v1/position/getPositions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({}),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.positions) {
+                    const transformedPositions = data.positions.map((position: any) => ({
+                        label: `${position.position_name} - ${position.position_code}`,
+                        value: position.position_ID,
+                    }));
+                    setPositions(transformedPositions);
+                }
+            } else {
+                console.error('Failed to fetch positions');
+            }
+        } catch (error) {
+            console.error('Error fetching positions:', error);
+        } finally {
+            setIsLoadingPositions(false);
+        }
+    };
+
+    // Load positions when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            fetchPositions();
+        }
+    }, [isOpen]);
 
     // Handle "Set as present address" checkbox effect
     const handleSetAsPresentAddressChange = (checked: boolean) => {
@@ -453,6 +497,13 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
                                     label="MOBILE NUMBER" 
                                     value={formData.others.mobileNumber || ""} 
                                     onChange={(e: any) => handleNestedInputChange('others', 'mobileNumber', e.target.value)}
+                                />
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] items-center">
+                                <Inputs 
+                                    label="PERSONAL EMAIL" 
+                                    value={formData.others.personalEmail || ""} 
+                                    onChange={(e: any) => handleNestedInputChange('others', 'personalEmail', e.target.value)}
                                 />
                             </div>
                         </div>
