@@ -1,72 +1,28 @@
 import { SideMenuWithProfile } from "enterprisze-global-components";
-import { Briefcase, Calendar, Clipboard, DocumentCopy, Personalcard, ReceiptText, Wallet1 } from "iconsax-reactjs";
+import {
+    Briefcase,
+    Calendar,
+    Clipboard,
+    DocumentCopy,
+    Personalcard,
+    ReceiptText,
+    Wallet1,
+} from "iconsax-reactjs";
 import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useSummaryService } from "../../services/employee-profile/summary/use-summary";
-import { useProfilePicture } from "../../services/employee-profile/profile-picture/use-profile-picture";
 import { useSelector } from "react-redux";
 import { RootState } from "../../reducers/store";
-import noAvatar from "../../assets/noAvatar.png";
-import { sanitizeUUID } from "../../utils";
 
 const Employees = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
     // Employee RTK State
-    const selectedEmployee = useSelector((state: RootState) => state.employeeState.selectedEmployee);
+    const selectedEmployee = useSelector(
+        (state: RootState) => state.employeeState.selectedEmployee
+    );
     const { getByIdView } = useSummaryService();
-    const { upload, profileData, refetchProfile, deleteProfilePicture } = useProfilePicture(selectedEmployee?.profile_ID || "");
-
-    const handleProfileUpdate = async (file: any | null) => {
-        // 🚫 Handle delete action
-        if (!file) {
-            console.log("i am here");
-            if (!selectedEmployee?.profile_ID) {
-                console.error("No profile ID found");
-                return;
-            }
-
-            try {
-                console.log("now im here", selectedEmployee.profile_ID);
-                await deleteProfilePicture({ profile_ID: sanitizeUUID(selectedEmployee.profile_ID) });
-                // setProfilePicture(noAvatar); // optional UI fallback
-            } catch (error) {
-                console.error("Error deleting profile picture:", error);
-            }
-
-            return;
-        }
-
-        // 🟢 Continue with upload if file exists
-        if (file.isLocal && file.url) {
-            try {
-                const response = await fetch(file.url);
-                const blob = await response.blob();
-                file = new File([blob], file.name, { type: file.mimeType });
-            } catch (error) {
-                console.error("Error converting file:", error);
-                return;
-            }
-        } else {
-            file = file as File;
-        }
-
-        if (!selectedEmployee?.profile_ID) {
-            console.error("No profile ID found");
-            return;
-        }
-
-        try {
-            await upload({
-                profile_image: file,
-                profile_ID: selectedEmployee.profile_ID,
-            });
-            await refetchProfile();
-        } catch (error) {
-            console.error("Error uploading profile picture:", error);
-        }
-    };
 
     const menuItems: {
         id: string;
@@ -117,6 +73,12 @@ const Employees = () => {
 
     const [selected, setSelected] = useState("summary");
 
+    // const user = {
+    //     name: "John Smith B. Fernandez",
+    //     role: "Junior Developer",
+    //     department: "Business Innovations & Solutions",
+    // };
+
     const [user, setUser] = useState<{
         name: string;
         role: string;
@@ -134,7 +96,8 @@ const Employees = () => {
 
     useEffect(() => {
         const pathSegments = location.pathname.split("/").filter(Boolean);
-        const employeeIdIndex = pathSegments.findIndex((segment) => segment === "employees") + 1;
+        const employeeIdIndex =
+            pathSegments.findIndex((segment) => segment === "employees") + 1;
         const employeeId = pathSegments[employeeIdIndex];
         const nextSegment = pathSegments[employeeIdIndex + 1];
 
@@ -163,7 +126,8 @@ const Employees = () => {
 
     // Get employee ID from URL params
     const pathSegments = location.pathname.split("/").filter(Boolean);
-    const employeeIdIndex = pathSegments.findIndex((segment) => segment === "employees") + 1;
+    const employeeIdIndex =
+        pathSegments.findIndex((segment) => segment === "employees") + 1;
     const employeeId = pathSegments[employeeIdIndex];
 
     // Removed employee data fetching - using fallback data instead
@@ -196,7 +160,7 @@ const Employees = () => {
                 const result = await getByIdView({
                     employeeId: selectedEmployee.employee_ID,
                 });
-
+                
                 if (result.data) {
                     let userData = {
                         name: `${result.data.data.first_name} ${result.data.data.middle_name[0]}. ${result.data.data.last_name}`,
@@ -218,10 +182,6 @@ const Employees = () => {
         }
     }, [selectedEmployee]); // Removed getByIdView from dependencies to prevent infinite loop
 
-    console.log("profileData", profileData?.data.profile_image);
-
-    const profileImage = profileData?.data.profile_image || noAvatar;
-
     return (
         user && (
             <SideMenuWithProfile
@@ -238,9 +198,6 @@ const Employees = () => {
                 selected={selected}
                 setSelected={handleMenuSelect}
                 backgroundColor="bg-[#FFFFFF]"
-                showEdit={true}
-                src={profileImage}
-                onProfileUpdate={handleProfileUpdate}
             >
                 <div className=" h-full">
                     <Outlet />
