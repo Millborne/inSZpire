@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ButtonsIcon, CardContainer, Inputs, Pagination, PopoverMenu, SnackbarAlert, Table } from "enterprisze-global-components";
 import { Add, Briefcase, Edit2, ExportCurve, Filter, InfoCircle, SearchNormal } from "iconsax-reactjs";
-import { useEmployeeService, type EmployeeData, type ViewEmployeesRequest } from "../../../services/employee/list/use-employee";
+import { useEmployeeService, type EmployeeData } from "../../../services/employee/list/use-employee";
+import { useEmployeeFilters } from "../../../services/employee/list/use-employee-filters";
+import { type FrontendFilters } from "../../../services/employee/list/filterAPI";
 // Components
 import EmployeeFilterModal from "../components/modals/EmployeeFilterModal";
 import EmployeeModal from "../components/modals/EmployeeModal";
@@ -11,21 +13,24 @@ import EmployeePositionModal from "../components/modals/EmployeePositionModal";
 const EmployeeList = () => {
     const navigate = useNavigate();
     const employeeService = useEmployeeService();
-
-    // State management
-    const [employees, setEmployees] = useState<EmployeeData[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [filters, setFilters] = useState<ViewEmployeesRequest>({});
-
-    // Pagination state
-    const [pagination, setPagination] = useState({
-        total: 0,
-        offset: 0,
-        limit: 10,
-        hasMore: false
-    });
+    
+    // Use the new filtering system
+    const {
+        employees,
+        isLoading,
+        error,
+        filters,
+        searchText,
+        pagination,
+        setSearchText,
+        handleFilterChange,
+        applyFilters,
+        clearFilters,
+        handlePageChange,
+        hasActiveFilters,
+        filterCount,
+        filterOptions
+    } = useEmployeeFilters();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<"add" | "edit">("add");
@@ -34,94 +39,6 @@ const EmployeeList = () => {
     const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
     const [snackbarAction, setSnackbarAction] = useState<"add" | "edit" | "update" | null>(null);
     const [openFilter, setOpenFilter] = useState(false);
-
-    // Load employees on component mount
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                setIsLoading(true);
-                setError(null);
-
-                // Load employees using vw_employee view
-                console.log("Sending request with filters:", filters);
-                const employeesResponse = await employeeService.listEmployees(filters);
-                console.log("Employees response:", employeesResponse);
-
-                // Handle different response structures
-                if (employeesResponse.data?.success && employeesResponse.data?.data?.employees) {
-                    // Response structure: { success: true, data: { employees: [...], pagination: {...} } }
-                    const responseData = employeesResponse.data.data;
-                    setEmployees(responseData.employees || []);
-                    setPagination(responseData.pagination || {
-                        total: 0,
-                        offset: 0,
-                        limit: 10,
-                        hasMore: false
-                    });
-                } else if (employeesResponse.data?.success && employeesResponse.data?.employees) {
-                    // Direct response structure: { success: true, employees: [...], pagination: {...} }
-                    const responseData = employeesResponse.data;
-                    setEmployees(responseData.employees || []);
-                    setPagination(responseData.pagination || {
-                        total: 0,
-                        offset: 0,
-                        limit: 10,
-                        hasMore: false
-                    });
-                } else {
-                    console.error("No employee data received - response structure:", employeesResponse.data);
-                    setEmployees([]);
-                    setPagination({
-                        total: 0,
-                        offset: 0,
-                        limit: 10,
-                        hasMore: false
-                    });
-                }
-
-            } catch (err) {
-                console.error("Error loading data:", err);
-                
-                // Check if it's a CORS error
-                if (err && typeof err === 'object' && 'status' in err) {
-                    const error = err as any;
-                    if (error.status === 'FETCH_ERROR' || error.status === 'CORS_ERROR') {
-                        setError("CORS Error: Backend needs to allow requests from frontend. Please check backend CORS configuration.");
-                    } else {
-                        setError(`Failed to load employees. Status: ${error.status}`);
-                    }
-                } else {
-                    setError("Failed to load employees. Please try again.");
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        loadData();
-    }, [filters]);
-
-    // Handle search
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            setFilters(prev => ({
-                ...prev,
-                search: searchTerm,
-                offset: 0
-            }));
-        }, 500);
-
-        return () => clearTimeout(timeoutId);
-    }, [searchTerm]);
-
-    // Handle page change
-    const handlePageChange = (page: number) => {
-        const newOffset = (page - 1) * pagination.limit;
-        setFilters(prev => ({
-            ...prev,
-            offset: newOffset
-        }));
-    };
 
     const handleRowClick = (index: number) => {
         console.log("Row clicked:", index);
@@ -352,18 +269,22 @@ const EmployeeList = () => {
                         />
                     </div>
 
-                    <div className="flex gap-4">
-                        <div className="w-full max-w-[355px]">
-                            <Inputs 
-                                placeholder="Search by Name, ID, Job Title, or Team" 
-                                icon={SearchNormal} 
-                                value={searchTerm}
-                                onChange={(e: any) => setSearchTerm(e.target.value)}
+                                            <div className="flex gap-4">
+                            <div className="w-full max-w-[355px]">
+                                <Inputs 
+                                    placeholder="Search by Name, ID, Job Title, or Team" 
+                                    icon={SearchNormal} 
+                                    value={searchText}
+                                    onChange={(e: any) => setSearchText(e.target.value)}
+                                />
+                            </div>
+                            <ButtonsIcon 
+                                icon={<Filter />} 
+                                variant="ghost" 
+                                size="large" 
+                                onClick={() => setOpenFilter(true)}
                             />
                         </div>
-                        <ButtonsIcon icon={<Filter />} variant="ghost" size="large" onClick={() => setOpenFilter(true)} />
-                        {/* <Button leftIcon={<Filter />} variant="ghost" size="large" onClick={() => setOpenFilter(true)} label={""} /> */}
-                    </div>
 
                     <div className="h-full">
                         <div className="hidden lg:block">
@@ -394,7 +315,23 @@ const EmployeeList = () => {
                         </div>
                     </div>
 
-                    <EmployeeFilterModal isOpen={openFilter} onClose={() => setOpenFilter(false)} />
+                    <EmployeeFilterModal 
+                        isOpen={openFilter} 
+                        onClose={() => setOpenFilter(false)}
+                        onApply={(newFilters) => {
+                            // Clear all current filters first
+                            clearFilters();
+                            
+                            // Then apply the new filters
+                            Object.keys(newFilters).forEach(category => {
+                                const key = category as keyof FrontendFilters;
+                                newFilters[key].forEach(value => {
+                                    handleFilterChange(key, value, true);
+                                });
+                            });
+                        }}
+                        currentFilters={filters}
+                    />
 
                     <EmployeeModal
                         isOpen={isModalOpen}
