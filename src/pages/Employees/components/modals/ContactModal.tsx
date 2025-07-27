@@ -11,9 +11,7 @@ import {
 
 // icons
 import { ArrowDown2, TickCircle, Trash, Edit2 } from "iconsax-reactjs";
-import { useState } from "react";
-import React from "react";
-import { useLocationsService } from "../../../../services/locations-options/use-locations";
+import { useState, useEffect } from "react";
 
 // components
 import DeleteConfirmation from "../../../../components/DeleteConfirmation";
@@ -59,23 +57,31 @@ export interface ContactDataType {
 interface ContactModalProps {
   isOpen: boolean;
   onClose: () => void;
-  emergencyContacts: any[];
-  onSubmitSuccess?: (msg?: string) => void;
-  onError?: (msg?: string) => void;
-  contactService: any;
-  profileId: string;
-  employeeId: string;
+  emergencyContacts: ContactDataType[];
+  onSubmitSuccess?: () => void;
+  currentContactData?: {
+    mobile_number?: string;
+    personal_email?: string;
+  } | null;
 }
+
+const relationshipOptions = [
+  "Mother",
+  "Father",
+  "Spouse",
+  "Child",
+  "Sibling",
+  "Live-In / Partner",
+  "Friend",
+  "Guardian",
+];
 
 const ContactModal: React.FC<ContactModalProps> = ({
   isOpen,
   onClose,
   emergencyContacts,
   onSubmitSuccess,
-  onError,
-  contactService,
-  profileId,
-  employeeId,
+  currentContactData,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [showInputContainer, setShowInputContainer] = useState(false);
@@ -86,37 +92,24 @@ const ContactModal: React.FC<ContactModalProps> = ({
   const [relationship, setRelationship] = useState(
     "Relationship to the Contact"
   );
-  const [currentContactData, setCurrentContactData] = useState<any | null>(null);
-  const [formLoading, setFormLoading] = useState(false);
-  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 
-  // Basic info service for updating mobile number and personal email
-  const { updateBasicInfo, actionIsLoading: basicInfoLoading } = useBasicInfoService();
-
-  const dispatch = useDispatch<AppDispatch>();
-
-  // Get selected employee from Redux store
-  const selectedEmployee = useSelector(
-    (state: RootState) => state.employeeState.selectedEmployee
-  );
-
-  // Contact information state
-  const [contactInfo, setContactInfo] = useState({
-    mobileNumber: "",
-    personalEmail: "",
+  // Form state for contact information
+  const [contactFormData, setContactFormData] = useState({
+    mobileNumber: currentContactData?.mobile_number || "",
+    personalEmail: currentContactData?.personal_email || "",
   });
 
-  // Populate contact information when modal opens
-  React.useEffect(() => {
-    if (isOpen && selectedEmployee) {
-      setContactInfo({
-        mobileNumber: selectedEmployee.mobile_number || "",
-        personalEmail: selectedEmployee.personal_email || "",
+  // Update form data when currentContactData changes
+  useEffect(() => {
+    if (currentContactData) {
+      setContactFormData({
+        mobileNumber: currentContactData.mobile_number || "",
+        personalEmail: currentContactData.personal_email || "",
       });
     }
-  }, [isOpen, selectedEmployee]);
+  }, [currentContactData]);
 
-  // For Adding Contact
+  // For Adding Education
   const handleAddContactClick = () => {
     setShowInputContainer(true);
     setIsEditMode(false);
@@ -240,26 +233,12 @@ const ContactModal: React.FC<ContactModalProps> = ({
     setIsDeleteModalOpen(true);
   };
 
-  const handleDeleteConfirm = async () => {
-    if (deleteIndex !== null) {
-      setFormLoading(true);
-      try {
-        const contact = emergencyContacts[deleteIndex];
-        const payload = { profile_family_ID: contact.profile_family_ID };
-        const result = await contactService.deleteContact(payload);
-        if (result.data?.success) {
-          onSubmitSuccess && onSubmitSuccess("Emergency contact deleted successfully");
-        } else {
-          onError && onError("Failed to delete emergency contact");
-        }
-      } catch (err) {
-        onError && onError("Failed to delete emergency contact");
-      } finally {
-        setFormLoading(false);
-        setIsDeleteModalOpen(false);
-        setDeleteIndex(null);
-      }
-    }
+  // Handle contact form input changes
+  const handleContactInputChange = (field: string, value: string) => {
+    setContactFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   // for add or edit contact inputs
@@ -606,15 +585,15 @@ const ContactModal: React.FC<ContactModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px]">
                 <Inputs 
                   label="CONTACT NUMBER" 
-                  placeholder="0919-207-5631" 
-                  value={contactInfo.mobileNumber}
-                  onChange={(e) => setContactInfo(prev => ({ ...prev, mobileNumber: e.target.value }))}
+                  placeholder="0919-207-5631"
+                  value={contactFormData.mobileNumber}
+                  onChange={(e) => handleContactInputChange("mobileNumber", e.target.value)}
                 />
                 <Inputs
                   label="PERSONAL EMAIL"
                   placeholder="example@gmail.com"
-                  value={contactInfo.personalEmail}
-                  onChange={(e) => setContactInfo(prev => ({ ...prev, personalEmail: e.target.value }))}
+                  value={contactFormData.personalEmail}
+                  onChange={(e) => handleContactInputChange("personalEmail", e.target.value)}
                 />
               </div>
             </div>

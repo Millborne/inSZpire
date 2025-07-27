@@ -1,33 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import {
-    ButtonsIcon,
-    CardContainer,
-    Inputs,
-    Pagination,
-    PopoverMenu,
-    SnackbarAlert,
-    Table,
-} from "enterprisze-global-components";
-import {
-    Add,
-    Briefcase,
-    Edit2,
-    ExportCurve,
-    Filter,
-    InfoCircle,
-    SearchNormal,
-} from "iconsax-reactjs";
-import {
-    useEmployeeService,
-    type EmployeeData,
-    type ViewEmployeesRequest,
-} from "../../../services/employee/list/use-employee";
-import { setSelectedEmployee } from "../../../reducers/employeeSlice";
-import type { AppDispatch } from "../../../reducers/store";
-import { transformEmployeeToFormData } from "../../../utils/employeeTransformers";
-import { useGetEmployeeByIdMutation } from "../../../services/employee/update/employeeUpdateAPI";
+import { ButtonsIcon, CardContainer, Inputs, Pagination, PopoverMenu, SnackbarAlert, Table } from "enterprisze-global-components";
+import { Add, Briefcase, Edit2, ExportCurve, Filter, InfoCircle, SearchNormal } from "iconsax-reactjs";
+import { useEmployeeService, type EmployeeData } from "../../../services/employee/list/use-employee";
+import { useEmployeeFilters } from "../../../services/employee/list/use-employee-filters";
+import { type FrontendFilters } from "../../../services/employee/list/filterAPI";
 // Components
 import EmployeeFilterModal from "../components/modals/EmployeeFilterModal";
 import EmployeeModal from "../components/modals/EmployeeModal";
@@ -35,14 +12,25 @@ import EmployeePositionModal from "../components/modals/EmployeePositionModal";
 
 const EmployeeList = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch<AppDispatch>();
     const employeeService = useEmployeeService();
-    const [getEmployeeById] = useGetEmployeeByIdMutation();
-
-    // State management
-    const [employees, setEmployees] = useState<EmployeeData[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    
+    // Use the new filtering system
+    const {
+        employees,
+        isLoading,
+        error,
+        filters,
+        searchText,
+        pagination,
+        setSearchText,
+        handleFilterChange,
+        applyFilters,
+        clearFilters,
+        handlePageChange,
+        hasActiveFilters,
+        filterCount,
+        filterOptions
+    } = useEmployeeFilters();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<"add" | "edit">("add");
@@ -54,18 +42,7 @@ const EmployeeList = () => {
 
     const handleRowClick = (index: number) => {
         console.log("Row clicked:", index);
-        const selectedEmployee = employees[index];
-        if (selectedEmployee) {
-            dispatch(setSelectedEmployee({ 
-                ...selectedEmployee, 
-                filters: {
-                    is_archived: 0,
-                    offset: 0,
-                    limit: 10
-                }
-            }));
-            navigate(`${selectedEmployee.employee_ID}/summary`);
-        }
+        navigate(`${employees[index]?.employee_ID}/summary`);
     };
 
     const handleSubmitSuccess = (action: "add" | "edit" | "update") => {
@@ -91,7 +68,7 @@ const EmployeeList = () => {
             employee.first_name,
             employee.middle_name,
             employee.last_name,
-            employee.name_ext,
+            employee.name_ext
         ].filter(Boolean);
         return parts.join(" ");
     };
@@ -115,32 +92,18 @@ const EmployeeList = () => {
     };
 
     // Transform data for table
-    const tableData = employees.map((employee) => ({
+    const tableData = employees.map(employee => ({
         name: (
             <div className="md:flex items-center gap-1">
-                <div
-                    className={`w-[14px] h-[14px] rounded-full ${getStatusColor(
-                        employee.employee_status
-                    )}`}
-                ></div>
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                    {getEmployeeFullName(employee)}
-                </span>
+                <div className={`w-[14px] h-[14px] rounded-full ${getStatusColor(employee.employee_status)}`}></div>
+                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{getEmployeeFullName(employee)}</span>
             </div>
         ),
         id: employee.employee_number,
-        team: (
-            <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                {employee.team_name}
-            </span>
-        ),
-        jobTitle: (
-            <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                {employee.position_name}
-            </span>
-        ),
+        team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{employee.team_name}</span>,
+        jobTitle: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{employee.position_name}</span>,
         jobCode: employee.position_code,
-        directHead: "N/A", // This field is not available in vw_employee view
+        directHead: "N/A" // This field is not available in vw_employee view
     }));
 
     // For larger screen
@@ -254,7 +217,14 @@ const EmployeeList = () => {
             icon: <Edit2 />,
             onClick: (index: number) => openEditEmployee(employees[index]),
         },
-        // Removed Update Position for now
+        {
+            label: "Update Position",
+            icon: <Briefcase />,
+            onClick: (index: number) => {
+                setSelectedEmployee(employees[index]);
+                setIsUpdatePositionModalOpen(true);
+            },
+        },
     ];
 
     // Loading state
@@ -263,9 +233,7 @@ const EmployeeList = () => {
             <CardContainer
                 content={
                     <div className="flex items-center justify-center h-64">
-                        <div className="text-szPrimary700">
-                            Loading employees...
-                        </div>
+                        <div className="text-szPrimary700">Loading employees...</div>
                     </div>
                 }
             />
@@ -301,7 +269,22 @@ const EmployeeList = () => {
                         />
                     </div>
 
-                    {/* Removed search and filter for now */}
+                                            <div className="flex gap-4">
+                            <div className="w-full max-w-[355px]">
+                                <Inputs 
+                                    placeholder="Search by Name, ID, Job Title, or Team" 
+                                    icon={SearchNormal} 
+                                    value={searchText}
+                                    onChange={(e: any) => setSearchText(e.target.value)}
+                                />
+                            </div>
+                            <ButtonsIcon 
+                                icon={<Filter />} 
+                                variant="ghost" 
+                                size="large" 
+                                onClick={() => setOpenFilter(true)}
+                            />
+                        </div>
 
                     <div className="h-full">
                         <div className="hidden lg:block">
@@ -322,35 +305,52 @@ const EmployeeList = () => {
                                 onRowClick={handleRowClick}
                             />
                         </div>
-                        {/* Removed pagination for now */}
+                        <div className="flex justify-end">
+                            <Pagination 
+                                currentPage={Math.floor(pagination.offset / pagination.limit) + 1}
+                                totalPages={Math.ceil(pagination.total / pagination.limit)}
+                                visiblePages={5} 
+                                onChange={handlePageChange} 
+                            />
+                        </div>
                     </div>
 
-                    {/* Only render EmployeeModal when needed */}
-                    {isModalOpen && (
-                        <EmployeeModal
-                            isOpen={isModalOpen}
-                            onClose={() => {
-                                setIsModalOpen(false);
-                                setSelectedEmployeeLocal(null);
-                                setOriginalEmployeeData(null);
-                            }}
-                            mode={modalMode}
-                            addEmployeeData={
-                                modalMode === "edit"
-                                    ? selectedEmployeeLocal
-                                    : undefined
-                            }
-                            originalEmployeeData={originalEmployeeData}
-                            employeeId={
-                                modalMode === "edit" && originalEmployeeData
-                                    ? (originalEmployeeData as any).data?.employee?.employee_ID || originalEmployeeData.employee_ID
-                                    : undefined
-                            }
-                            onSubmitSuccess={() => handleSubmitSuccess(modalMode)}
-                        />
-                    )}
+                    <EmployeeFilterModal 
+                        isOpen={openFilter} 
+                        onClose={() => setOpenFilter(false)}
+                        onApply={(newFilters) => {
+                            // Clear all current filters first
+                            clearFilters();
+                            
+                            // Then apply the new filters
+                            Object.keys(newFilters).forEach(category => {
+                                const key = category as keyof FrontendFilters;
+                                newFilters[key].forEach(value => {
+                                    handleFilterChange(key, value, true);
+                                });
+                            });
+                        }}
+                        currentFilters={filters}
+                    />
 
-                    {/* Success Message */}
+                    <EmployeeModal
+                        isOpen={isModalOpen}
+                        onClose={() => {
+                            setIsModalOpen(false);
+                            setSelectedEmployee(null);
+                        }}
+                        mode={modalMode}
+                        addEmployeeData={modalMode === "edit" ? selectedEmployee : undefined}
+                        onSubmitSuccess={() => handleSubmitSuccess(modalMode)}
+                    />
+
+                    <EmployeePositionModal
+                        isOpen={isUpdatePositionModalOpen}
+                        onClose={() => setIsUpdatePositionModalOpen(false)}
+                        employeePositionData={selectedEmployee}
+                        onSubmitSuccess={() => handleSubmitSuccess("update")}
+                    />
+
                     <SnackbarAlert
                         isOpen={isSnackbarOpen}
                         onClose={() => setIsSnackbarOpen(false)}
