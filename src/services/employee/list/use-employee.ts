@@ -115,7 +115,6 @@ export interface EmployeeData {
 // Request interfaces for vw_employee view
 export interface ViewEmployeesRequest {
     search?: string;
-    is_archived?: number;
     offset?: number;
     limit?: number;
 }
@@ -208,7 +207,7 @@ export const useEmployeeService = () => {
     ] = useActionEmployeesMutation();
 
     // List employees using vw_employee view
-    const listEmployees = async (filters: ViewEmployeesRequest) => {
+    const listEmployees = async (filters: ViewEmployeesRequest = {}) => {
         return generalAction({
             queryParameters: "/list-view",
             method: "POST",

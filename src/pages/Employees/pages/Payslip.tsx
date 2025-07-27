@@ -85,6 +85,7 @@ const PaySlip = () => {
                                 <p className="text-caption-all-caps text-szGrey500 uppercase ">Year</p>
                                 <Dropdown
                                     label="Year"
+                                    placeholder="Select Year"
                                     options={yearOptions}
                                     size="medium"
                                     value={selectedYear}
@@ -96,6 +97,7 @@ const PaySlip = () => {
                                 <p className="text-caption-all-caps text-szGrey500 uppercase">Month</p>
                                 <Dropdown
                                     label="Month"
+                                    placeholder="Select Month"
                                     options={monthOptions}
                                     size="medium"
                                     value={selectedMonth}
@@ -106,8 +108,12 @@ const PaySlip = () => {
                             <div className="flex flex-col">
                                 <p className="text-caption-all-caps text-szGrey500 uppercase">Coverage</p>
                                 <div className="flex lg:flex-row flex-col gap-2">
-                                    <CustomDatePicker label="Start Date" value={startDate || undefined} onChange={setStartDate} />
-                                    <CustomDatePicker label="End Date" value={endDate || undefined} onChange={setEndDate} />
+                                    <div className="relative z-50">
+                                        <CustomDatePicker label="Start Date" value={startDate || undefined} onChange={setStartDate} />
+                                    </div>
+                                    <div className="relative z-50">
+                                        <CustomDatePicker label="End Date" value={endDate || undefined} onChange={setEndDate} />
+                                    </div>
                                 </div>
                             </div>
 

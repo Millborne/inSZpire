@@ -11,7 +11,12 @@ import { Edit2, Trash } from "iconsax-react";
 
 //components
 import ContactModal from "./modals/ContactModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../reducers/store";
+import {
+  useBasicInfoService,
+} from "../../../services/employee-profile/personal/basic-info/use-basic-info";
 
 const emergencyContacts = [
   {
@@ -64,9 +69,52 @@ const emergencyContacts = [
 const Contacts = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+  const [contactData, setContactData] = useState<{
+    mobile_number?: string;
+    personal_email?: string;
+  } | null>(null);
+
+  // Employee RTK State
+  const selectedEmployee = useSelector(
+    (state: RootState) => state.employeeState.selectedEmployee
+  );
+
+  const {
+    getById,
+    actionIsLoading,
+    actionIsError,
+    actionError,
+  } = useBasicInfoService();
+
+  const fetchContactData = async () => {
+    if (!selectedEmployee?.employee_ID) return;
+    
+    try {
+      const result = await getById({
+        employeeId: selectedEmployee.employee_ID,
+      });
+      
+      if (result.data?.data?.profile) {
+        setContactData({
+          mobile_number: result.data.data.profile.mobile_number,
+          personal_email: result.data.data.profile.personal_email,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching contact data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedEmployee) {
+      fetchContactData();
+    }
+  }, [selectedEmployee]);
 
   const handleSubmitSuccess = () => {
     setIsSnackbarOpen(true);
+    // Refresh contact data after successful update
+    fetchContactData();
   };
 
   return (
@@ -85,12 +133,19 @@ const Contacts = () => {
             onClose={() => setIsModalOpen(false)}
             emergencyContacts={emergencyContacts}
             onSubmitSuccess={handleSubmitSuccess}
+            currentContactData={contactData}
           />
         </div>
 
         <div className="grid grid-cols-2 pb-4 gap-4 items-start max-w-2xl flex-grow">
-          <TextContent header="contact number" text="0919 -207-5631" />
-          <TextContent header="personal emails" text="freddyhill@mail.net" />
+          <TextContent 
+            header="contact number" 
+            text={contactData?.mobile_number || "N/A"} 
+          />
+          <TextContent 
+            header="personal emails" 
+            text={contactData?.personal_email || "N/A"} 
+          />
         </div>
       </div>
       <Divider />

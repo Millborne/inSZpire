@@ -139,21 +139,9 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
 
     // Get employee position for display - show position name if available, otherwise show the ID
     const getPositionDisplayName = (positionId: string) => {
-        switch (positionId) {
-            case "fc01fee95e8a11f0b4b102dcb324866b": return "pos 5 - 124";
-            case "f89bb5af459111f0b6b802dcb324866b": return "bsi-dir-01 - bsi-dir-01";
-            case "f639b02d459e11f0b6b802dcb324866b": return "another newest bsi project manager - bsi-projmgr-04";
-            case "f639d0d3459e11f0b6b802dcb324866b": return "another coo for bsi - bsi-dir-02";
-            case "cc8413ec58d611f0b6b802dcb324866b": return "another coo for bsi - coo-bsi-mgr";
-            case "a50ebaca58b311f0b6b802dcb324866b": return "another coo for bsi - coo-bsi-mgr2";
-            case "7bcd1724451611f0b6b802dcb324866b": return "another coo for bsi - coo-bsi-mgr3";
-            case "5382919b5e6211f0b4b102dcb324866b": return "coo mngr 4 - coo-bsi-mgr4";
-            case "ab88ede7459b11f0b6b802dcb324866b": return "special projects manager 1 edit - bsi-sptmgr-01";
-            case "c92cf16b5e8b11f0b4b102dcb324866b": return "pos 73 - 34423";
-            case "c7f05146615011f0b4b102dcb324866b": return "position mill edit - mill edit";
-            case "04ba80e2615d11f0b4b102dcb324866b": return "position mill new - 3234";
-            default: return positionId;
-        }
+        // For now, return the position ID as a fallback since we don't have access to the positions data here
+        // In a real implementation, you might want to pass the positions data to this modal
+        return positionId || "Position";
     };
 
     const employeePosition = employeeData ? 
@@ -200,7 +188,7 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                         blood_type: employeeData.others.bloodType || "",
                         telephone_number: employeeData.others.telephoneNumber || "",
                         mobile_number: employeeData.others.mobileNumber || "",
-                        personal_email: "anothertestingIntegration@example.com", // Required field with valid email format
+                        personal_email: employeeData.others.personalEmail || "", // Use dynamic personal email from form
                         educational_attainment_ID: "7cbd3ea82b1111f0b6b802dcb324866b" // Default value
                     },
                     // Create permanent address record

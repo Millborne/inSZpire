@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Inputs, Dropdown, Avatar, SnackbarAlert, CustomDatePicker } from "enterprisze-global-components";
 import { InfoCircle } from "iconsax-reactjs";
 import EmployeeConfirmationModal from "./EmployeeConfirmationModal";
+
 import SZOfficialLogo from "../../../assets/SZ Official Logo_circle.png";
 
 export interface addEmployeeData {
@@ -48,6 +49,7 @@ export interface addEmployeeData {
         birthAddress: string;
         telephoneNumber: string;
         mobileNumber: string;
+        personalEmail: string;
     };
 }
 
@@ -103,6 +105,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
             birthAddress: "",
             telephoneNumber: "",
             mobileNumber: "",
+            personalEmail: "",
         },
     });
 
@@ -111,6 +114,48 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
         mode === "edit" && addEmployeeData ? addEmployeeData : null
     );
     const [setAsPresentAddress, setSetAsPresentAddress] = useState(false);
+
+    // Positions state
+    const [positions, setPositions] = useState<Array<{ label: string; value: string }>>([]);
+    const [isLoadingPositions, setIsLoadingPositions] = useState(false);
+
+    // Fetch positions from API
+    const fetchPositions = async () => {
+        setIsLoadingPositions(true);
+        try {
+            const response = await fetch('https://erp-team-and-position-api-dev.supportzebra.net/api/v1/position/getPositions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({}),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.positions) {
+                    const transformedPositions = data.positions.map((position: any) => ({
+                        label: `${position.position_name} - ${position.position_code}`,
+                        value: position.position_ID,
+                    }));
+                    setPositions(transformedPositions);
+                }
+            } else {
+                console.error('Failed to fetch positions');
+            }
+        } catch (error) {
+            console.error('Error fetching positions:', error);
+        } finally {
+            setIsLoadingPositions(false);
+        }
+    };
+
+    // Load positions when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            fetchPositions();
+        }
+    }, [isOpen]);
 
     // Handle "Set as present address" checkbox effect
     const handleSetAsPresentAddressChange = (checked: boolean) => {
@@ -220,11 +265,13 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                     value={formData.fullName.nickname || ""} 
                                     onChange={(e: any) => handleNestedInputChange('fullName', 'nickname', e.target.value)}
                                 />
-                                <CustomDatePicker 
-                                    label="BIRTHDATE" 
-                                    value={formData.fullName.dateOfBirth || ""} 
-                                    onChange={(value: Date) => handleNestedInputChange('fullName', 'dateOfBirth', value.toISOString())}
-                                />
+                                <div className="relative z-50">
+                                    <CustomDatePicker 
+                                        label="BIRTHDATE" 
+                                        value={formData.fullName.dateOfBirth || ""} 
+                                        onChange={(value: Date) => handleNestedInputChange('fullName', 'dateOfBirth', value.toISOString())}
+                                    />
+                                </div>
                             </div>
                         </div>
 
@@ -303,6 +350,13 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                                     label="MOBILE NUMBER" 
                                     value={formData.others.mobileNumber || ""} 
                                     onChange={(e: any) => handleNestedInputChange('others', 'mobileNumber', e.target.value)}
+                                />
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] items-center">
+                                <Inputs 
+                                    label="PERSONAL EMAIL" 
+                                    value={formData.others.personalEmail || ""} 
+                                    onChange={(e: any) => handleNestedInputChange('others', 'personalEmail', e.target.value)}
                                 />
                             </div>
                         </div>
@@ -735,46 +789,22 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, mode
                             </div>
                             <div className="flex flex-col w-full gap-[16px]">
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-[16px] items-center">
-                                    <CustomDatePicker 
-                                        label="DATE HIRED" 
-                                        value={formData.work.dateHired || ""} 
-                                        onChange={(value: Date) => handleNestedInputChange('work', 'dateHired', value.toISOString())}
-                                    />
+                                    <div className="relative z-50">
+                                        <CustomDatePicker 
+                                            label="DATE HIRED" 
+                                            value={formData.work.dateHired || ""} 
+                                            onChange={(value: Date) => handleNestedInputChange('work', 'dateHired', value.toISOString())}
+                                        />
+                                    </div>
                                                                     <Dropdown 
                                     label="POSITION" 
-                                    placeholder="Select position"
-                                    options={[
-                                        { label: "pos 5 - 124", value: "fc01fee95e8a11f0b4b102dcb324866b" },
-                                        { label: "bsi-dir-01 - bsi-dir-01", value: "f89bb5af459111f0b6b802dcb324866b" },
-                                        { label: "another newest bsi project manager - bsi-projmgr-04", value: "f639b02d459e11f0b6b802dcb324866b" },
-                                        { label: "another coo for bsi - bsi-dir-02", value: "f639d0d3459e11f0b6b802dcb324866b" },
-                                        { label: "another coo for bsi - coo-bsi-mgr", value: "cc8413ec58d611f0b6b802dcb324866b" },
-                                        { label: "another coo for bsi - coo-bsi-mgr2", value: "a50ebaca58b311f0b6b802dcb324866b" },
-                                        { label: "another coo for bsi - coo-bsi-mgr3", value: "7bcd1724451611f0b6b802dcb324866b" },
-                                        { label: "coo mngr 4 - coo-bsi-mgr4", value: "5382919b5e6211f0b4b102dcb324866b" },
-                                        { label: "special projects manager 1 edit - bsi-sptmgr-01", value: "ab88ede7459b11f0b6b802dcb324866b" },
-                                        { label: "pos 73 - 34423", value: "c92cf16b5e8b11f0b4b102dcb324866b" },
-                                        { label: "position mill edit - mill edit", value: "c7f05146615011f0b4b102dcb324866b" },
-                                        { label: "position mill new - 3234", value: "04ba80e2615d11f0b4b102dcb324866b" }
-                                    ]} 
+                                    placeholder={isLoadingPositions ? "Loading positions..." : "Select position"}
+                                    options={positions}
                                     onSelectionChange={(selected: any) => handleNestedInputChange('work', 'position', selected?.value || '')}
-                                    value={formData.work.position ? {
-                                        label: formData.work.position === "fc01fee95e8a11f0b4b102dcb324866b" ? "pos 5 - 124" :
-                                               formData.work.position === "f89bb5af459111f0b6b802dcb324866b" ? "bsi-dir-01 - bsi-dir-01" :
-                                               formData.work.position === "f639b02d459e11f0b6b802dcb324866b" ? "another newest bsi project manager - bsi-projmgr-04" :
-                                               formData.work.position === "f639d0d3459e11f0b6b802dcb324866b" ? "another coo for bsi - bsi-dir-02" :
-                                               formData.work.position === "cc8413ec58d611f0b6b802dcb324866b" ? "another coo for bsi - coo-bsi-mgr" :
-                                               formData.work.position === "a50ebaca58b311f0b6b802dcb324866b" ? "another coo for bsi - coo-bsi-mgr2" :
-                                               formData.work.position === "7bcd1724451611f0b6b802dcb324866b" ? "another coo for bsi - coo-bsi-mgr3" :
-                                               formData.work.position === "5382919b5e6211f0b4b102dcb324866b" ? "coo mngr 4 - coo-bsi-mgr4" :
-                                               formData.work.position === "ab88ede7459b11f0b6b802dcb324866b" ? "special projects manager 1 edit - bsi-sptmgr-01" :
-                                               formData.work.position === "c92cf16b5e8b11f0b4b102dcb324866b" ? "pos 73 - 34423" :
-                                               formData.work.position === "c7f05146615011f0b4b102dcb324866b" ? "position mill edit - mill edit" :
-                                               formData.work.position === "04ba80e2615d11f0b4b102dcb324866b" ? "position mill new - 3234" : formData.work.position,
-                                        value: formData.work.position
-                                    } : undefined}
+                                    value={formData.work.position ? positions.find(p => p.value === formData.work.position) : undefined}
                                     usePortal={true}
                                     size="small"
+                                    disabled={isLoadingPositions}
                                 />
                                     <Dropdown
                                         label="POSITION STATUS"

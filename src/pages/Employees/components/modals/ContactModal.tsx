@@ -10,7 +10,7 @@ import {
 
 // icons
 import { ArrowDown2, TickCircle, Trash, Edit2 } from "iconsax-reactjs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // components
 import DeleteConfirmation from "../../../../components/DeleteConfirmation";
@@ -37,6 +37,10 @@ interface ContactModalProps {
   onClose: () => void;
   emergencyContacts: ContactDataType[];
   onSubmitSuccess?: () => void;
+  currentContactData?: {
+    mobile_number?: string;
+    personal_email?: string;
+  } | null;
 }
 
 const relationshipOptions = [
@@ -55,6 +59,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
   onClose,
   emergencyContacts,
   onSubmitSuccess,
+  currentContactData,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [showInputContainer, setShowInputContainer] = useState(false);
@@ -65,6 +70,22 @@ const ContactModal: React.FC<ContactModalProps> = ({
   const [relationship, setRelationship] = useState(
     "Relationship to the Contact"
   );
+
+  // Form state for contact information
+  const [contactFormData, setContactFormData] = useState({
+    mobileNumber: currentContactData?.mobile_number || "",
+    personalEmail: currentContactData?.personal_email || "",
+  });
+
+  // Update form data when currentContactData changes
+  useEffect(() => {
+    if (currentContactData) {
+      setContactFormData({
+        mobileNumber: currentContactData.mobile_number || "",
+        personalEmail: currentContactData.personal_email || "",
+      });
+    }
+  }, [currentContactData]);
 
   // For Adding Education
   const handleAddContactClick = () => {
@@ -107,6 +128,14 @@ const ContactModal: React.FC<ContactModalProps> = ({
 
   const handleDeleteClick = (index: number) => {
     setIsDeleteModalOpen(true);
+  };
+
+  // Handle contact form input changes
+  const handleContactInputChange = (field: string, value: string) => {
+    setContactFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   // for add or edit contact inputs
@@ -247,10 +276,17 @@ const ContactModal: React.FC<ContactModalProps> = ({
                 Contact Information
               </h6>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px]">
-                <Inputs label="CONTACT NUMBER" placeholder="0919-207-5631" />
+                <Inputs 
+                  label="CONTACT NUMBER" 
+                  placeholder="0919-207-5631"
+                  value={contactFormData.mobileNumber}
+                  onChange={(e) => handleContactInputChange("mobileNumber", e.target.value)}
+                />
                 <Inputs
                   label="PERSONAL EMAIL"
                   placeholder="example@gmail.com"
+                  value={contactFormData.personalEmail}
+                  onChange={(e) => handleContactInputChange("personalEmail", e.target.value)}
                 />
               </div>
             </div>

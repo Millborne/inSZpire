@@ -17,11 +17,7 @@ const EmployeeList = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [filters, setFilters] = useState<ViewEmployeesRequest>({
-        is_archived: 0,
-        offset: 0,
-        limit: 10
-    });
+    const [filters, setFilters] = useState<ViewEmployeesRequest>({});
 
     // Pagination state
     const [pagination, setPagination] = useState({

@@ -405,21 +405,25 @@ const IDModal: React.FC<IDModalProps> = ({
                 error={!!errors.cardNum}
               />
 
-              <CustomDatePicker
-                label="ISSUED DATE"
-                value={form.issuedDate ? new Date(form.issuedDate) : undefined}
-                onChange={(v) => handleInputChange("issuedDate", v)}
-                disabled={currentMode === "view"}
-                error={!!errors.issuedDate}
-              />
+              <div className="relative z-50">
+                <CustomDatePicker
+                  label="ISSUED DATE"
+                  value={form.issuedDate ? new Date(form.issuedDate) : undefined}
+                  onChange={(v) => handleInputChange("issuedDate", v)}
+                  disabled={currentMode === "view"}
+                  error={!!errors.issuedDate}
+                />
+              </div>
 
-              <CustomDatePicker
-                label="VALIDITY"
-                value={form.validity ? new Date(form.validity) : undefined}
-                onChange={(v) => handleInputChange("validity", v)}
-                disabled={currentMode === "view"}
-                error={!!errors.validity}
-              />
+              <div className="relative z-50">
+                <CustomDatePicker
+                  label="VALIDITY"
+                  value={form.validity ? new Date(form.validity) : undefined}
+                  onChange={(v) => handleInputChange("validity", v)}
+                  disabled={currentMode === "view"}
+                  error={!!errors.validity}
+                />
+              </div>
             </div>
           </div>
         }

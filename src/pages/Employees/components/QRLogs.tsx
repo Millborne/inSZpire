@@ -75,17 +75,21 @@ const QRLogs = () => {
     <div className="grid grid-cols-1 gap-[24px] bg-white">
       <div className="flex flex-wrap gap-[20px]">
         <div className="grid grid-cols-1 md:grid-cols-[auto_auto_auto] gap-2 items-center justify-center">
-          <CustomDatePicker
-            value={value}
-            label="START"
-            onChange={(value) => setValue(value)}
-          />
+          <div className="relative z-50">
+            <CustomDatePicker
+              value={value}
+              label="START"
+              onChange={(value) => setValue(value)}
+            />
+          </div>
           <span className="justify-self-center">-</span>
-          <CustomDatePicker
-            value={value}
-            label="END"
-            onChange={(value) => setValue(value)}
-          />
+          <div className="relative z-50">
+            <CustomDatePicker
+              value={value}
+              label="END"
+              onChange={(value) => setValue(value)}
+            />
+          </div>
         </div>
         <div className="flex gap-[12px] justify-between flex-grow h-fit">
           <Button label="Show" variant="secondary" size="large" />
