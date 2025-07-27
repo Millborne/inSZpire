@@ -10,7 +10,6 @@ import { positionsAPI } from "../services/settings/positions/list/positionsAPI";
 import { jobTitleAPI } from "../services/settings/job-title/list/jobTitleAPI";
 import { employeeAPI } from "../services/employee/list/employeeAPI";
 import { employeeCreateAPI } from "../services/employee/create/employeeCreateAPI";
-import { employeeUpdateAPI } from "../services/employee/update/employeeUpdateAPI";
 import { summaryAPI } from "../services/employee-profile/summary/summaryAPI";
 import { basicInfoAPI } from "../services/employee-profile/personal/basic-info/basicInfoAPI";
 import { educationAPI } from "../services/employee-profile/personal/education/educationAPI";
@@ -24,9 +23,7 @@ import { personalDocumentsAPI } from "../services/employee-profile/work/document
 import { positionTypeAPI } from "../services/settings/positions/type/positionTypeAPI";
 import { workSetupAPI } from "../services/settings/work-setup/list/workSetupAPI";
 import { locationsAPI } from "../services/locations-options/locationsAPI";
-import { employeeCreateAPI } from "../services/employee/create/employeeCreateAPI";
-import { religionAPI } from "../services/employee-profile/personal/basic-info/religionAPI";
-import { profilePictureAPI } from "../services/employee-profile/profile-picture/profilePictureAPI";
+import { religionAPI } from "../services/employee-profile/personal/basic-info/religionAPI"; 
 
 // Slices
 import employeeReducer from "./employeeSlice";
@@ -43,7 +40,6 @@ const rootReducer = combineReducers({
     [jobTitleAPI.reducerPath]: jobTitleAPI.reducer,
     [employeeAPI.reducerPath]: employeeAPI.reducer,
     [employeeCreateAPI.reducerPath]: employeeCreateAPI.reducer,
-    [employeeUpdateAPI.reducerPath]: employeeUpdateAPI.reducer,
     [summaryAPI.reducerPath]: summaryAPI.reducer,
     [basicInfoAPI.reducerPath]: basicInfoAPI.reducer,
     [educationAPI.reducerPath]: educationAPI.reducer,
@@ -58,7 +54,6 @@ const rootReducer = combineReducers({
     [workSetupAPI.reducerPath]: workSetupAPI.reducer,
     [locationsAPI.reducerPath]: locationsAPI.reducer,
     [religionAPI.reducerPath]: religionAPI.reducer,
-    [profilePictureAPI.reducerPath]: profilePictureAPI.reducer,
 });
 
 const configStore = configureStore({
@@ -72,7 +67,6 @@ const configStore = configureStore({
             jobTitleAPI.middleware,
             employeeAPI.middleware,
             employeeCreateAPI.middleware,
-            employeeUpdateAPI.middleware,
             summaryAPI.middleware,
             basicInfoAPI.middleware,
             educationAPI.middleware,
@@ -86,11 +80,9 @@ const configStore = configureStore({
             positionTypeAPI.middleware,
             workSetupAPI.middleware,
             locationsAPI.middleware,
-            religionAPI.middleware,
-            profilePictureAPI.middleware
+            religionAPI.middleware
         ),
 });
 
 export { configStore };
 export type RootState = ReturnType<typeof configStore.getState>; //to get states from slices
-export type AppDispatch = typeof configStore.dispatch; //to get dispatch type
