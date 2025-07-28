@@ -4,20 +4,14 @@ import { InfoCircle, Warning2 } from "iconsax-reactjs";
 import { useCreateEmployeeMutation } from "../../../../services/employee/create/employeeCreateAPI";
 import { addEmployeeData } from "./EmployeeModal";
 import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
-<<<<<<< HEAD
-=======
 import { useCreateEmployeeMutation } from "../../../../services/employee/create/employeeCreateAPI";
 import { getReligionId } from "../../../../utils/employeeTransformers";
-<<<<<<< HEAD
->>>>>>> 2bf7467 (Will work on later)
-=======
 import { safeFormatDateForBackend } from "../../../../utils";
->>>>>>> 36171db (all goods now)
 
-interface EmployeeConfirmationModalProps {
+interface FamilyConfirmationModalProps {
     isOpen: boolean;
     onClose: () => void;
-    addEmployeeData: addEmployeeData[];
+    familyData: FamilyMemberDataType[];
     onSubmitSuccess?: () => void;
 }
 
@@ -132,15 +126,6 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
         }
     };
 
-<<<<<<< HEAD
-    const addressData = employeeData ? [
-        { label: "Region", value: getDisplayLabel(employeeData.permanentAddress.region || "", "region") },
-        { label: "Province", value: getDisplayLabel(employeeData.permanentAddress.province || "", "province") },
-        { label: "City / Municipality", value: getDisplayLabel(employeeData.permanentAddress.cityMunicipality || "", "city") },
-        { label: "Barangay", value: getDisplayLabel(employeeData.permanentAddress.barangay || "", "barangay") },
-        { label: "Street / House Number / Lot", value: employeeData.permanentAddress.streetHouseNoLot || "" },
-        { label: "Postal Code", value: employeeData.permanentAddress.postalCode || "" },
-=======
     // Convert form data to display format
     const nameAndBirthdayData = employeeData && employeeData.fullName ? [
         { label: "Extension", value: employeeData.fullName.extension || "" },
@@ -177,29 +162,15 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
         { label: "Barangay", value: getDisplayLabel(employeeData.address.barangay || "", "barangay") },
         { label: "Street / House Number / Lot", value: employeeData.address.streetHouseNoLot || "" },
         { label: "Postal Code", value: employeeData.address.postalCode || "" },
->>>>>>> 2bf7467 (Will work on later)
     ] : [];
 
     // Get employee full name for display
-    const employeeFullName = employeeData && employeeData.fullName ? 
+    const employeeFullName = employeeData ? 
         `${employeeData.fullName.firstName || ""} ${employeeData.fullName.middleName || ""} ${employeeData.fullName.lastName || ""}`.trim() : 
         "Employee Name";
 
-<<<<<<< HEAD
-    // Get employee position for display - show position name if available, otherwise show the ID
-    const getPositionDisplayName = (positionId: string) => {
-        // For now, return the position ID as a fallback since we don't have access to the positions data here
-        // In a real implementation, you might want to pass the positions data to this modal
-        return positionId || "Position";
-    };
-
-    const employeePosition = employeeData ? 
-        (employeeData.work.position ? getPositionDisplayName(employeeData.work.position) : "Position") : 
-        "Position";
-=======
     // Get employee position for display
     const employeePosition = employeeData && employeeData.work ? getDisplayLabel(employeeData.work.position || "", "position") : "Position";
->>>>>>> 2bf7467 (Will work on later)
 
     const handlePendingCheck = async () => {
         try {
@@ -237,15 +208,11 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
                                      employeeData.others.civilStatus === "D" ? "divorced" : 
                                      employeeData.others.civilStatus === "W" ? "widowed" : 
                                      employeeData.others.civilStatus === "SEP" ? "separated" : "single",
-                        religion_ID: employeeData.others.religion ? getReligionId(employeeData.others.religion) : "0c3b8bd02fa111f0b6b802dcb324866b", // Convert religion name to ID
+                        religion_ID: "0c3b8bd02fa111f0b6b802dcb324866b", // Default value
                         blood_type: employeeData.others.bloodType || "",
                         telephone_number: employeeData.others.telephoneNumber || "",
                         mobile_number: employeeData.others.mobileNumber || "",
-<<<<<<< HEAD
-                        personal_email: employeeData.others.personalEmail || "", // Use dynamic personal email from form
-=======
                         personal_email: "fortestinglangupdate@example.com", // Required field with valid email format
->>>>>>> 2bf7467 (Will work on later)
                         educational_attainment_ID: "7cbd3ea82b1111f0b6b802dcb324866b" // Default value
                     },
                     // Create permanent address record
@@ -455,4 +422,4 @@ const EmployeeConfirmationModal: React.FC<EmployeeConfirmationModalProps> = ({ i
     );
 };
 
-export default EmployeeConfirmationModal;
+export default FamilyConfirmationModal;
