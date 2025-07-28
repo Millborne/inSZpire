@@ -80,11 +80,7 @@ const EmployeeList = () => {
             setError(null);
 
             console.log("Loading employee list...");
-            const employeesResponse = await employeeService.listEmployees({
-                is_archived: 0,
-                offset: 0,
-                limit: 10,
-            });
+            const employeesResponse = await employeeService.listEmployees({});
             console.log("Employees response:", employeesResponse);
 
             if (employeesResponse.data?.success && employeesResponse.data?.data?.employees) {
