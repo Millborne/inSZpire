@@ -1,19 +1,40 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ButtonsIcon, CardContainer, Inputs, Pagination, PopoverMenu, SnackbarAlert, Table } from "enterprisze-global-components";
-import { Add, Briefcase, Edit2, ExportCurve, Filter, InfoCircle, SearchNormal } from "iconsax-reactjs";
-import { useEmployeeService, type EmployeeData } from "../../../services/employee/list/use-employee";
+import {
+    ButtonsIcon,
+    CardContainer,
+    Inputs,
+    Pagination,
+    PopoverMenu,
+    SnackbarAlert,
+    Table,
+} from "enterprisze-global-components";
+import {
+    Add,
+    Briefcase,
+    Edit2,
+    ExportCurve,
+    Filter,
+    InfoCircle,
+    SearchNormal,
+} from "iconsax-reactjs";
+import {
+    useEmployeeService,
+    type EmployeeData,
+} from "../../../services/employee/list/use-employee";
 import { useEmployeeFilters } from "../../../services/employee/list/use-employee-filters";
 import { type FrontendFilters } from "../../../services/employee/list/filterAPI";
 // Components
 import EmployeeFilterModal from "../components/modals/EmployeeFilterModal";
 import EmployeeModal from "../components/modals/EmployeeModal";
 import EmployeePositionModal from "../components/modals/EmployeePositionModal";
+import { setSelectedEmployee as setSelectedEmployeeAction } from "../../../reducers/employeeSlice";
+import { useDispatch } from "react-redux";
 
 const EmployeeList = () => {
     const navigate = useNavigate();
     const employeeService = useEmployeeService();
-    
+    const dispatch = useDispatch();
     // Use the new filtering system
     const {
         employees,
@@ -29,20 +50,24 @@ const EmployeeList = () => {
         handlePageChange,
         hasActiveFilters,
         filterCount,
-        filterOptions
+        filterOptions,
     } = useEmployeeFilters();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<"add" | "edit">("add");
-    const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] = useState(false);
+    const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] =
+        useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
     const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
-    const [snackbarAction, setSnackbarAction] = useState<"add" | "edit" | "update" | null>(null);
+    const [snackbarAction, setSnackbarAction] = useState<
+        "add" | "edit" | "update" | null
+    >(null);
     const [openFilter, setOpenFilter] = useState(false);
 
     const handleRowClick = (index: number) => {
-        console.log("Row clicked:", index);
+        dispatch(setSelectedEmployeeAction(employees[index]));
         navigate(`${employees[index]?.employee_ID}/summary`);
+        console.log("Row clicked:", employees[index]);
     };
 
     const handleSubmitSuccess = (action: "add" | "edit" | "update") => {
@@ -68,7 +93,7 @@ const EmployeeList = () => {
             employee.first_name,
             employee.middle_name,
             employee.last_name,
-            employee.name_ext
+            employee.name_ext,
         ].filter(Boolean);
         return parts.join(" ");
     };
@@ -92,18 +117,32 @@ const EmployeeList = () => {
     };
 
     // Transform data for table
-    const tableData = employees.map(employee => ({
+    const tableData = employees.map((employee) => ({
         name: (
             <div className="md:flex items-center gap-1">
-                <div className={`w-[14px] h-[14px] rounded-full ${getStatusColor(employee.employee_status)}`}></div>
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{getEmployeeFullName(employee)}</span>
+                <div
+                    className={`w-[14px] h-[14px] rounded-full ${getStatusColor(
+                        employee.employee_status
+                    )}`}
+                ></div>
+                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
+                    {getEmployeeFullName(employee)}
+                </span>
             </div>
         ),
         id: employee.employee_number,
-        team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{employee.team_name}</span>,
-        jobTitle: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{employee.position_name}</span>,
+        team: (
+            <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
+                {employee.team_name}
+            </span>
+        ),
+        jobTitle: (
+            <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
+                {employee.position_name}
+            </span>
+        ),
         jobCode: employee.position_code,
-        directHead: "N/A" // This field is not available in vw_employee view
+        directHead: "N/A", // This field is not available in vw_employee view
     }));
 
     // For larger screen
@@ -127,22 +166,32 @@ const EmployeeList = () => {
                     <InfoCircle className="w-4 h-4 text-szBlack700 hover:text-szPrimary700 transition-colors duration-200 cursor-help" />
                     <div className="absolute z-10 invisible group-hover:visible bg-white shadow-lg rounded-lg p-2 w-[97px] -left-20 top-6">
                         <div className="flex flex-col gap-2 w-full items-start">
-                            <span className="text-body-small-reg text-szBlack800">Legends:</span>
+                            <span className="text-body-small-reg text-szBlack800">
+                                Legends:
+                            </span>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-success700 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Active</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Active
+                                </span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-szGrey300 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Inactive</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Inactive
+                                </span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-info500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Floating</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Floating
+                                </span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-warning500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Clearance</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Clearance
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -177,22 +226,32 @@ const EmployeeList = () => {
                     <InfoCircle className="w-4 h-4 text-szBlack700 hover:text-szPrimary700 transition-colors duration-200 cursor-help" />
                     <div className="absolute z-10 invisible group-hover:visible bg-white shadow-lg rounded-lg p-2 w-[97px] -left-20 top-6">
                         <div className="flex flex-col gap-2 w-full items-start">
-                            <span className="text-body-small-reg text-szBlack800">Legends:</span>
+                            <span className="text-body-small-reg text-szBlack800">
+                                Legends:
+                            </span>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-success700 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Active</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Active
+                                </span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-szGrey300 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Inactive</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Inactive
+                                </span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-info500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Floating</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Floating
+                                </span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-warning500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">Clearance</span>
+                                <span className="text-caption-reg text-szBlack800">
+                                    Clearance
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -233,7 +292,9 @@ const EmployeeList = () => {
             <CardContainer
                 content={
                     <div className="flex items-center justify-center h-64">
-                        <div className="text-szPrimary700">Loading employees...</div>
+                        <div className="text-szPrimary700">
+                            Loading employees...
+                        </div>
                     </div>
                 }
             />
@@ -263,28 +324,38 @@ const EmployeeList = () => {
                         <PopoverMenu
                             size="small"
                             items={[
-                                { label: "Add Employee", icon: <Add />, onClick: openAddEmployee },
-                                { label: "Export", icon: <ExportCurve />, onClick: () => {} },
+                                {
+                                    label: "Add Employee",
+                                    icon: <Add />,
+                                    onClick: openAddEmployee,
+                                },
+                                {
+                                    label: "Export",
+                                    icon: <ExportCurve />,
+                                    onClick: () => {},
+                                },
                             ]}
                         />
                     </div>
 
-                                            <div className="flex gap-4">
-                            <div className="w-full max-w-[355px]">
-                                <Inputs 
-                                    placeholder="Search by Name, ID, Job Title, or Team" 
-                                    icon={SearchNormal} 
-                                    value={searchText}
-                                    onChange={(e: any) => setSearchText(e.target.value)}
-                                />
-                            </div>
-                            <ButtonsIcon 
-                                icon={<Filter />} 
-                                variant="ghost" 
-                                size="large" 
-                                onClick={() => setOpenFilter(true)}
+                    <div className="flex gap-4">
+                        <div className="w-full max-w-[355px]">
+                            <Inputs
+                                placeholder="Search by Name, ID, Job Title, or Team"
+                                icon={SearchNormal}
+                                value={searchText}
+                                onChange={(e: any) =>
+                                    setSearchText(e.target.value)
+                                }
                             />
                         </div>
+                        <ButtonsIcon
+                            icon={<Filter />}
+                            variant="ghost"
+                            size="large"
+                            onClick={() => setOpenFilter(true)}
+                        />
+                    </div>
 
                     <div className="h-full">
                         <div className="hidden lg:block">
@@ -306,26 +377,32 @@ const EmployeeList = () => {
                             />
                         </div>
                         <div className="flex justify-end">
-                            <Pagination 
-                                currentPage={Math.floor(pagination.offset / pagination.limit) + 1}
-                                totalPages={Math.ceil(pagination.total / pagination.limit)}
-                                visiblePages={5} 
-                                onChange={handlePageChange} 
+                            <Pagination
+                                currentPage={
+                                    Math.floor(
+                                        pagination.offset / pagination.limit
+                                    ) + 1
+                                }
+                                totalPages={Math.ceil(
+                                    pagination.total / pagination.limit
+                                )}
+                                visiblePages={5}
+                                onChange={handlePageChange}
                             />
                         </div>
                     </div>
 
-                    <EmployeeFilterModal 
-                        isOpen={openFilter} 
+                    <EmployeeFilterModal
+                        isOpen={openFilter}
                         onClose={() => setOpenFilter(false)}
                         onApply={(newFilters) => {
                             // Clear all current filters first
                             clearFilters();
-                            
+
                             // Then apply the new filters
-                            Object.keys(newFilters).forEach(category => {
+                            Object.keys(newFilters).forEach((category) => {
                                 const key = category as keyof FrontendFilters;
-                                newFilters[key].forEach(value => {
+                                newFilters[key].forEach((value) => {
                                     handleFilterChange(key, value, true);
                                 });
                             });
@@ -340,7 +417,9 @@ const EmployeeList = () => {
                             setSelectedEmployee(null);
                         }}
                         mode={modalMode}
-                        addEmployeeData={modalMode === "edit" ? selectedEmployee : undefined}
+                        addEmployeeData={
+                            modalMode === "edit" ? selectedEmployee : undefined
+                        }
                         onSubmitSuccess={() => handleSubmitSuccess(modalMode)}
                     />
 
