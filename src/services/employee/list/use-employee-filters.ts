@@ -27,6 +27,7 @@ export interface UseEmployeeFiltersReturn {
     // Actions
     setSearchText: (text: string) => void;
     handleFilterChange: (category: keyof FrontendFilters, value: string, checked: boolean) => void;
+    setFilters: (newFilters: FrontendFilters) => void;
     applyFilters: () => void;
     clearFilters: () => void;
     handlePageChange: (page: number) => void;
@@ -141,6 +142,62 @@ export const useEmployeeFilters = (): UseEmployeeFiltersReturn => {
         setFilters(prev => handleFilterChangeUtil(prev, category, value, checked));
     }, []);
 
+    // Set filters directly (for bulk updates)
+    const setFiltersDirectly = useCallback((newFilters: FrontendFilters) => {
+        setFilters(newFilters);
+        // Reset pagination to first page when filters change
+        setPagination(prev => ({ ...prev, offset: 0 }));
+        
+        // Force immediate API call with new filters
+        const backendFilters = mapFiltersToBackend(newFilters);
+        const requestBody: ViewEmployeesRequest = {
+            ...backendFilters,
+            search: searchText,
+            offset: 0, // Always start from first page
+            limit: pagination.limit
+        };
+        
+        const cleanedRequestBody = cleanRequestBody(requestBody);
+        console.log("Force applying filters:", cleanedRequestBody);
+        
+        // Call API directly
+        employeeService.listEmployees(cleanedRequestBody).then(response => {
+            console.log("Direct API response:", response);
+            
+            if (response.data?.success && response.data?.data?.employees) {
+                const responseData = response.data.data;
+                setEmployees(responseData.employees || []);
+                setPagination(responseData.pagination || {
+                    total: 0,
+                    offset: 0,
+                    limit: 10,
+                    hasMore: false
+                });
+            } else if (response.data?.success && response.data?.employees) {
+                const responseData = response.data;
+                setEmployees(responseData.employees || []);
+                setPagination(responseData.pagination || {
+                    total: 0,
+                    offset: 0,
+                    limit: 10,
+                    hasMore: false
+                });
+            } else {
+                console.error("No employee data received - response structure:", response.data);
+                setEmployees([]);
+                setPagination({
+                    total: 0,
+                    offset: 0,
+                    limit: 10,
+                    hasMore: false
+                });
+            }
+        }).catch(err => {
+            console.error("Error in direct API call:", err);
+            setError("Failed to load employees. Please try again.");
+        });
+    }, [searchText, pagination.limit, employeeService]);
+
     // Clear all filters
     const clearFilters = useCallback(() => {
         setFilters({
@@ -197,6 +254,7 @@ export const useEmployeeFilters = (): UseEmployeeFiltersReturn => {
         // Actions
         setSearchText,
         handleFilterChange,
+        setFilters: setFiltersDirectly,
         applyFilters,
         clearFilters,
         handlePageChange,

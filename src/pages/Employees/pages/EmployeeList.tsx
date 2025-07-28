@@ -45,6 +45,7 @@ const EmployeeList = () => {
         pagination,
         setSearchText,
         handleFilterChange,
+        setFilters,
         applyFilters,
         clearFilters,
         handlePageChange,
@@ -63,6 +64,14 @@ const EmployeeList = () => {
         "add" | "edit" | "update" | null
     >(null);
     const [openFilter, setOpenFilter] = useState(false);
+
+    // New function to handle filter updates atomically
+    const handleFilterUpdate = (newFilters: FrontendFilters) => {
+        console.log("Applying new filters:", newFilters);
+        
+        // Set filters directly - the hook will handle the API call
+        setFilters(newFilters);
+    };
 
     const handleRowClick = (index: number) => {
         dispatch(setSelectedEmployeeAction(employees[index]));
@@ -399,16 +408,7 @@ const EmployeeList = () => {
                         isOpen={openFilter}
                         onClose={() => setOpenFilter(false)}
                         onApply={(newFilters) => {
-                            // Clear all current filters first
-                            clearFilters();
-
-                            // Then apply the new filters
-                            Object.keys(newFilters).forEach((category) => {
-                                const key = category as keyof FrontendFilters;
-                                newFilters[key].forEach((value) => {
-                                    handleFilterChange(key, value, true);
-                                });
-                            });
+                            handleFilterUpdate(newFilters);
                         }}
                         currentFilters={filters}
                     />
