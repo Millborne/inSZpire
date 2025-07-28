@@ -1,33 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import {
-    ButtonsIcon,
-    CardContainer,
-    Inputs,
-    Pagination,
-    PopoverMenu,
-    SnackbarAlert,
-    Table,
-} from "enterprisze-global-components";
-import {
-    Add,
-    Briefcase,
-    Edit2,
-    ExportCurve,
-    Filter,
-    InfoCircle,
-    SearchNormal,
-} from "iconsax-reactjs";
-import {
-    useEmployeeService,
-    type EmployeeData,
-    type ViewEmployeesRequest,
-} from "../../../services/employee/list/use-employee";
-import { setSelectedEmployee } from "../../../reducers/employeeSlice";
-import type { AppDispatch } from "../../../reducers/store";
-import { transformEmployeeToFormData } from "../../../utils/employeeTransformers";
-import { useGetEmployeeByIdMutation } from "../../../services/employee/update/employeeUpdateAPI";
+import { ButtonsIcon, CardContainer, Inputs, Pagination, PopoverMenu, SnackbarAlert, Table } from "enterprisze-global-components";
+import { Add, Briefcase, Edit2, ExportCurve, Filter, InfoCircle, SearchNormal } from "iconsax-reactjs";
+import { useEmployeeService, type EmployeeData } from "../../../services/employee/list/use-employee";
+import { useEmployeeFilters } from "../../../services/employee/list/use-employee-filters";
+import { type FrontendFilters } from "../../../services/employee/list/filterAPI";
 // Components
 import EmployeeFilterModal from "../components/modals/EmployeeFilterModal";
 import EmployeeModal from "../components/modals/EmployeeModal";
@@ -35,142 +12,54 @@ import EmployeePositionModal from "../components/modals/EmployeePositionModal";
 
 const EmployeeList = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch<AppDispatch>();
     const employeeService = useEmployeeService();
-    const [getEmployeeById] = useGetEmployeeByIdMutation();
-
-    // State management
-    const [employees, setEmployees] = useState<EmployeeData[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    
+    // Use the new filtering system
+    const {
+        employees,
+        isLoading,
+        error,
+        filters,
+        searchText,
+        pagination,
+        setSearchText,
+        handleFilterChange,
+        applyFilters,
+        clearFilters,
+        handlePageChange,
+        hasActiveFilters,
+        filterCount,
+        filterOptions
+    } = useEmployeeFilters();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<"add" | "edit">("add");
-    const [selectedEmployeeLocal, setSelectedEmployeeLocal] =
-        useState<any>(null);
-    const [originalEmployeeData, setOriginalEmployeeData] =
-        useState<EmployeeData | null>(null);
-    
-    // Success message state
-    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-    const [successMessage, setSuccessMessage] = useState("");
-
-    // Load employees function
-    const loadData = async () => {
-        try {
-            setIsLoading(true);
-            setError(null);
-
-            console.log("Loading employee list...");
-            const employeesResponse = await employeeService.listEmployees({
-                is_archived: 0,
-                offset: 0,
-                limit: 10,
-            });
-            console.log("Employees response:", employeesResponse);
-
-            if (employeesResponse.data?.success && employeesResponse.data?.data?.employees) {
-                const responseData = employeesResponse.data.data;
-                setEmployees(responseData.employees || []);
-            } else {
-                console.error("No employee data received");
-                setEmployees([]);
-            }
-        } catch (err) {
-            console.error("Error loading employees:", err);
-            setError("Failed to load employees. Please try again.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Load employees on component mount
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    // Removed search functionality for now
-
-    // Handle page change
-    // Removed pagination for now
+    const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] = useState(false);
+    const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+    const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+    const [snackbarAction, setSnackbarAction] = useState<"add" | "edit" | "update" | null>(null);
+    const [openFilter, setOpenFilter] = useState(false);
 
     const handleRowClick = (index: number) => {
         console.log("Row clicked:", index);
-        const selectedEmployee = employees[index];
-        if (selectedEmployee) {
-            dispatch(setSelectedEmployee({ 
-                ...selectedEmployee, 
-                filters: {
-                    is_archived: 0,
-                    offset: 0,
-                    limit: 10
-                }
-            }));
-            navigate(`${selectedEmployee.employee_ID}/summary`);
-        }
+        navigate(`${employees[index]?.employee_ID}/summary`);
     };
 
     const handleSubmitSuccess = (action: "add" | "edit" | "update") => {
-        console.log("Action completed:", action);
-        
-        // Show success message based on action
-        if (action === "edit" || action === "update") {
-            setSuccessMessage("✅ Employee information has been successfully updated!");
-            setShowSuccessMessage(true);
-            
-            // Auto-hide success message after 4 seconds
-            setTimeout(() => {
-                setShowSuccessMessage(false);
-            }, 4000);
-        } else if (action === "add") {
-            setSuccessMessage("✅ Employee has been successfully added!");
-            setShowSuccessMessage(true);
-            
-            // Auto-hide success message after 4 seconds
-            setTimeout(() => {
-                setShowSuccessMessage(false);
-            }, 4000);
-        }
-        
-        // Refresh the employee list after any successful action
-        if (action === "add" || action === "edit" || action === "update") {
-            loadData();
-        }
+        setSnackbarAction(action);
+        setIsSnackbarOpen(true);
     };
 
     const openAddEmployee = () => {
         setModalMode("add");
-        setSelectedEmployeeLocal(null);
+        setSelectedEmployee(null);
         setIsModalOpen(true);
     };
 
-    const openEditEmployee = async (employee: EmployeeData) => {
-        console.log("Opening edit for employee:", employee);
+    const openEditEmployee = (employee: any) => {
         setModalMode("edit");
-        
-        try {
-            // Fetch complete employee data using get-by-id endpoint
-            const requestBody = { 
-                employee_ID: employee.employee_ID
-            };
-            const response = await getEmployeeById(requestBody).unwrap();
-            
-            // Pass the entire response to the transformation function
-            // It will handle the nested structure internally
-            const transformedData = transformEmployeeToFormData(response);
-            
-            setSelectedEmployeeLocal(transformedData);
-            setOriginalEmployeeData(response);
-            setIsModalOpen(true);
-        } catch (error) {
-            console.error("Error fetching complete employee data:", error);
-            
-            // Fallback to original employee data if API call fails
-            const transformedData = transformEmployeeToFormData(employee);
-            setSelectedEmployeeLocal(transformedData);
-            setOriginalEmployeeData(employee);
-            setIsModalOpen(true);
-        }
+        setSelectedEmployee(employee);
+        setIsModalOpen(true);
     };
 
     // Get employee full name
@@ -179,7 +68,7 @@ const EmployeeList = () => {
             employee.first_name,
             employee.middle_name,
             employee.last_name,
-            employee.name_ext,
+            employee.name_ext
         ].filter(Boolean);
         return parts.join(" ");
     };
@@ -203,32 +92,18 @@ const EmployeeList = () => {
     };
 
     // Transform data for table
-    const tableData = employees.map((employee) => ({
+    const tableData = employees.map(employee => ({
         name: (
             <div className="md:flex items-center gap-1">
-                <div
-                    className={`w-[14px] h-[14px] rounded-full ${getStatusColor(
-                        employee.employee_status
-                    )}`}
-                ></div>
-                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                    {getEmployeeFullName(employee)}
-                </span>
+                <div className={`w-[14px] h-[14px] rounded-full ${getStatusColor(employee.employee_status)}`}></div>
+                <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{getEmployeeFullName(employee)}</span>
             </div>
         ),
         id: employee.employee_number,
-        team: (
-            <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                {employee.team_name}
-            </span>
-        ),
-        jobTitle: (
-            <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">
-                {employee.position_name}
-            </span>
-        ),
+        team: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{employee.team_name}</span>,
+        jobTitle: <span className="text-body-base-reg lg:truncate max-w-[120px] lg:max-w-none block">{employee.position_name}</span>,
         jobCode: employee.position_code,
-        directHead: "N/A", // This field is not available in vw_employee view
+        directHead: "N/A" // This field is not available in vw_employee view
     }));
 
     // For larger screen
@@ -252,32 +127,22 @@ const EmployeeList = () => {
                     <InfoCircle className="w-4 h-4 text-szBlack700 hover:text-szPrimary700 transition-colors duration-200 cursor-help" />
                     <div className="absolute z-10 invisible group-hover:visible bg-white shadow-lg rounded-lg p-2 w-[97px] -left-20 top-6">
                         <div className="flex flex-col gap-2 w-full items-start">
-                            <span className="text-body-small-reg text-szBlack800">
-                                Legends:
-                            </span>
+                            <span className="text-body-small-reg text-szBlack800">Legends:</span>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-success700 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Active
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Active</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-szGrey300 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Inactive
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Inactive</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-info500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Floating
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Floating</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-warning500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Clearance
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Clearance</span>
                             </div>
                         </div>
                     </div>
@@ -312,32 +177,22 @@ const EmployeeList = () => {
                     <InfoCircle className="w-4 h-4 text-szBlack700 hover:text-szPrimary700 transition-colors duration-200 cursor-help" />
                     <div className="absolute z-10 invisible group-hover:visible bg-white shadow-lg rounded-lg p-2 w-[97px] -left-20 top-6">
                         <div className="flex flex-col gap-2 w-full items-start">
-                            <span className="text-body-small-reg text-szBlack800">
-                                Legends:
-                            </span>
+                            <span className="text-body-small-reg text-szBlack800">Legends:</span>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-success700 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Active
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Active</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-szGrey300 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Inactive
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Inactive</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-info500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Floating
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Floating</span>
                             </div>
                             <div className="flex items-center gap-[10px]">
                                 <div className="w-[14px] h-[14px] bg-warning500 rounded-full"></div>
-                                <span className="text-caption-reg text-szBlack800">
-                                    Clearance
-                                </span>
+                                <span className="text-caption-reg text-szBlack800">Clearance</span>
                             </div>
                         </div>
                     </div>
@@ -362,7 +217,14 @@ const EmployeeList = () => {
             icon: <Edit2 />,
             onClick: (index: number) => openEditEmployee(employees[index]),
         },
-        // Removed Update Position for now
+        {
+            label: "Update Position",
+            icon: <Briefcase />,
+            onClick: (index: number) => {
+                setSelectedEmployee(employees[index]);
+                setIsUpdatePositionModalOpen(true);
+            },
+        },
     ];
 
     // Loading state
@@ -371,9 +233,7 @@ const EmployeeList = () => {
             <CardContainer
                 content={
                     <div className="flex items-center justify-center h-64">
-                        <div className="text-szPrimary700">
-                            Loading employees...
-                        </div>
+                        <div className="text-szPrimary700">Loading employees...</div>
                     </div>
                 }
             />
@@ -403,21 +263,28 @@ const EmployeeList = () => {
                         <PopoverMenu
                             size="small"
                             items={[
-                                {
-                                    label: "Add Employee",
-                                    icon: <Add />,
-                                    onClick: openAddEmployee,
-                                },
-                                {
-                                    label: "Export",
-                                    icon: <ExportCurve />,
-                                    onClick: () => {},
-                                },
+                                { label: "Add Employee", icon: <Add />, onClick: openAddEmployee },
+                                { label: "Export", icon: <ExportCurve />, onClick: () => {} },
                             ]}
                         />
                     </div>
 
-                    {/* Removed search and filter for now */}
+                                            <div className="flex gap-4">
+                            <div className="w-full max-w-[355px]">
+                                <Inputs 
+                                    placeholder="Search by Name, ID, Job Title, or Team" 
+                                    icon={SearchNormal} 
+                                    value={searchText}
+                                    onChange={(e: any) => setSearchText(e.target.value)}
+                                />
+                            </div>
+                            <ButtonsIcon 
+                                icon={<Filter />} 
+                                variant="ghost" 
+                                size="large" 
+                                onClick={() => setOpenFilter(true)}
+                            />
+                        </div>
 
                     <div className="h-full">
                         <div className="hidden lg:block">
@@ -438,41 +305,64 @@ const EmployeeList = () => {
                                 onRowClick={handleRowClick}
                             />
                         </div>
-                        {/* Removed pagination for now */}
+                        <div className="flex justify-end">
+                            <Pagination 
+                                currentPage={Math.floor(pagination.offset / pagination.limit) + 1}
+                                totalPages={Math.ceil(pagination.total / pagination.limit)}
+                                visiblePages={5} 
+                                onChange={handlePageChange} 
+                            />
+                        </div>
                     </div>
 
-                    {/* Only render EmployeeModal when needed */}
-                    {isModalOpen && (
-                        <EmployeeModal
-                            isOpen={isModalOpen}
-                            onClose={() => {
-                                setIsModalOpen(false);
-                                setSelectedEmployeeLocal(null);
-                                setOriginalEmployeeData(null);
-                            }}
-                            mode={modalMode}
-                            addEmployeeData={
-                                modalMode === "edit"
-                                    ? selectedEmployeeLocal
-                                    : undefined
-                            }
-                            originalEmployeeData={originalEmployeeData}
-                            employeeId={
-                                modalMode === "edit" && originalEmployeeData
-                                    ? (originalEmployeeData as any).data?.employee?.employee_ID || originalEmployeeData.employee_ID
-                                    : undefined
-                            }
-                            onSubmitSuccess={() => handleSubmitSuccess(modalMode)}
-                        />
-                    )}
+                    <EmployeeFilterModal 
+                        isOpen={openFilter} 
+                        onClose={() => setOpenFilter(false)}
+                        onApply={(newFilters) => {
+                            // Clear all current filters first
+                            clearFilters();
+                            
+                            // Then apply the new filters
+                            Object.keys(newFilters).forEach(category => {
+                                const key = category as keyof FrontendFilters;
+                                newFilters[key].forEach(value => {
+                                    handleFilterChange(key, value, true);
+                                });
+                            });
+                        }}
+                        currentFilters={filters}
+                    />
 
-                    {/* Success Message */}
+                    <EmployeeModal
+                        isOpen={isModalOpen}
+                        onClose={() => {
+                            setIsModalOpen(false);
+                            setSelectedEmployee(null);
+                        }}
+                        mode={modalMode}
+                        addEmployeeData={modalMode === "edit" ? selectedEmployee : undefined}
+                        onSubmitSuccess={() => handleSubmitSuccess(modalMode)}
+                    />
+
+                    <EmployeePositionModal
+                        isOpen={isUpdatePositionModalOpen}
+                        onClose={() => setIsUpdatePositionModalOpen(false)}
+                        employeePositionData={selectedEmployee}
+                        onSubmitSuccess={() => handleSubmitSuccess("update")}
+                    />
+
                     <SnackbarAlert
-                        isOpen={showSuccessMessage}
-                        onClose={() => setShowSuccessMessage(false)}
+                        isOpen={isSnackbarOpen}
+                        onClose={() => setIsSnackbarOpen(false)}
                         showCloseButton={true}
                         type="success"
-                        title={successMessage}
+                        title={
+                            snackbarAction === "edit"
+                                ? "Successfully edited employee"
+                                : snackbarAction === "update"
+                                ? "Successfully updated position"
+                                : "Successfully added employee"
+                        }
                         animation="slide-up"
                     />
                 </div>

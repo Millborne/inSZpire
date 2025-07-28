@@ -117,9 +117,29 @@ export interface EmployeeData {
 // Request interfaces for vw_employee view
 export interface ViewEmployeesRequest {
     search?: string;
-    is_archived?: number;
     offset?: number;
     limit?: number;
+    // Multi-selection filter parameters
+    employment_status?: string[];
+    employee_status?: string[];
+    team_name?: string[];
+    position_name?: string[];
+    blood_type?: string[];
+    // Single value filters
+    employee_ID?: string;
+    employee_number?: string;
+    company_email?: string;
+    first_name?: string;
+    last_name?: string;
+    personal_email?: string;
+    mobile_number?: string;
+    hire_date_from?: string;
+    hire_date_to?: string;
+    is_archived?: number;
+}
+
+export interface GetEmployeeRequest {
+    employee_ID: string;
 }
 
 export interface CreateEmployeeRequest {
@@ -210,7 +230,7 @@ export const useEmployeeService = () => {
     ] = useActionEmployeesMutation();
 
     // List employees using vw_employee view
-    const listEmployees = async (filters: ViewEmployeesRequest) => {
+    const listEmployees = async (filters: ViewEmployeesRequest = {}) => {
         return generalAction({
             queryParameters: "/list-view",
             method: "POST",
