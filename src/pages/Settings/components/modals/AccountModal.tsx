@@ -78,9 +78,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
     const [snackbarType, setSnackbarType] = useState<"error" | "success">(
         "error"
     );
-
-    // TODO: Backend Integration - Add loading state for form operations
-    // const [isLoading, setIsLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Load selected account data when it changes
     useEffect(() => {
@@ -164,27 +162,23 @@ const AccountModal: React.FC<AccountModalProps> = ({
         );
     };
 
-    // TODO: Backend Integration - Add validation before saving
     const handleSave = async () => {
+        setIsConfirmationModalOpen(false);
+        setIsSubmitting(true);
         // Validate form before saving
         if (!validateForm()) {
+            setIsSubmitting(false);
             return;
         }
 
         try {
-            // TODO: Add loading state
-            // setIsLoading(true);
-
             if (onSave) {
                 await onSave({ ...formData, is_archived: toggle ? 1 : 0 });
+                setIsSubmitting(false);
             }
-            // onClose();
         } catch (error) {
-            // TODO: Add error handling
             console.error("Error saving account:", error);
-        } finally {
-            // TODO: Remove loading state
-            // setIsLoading(false);
+            setIsSubmitting(false);
         }
     };
 
@@ -343,6 +337,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
         onClick: () => void;
         size: "medium";
         disabled?: boolean;
+        loading?: boolean;
     }> = [
         {
             label: "Cancel",
@@ -363,6 +358,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
                     : () => handleConfirmationOpen("add"),
             size: "medium",
             disabled: mode === "add" ? !hasFormData() : !hasChanges(),
+            loading: isSubmitting,
         });
     }
 
@@ -517,18 +513,20 @@ const AccountModal: React.FC<AccountModalProps> = ({
                 onClose={() => setIsConfirmationModalOpen(false)}
                 onClick={async () => {
                     try {
+                        setIsSubmitting(true);
                         if (confirmationAction === "archive") {
                             // TODO: Backend Integration - Call archive API
                             // await archiveAccount(selectedAccount?.id).unwrap();
                             setToggle(true);
                             setIsConfirmationModalOpen(false);
+                            setIsSubmitting(false);
                         } else {
-                            handleSave();
+                            await handleSave();
                             setIsConfirmationModalOpen(false);
                         }
                     } catch (error) {
-                        // TODO: Add error handling
                         console.error("Error in confirmation action:", error);
+                        setIsSubmitting(false);
                     }
                 }}
                 image={confirmationProps.image}

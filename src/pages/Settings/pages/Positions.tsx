@@ -121,7 +121,7 @@ const Position: React.FC<PositionPageProps> = ({ mode }) => {
       id: position.position_ID || "",
       position: capitalizeFirst(position.position_name),
       team: capitalizeFirst(position.team_name) || "",
-      jobTitle: capitalizeFirst(position.job_title) || "",
+      jobTitle: position.job_title|| "",
       positionCode: position.position_code,
       basicSalary:
         typeof position.basic_salary === "string"
