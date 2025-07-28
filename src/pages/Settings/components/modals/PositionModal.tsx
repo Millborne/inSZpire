@@ -119,7 +119,7 @@ const PositionModal: React.FC<PositionModalProps> = ({
         updated_at: "",
         created_at: "",
     });
-
+    
     const [toggle, setToggle] = useState(false);
     const [isConfirmationModalOpen, setIsConfirmationModalOpen] =
         useState(false);
@@ -133,6 +133,7 @@ const PositionModal: React.FC<PositionModalProps> = ({
     const [snackbarType, setSnackbarType] = useState<"error" | "success">(
         "error"
     );
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Job titles state
     const [jobTitles, setJobTitles] = useState<JobTitleData[]>([]);
@@ -601,8 +602,11 @@ const PositionModal: React.FC<PositionModalProps> = ({
     };
 
     const handleSave = async () => {
+        setIsConfirmationModalOpen(false);
+        setIsSubmitting(true);
         // Validate form before saving
         if (!validateForm()) {
+            setIsSubmitting(false);
             return;
         }
 
@@ -642,9 +646,11 @@ const PositionModal: React.FC<PositionModalProps> = ({
                     ...formData,
                     is_archived: toggle ? 1 : 0,
                 });
+                setIsSubmitting(false);
             }
         } catch (error) {
             console.error("Error saving position:", error);
+            setIsSubmitting(false);
         }
     };
 
@@ -1095,6 +1101,7 @@ const PositionModal: React.FC<PositionModalProps> = ({
         onClick: () => void;
         size: "medium";
         disabled?: boolean;
+        loading?: boolean;
     }> = [
         {
             label: "Cancel",
@@ -1115,6 +1122,7 @@ const PositionModal: React.FC<PositionModalProps> = ({
                     : () => handleConfirmationOpen("add"),
             size: "medium",
             disabled: mode === "add" ? !hasFormData() : !hasChanges(),
+            loading: isSubmitting,
         });
     }
 
@@ -1620,17 +1628,20 @@ const PositionModal: React.FC<PositionModalProps> = ({
                 onClose={() => setIsConfirmationModalOpen(false)}
                 onClick={async () => {
                     try {
+                        setIsSubmitting(true);
                         if (confirmationAction === "archive") {
                             // TODO: Backend Integration - Call archive API
                             // await archivePosition(selectedPosition?.id).unwrap();
                             setToggle(true);
                             setIsConfirmationModalOpen(false);
+                            setIsSubmitting(false);
                         } else {
-                            handleSave();
+                            await handleSave();
                             setIsConfirmationModalOpen(false);
                         }
                     } catch (error) {
                         console.error("Error in confirmation action:", error);
+                        setIsSubmitting(false);
                     }
                 }}
                 image={confirmationProps.image}
