@@ -73,6 +73,9 @@ const EmployeeList = () => {
     const handleSubmitSuccess = (action: "add" | "edit" | "update") => {
         setSnackbarAction(action);
         setIsSnackbarOpen(true);
+        setIsModalOpen(false);
+        setIsUpdatePositionModalOpen(false);
+        applyFilters();
     };
 
     const openAddEmployee = () => {
