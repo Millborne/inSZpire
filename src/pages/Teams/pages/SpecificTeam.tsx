@@ -285,3 +285,258 @@ const SpecificTeam = () => {
 };
 
 export default SpecificTeam;
+
+// import { useState, useEffect } from "react";
+// import {
+//   CardContainer,
+//   Chip,
+//   PopoverMenu,
+//   SnackbarAlert,
+//   Tab,
+//   TextContent,
+// } from "enterprisze-global-components";
+// import {
+//   ArchiveBox,
+//   ArrowLeft,
+//   Data2,
+//   Edit2,
+//   Hierarchy2,
+//   People,
+//   Tag,
+// } from "iconsax-reactjs";
+// import SpecificTeamCard from "../components/SpecificTeamCard";
+// import SpecificTeamModal, {
+//   ModalMode,
+//   SpecificTeamDataType,
+// } from "../components/modals/SpecificTeamModal";
+// import ConfirmSpecificTeamArchive from "../components/modals/ConfirmSpecificTeamArchive";
+// import { useNavigate, useParams } from "react-router-dom";
+// import { useActionTeamsMutation } from "../../../services/teams/list/teamsAPI";
+
+// interface TeamMember {
+//   employee_ID: string;
+//   name: string;
+//   jobTitle: string;
+// }
+
+// const SpecificTeam = () => {
+//   const navigate = useNavigate();
+//   const { team_ID } = useParams();
+//   const [fetchTeam] = useActionTeamsMutation();
+
+//   const [teamData, setTeamData] = useState<any>(null);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
+//   const [modalMode, setModalMode] = useState<ModalMode>("add");
+//   const [selectedSpecificTeam, setSelectedSpecificTeam] = useState<SpecificTeamDataType | null>(null);
+//   const [viewType, setViewType] = useState<"team" | "underlings">("team");
+//   const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
+//   const [snackbarMessage, setSnackbarMessage] = useState("");
+
+//   const loadTeam = async () => {
+//     if (!team_ID) return;
+//     try {
+//       const result = await fetchTeam({
+//         queryParameters: "/view",
+//         method: "POST",
+//         body: { team_ID },
+//       }).unwrap();
+//       setTeamData(result.data);
+//     } catch (err) {
+//       console.error("❌ Failed to fetch team data:", err);
+//     }
+//   };
+
+//   useEffect(() => {
+//     loadTeam();
+//   }, [team_ID]);
+
+//   useEffect(() => {
+//     if (teamData) {
+//       setSelectedSpecificTeam({
+//         ...teamData,
+//         members: teamData.members,
+//       });
+//     }
+//   }, [teamData]);
+
+//   const handleOpenModal = (team: SpecificTeamDataType, mode: ModalMode) => {
+//     setSelectedSpecificTeam({
+//       ...team,
+//     //   members: team.members,
+//     });
+//     setModalMode(mode);
+//     setIsModalOpen(true);
+//   };
+
+//   const handleCloseModal = () => {
+//     setIsModalOpen(false);
+//     setSelectedSpecificTeam(null);
+//   };
+
+//   const handleSpecificTeamSuccess = (message: string) => {
+//     setSnackbarMessage(message);
+//     setShowSuccessSnackbar(true);
+//     setTimeout(() => setShowSuccessSnackbar(false), 3000);
+//   };
+
+//   const handleOpenArchiveModal = () => {
+//     setIsArchiveModalOpen(true);
+//   };
+
+//   const SpecificTeamData = teamData?.members || [];
+
+//   return (
+//     <>
+//       <CardContainer
+//         content={
+//           <div className="flex flex-col gap-[20px]">
+//             <div className="flex flex-col lg:flex-row items-start gap-[8px]">
+//               <ArrowLeft
+//                 className="text-szPrimary700 cursor-pointer"
+//                 onClick={() => navigate("/home/teams")}
+//               />
+//               <h5 className="text-h5 text-szPrimary700">
+//                 {teamData?.team_name || "Loading..."}
+//               </h5>
+//               <div className="flex-1">
+//                 <PopoverMenu
+//                   size="small"
+//                   items={[
+//                     {
+//                       label: "Edit Team Info",
+//                       icon: <Edit2 />,
+//                       onClick: () => handleOpenModal(teamData as SpecificTeamDataType, "edit"),
+//                     },
+//                     {
+//                       label: "Archive Team",
+//                       icon: <ArchiveBox />,
+//                       onClick: () => handleOpenArchiveModal(),
+//                     },
+//                   ]}
+//                 />
+//               </div>
+//             </div>
+
+//             <div className="flex flex-col gap-[20px]">
+//               <p className="text-body-small-strong text-szDarkGrey600">
+//                 {teamData?.team_description || "Loading description..."}
+//               </p>
+
+//               <div>
+//                 <div className="flex flex-col lg:flex-row justify-between">
+//                   <div className="flex flex-row gap-[8px]">
+//                     <Hierarchy2 />
+//                     <div className="flex flex-col lg:flex-row lg:gap-[75px]">
+//                       <p className="text-caption-all-caps text-szGrey500">
+//                         TEAM REFERENCE
+//                       </p>
+//                       <p className="text-body-small-strong">
+//                         {teamData?.team_reference_name || "—"}
+//                       </p>
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 <div className="relative flex w-full justify-center items-center">
+//                   <div className="absolute top-1/2 left-0 w-full h-[1px] bg-szGrey300 z-0" />
+//                   <div className="flex w-fit z-10">
+//                     <Tab
+//                       type="left"
+//                       active={viewType === "team"}
+//                       icon={
+//                         <div className="flex flex-row items-center gap-2">
+//                           <People />
+//                           <div className="w-[1px] h-[16px] bg-szGrey300" />
+//                           <p
+//                             className={`text-caption-strong ${
+//                               viewType === "team" ? "text-szSecondary500" : "text-szGrey500"
+//                             }`}
+//                           >
+//                             {SpecificTeamData.length}
+//                           </p>
+//                         </div>
+//                       }
+//                       onClick={() => setViewType("team")}
+//                     />
+//                     <Tab
+//                       type="right"
+//                       active={viewType === "underlings"}
+//                       icon={
+//                         <div className="flex flex-row gap-2">
+//                           <Data2 />
+//                           <div className="w-[1px] h-[16px] bg-szGrey300" />
+//                           <p
+//                             className={`text-caption-strong ${
+//                               viewType === "underlings" ? "text-szSecondary500" : "text-szGrey500"
+//                             }`}
+//                           >
+//                             {teamData?.underlings?.length || 0}
+//                           </p>
+//                         </div>
+//                       }
+//                       onClick={() => setViewType("underlings")}
+//                     />
+//                   </div>
+//                 </div>
+
+//                 {SpecificTeamData.map((data: TeamMember) => (
+//                   <SpecificTeamCard
+//                     key={data.employee_ID}
+//                     name={data.name}
+//                     jobTitle={data.jobTitle}
+//                   />
+//                 ))}
+//               </div>
+//             </div>
+//           </div>
+//         }
+//       />
+
+//       <SpecificTeamModal
+//         isOpen={isModalOpen}
+//         onClose={handleCloseModal}
+//         mode={modalMode}
+//         selectedTeam={selectedSpecificTeam}
+//         onSave={() => {
+//           const message =
+//             modalMode === "add"
+//               ? "Successfully added a new Team"
+//               : "Successfully updated team";
+//           handleSpecificTeamSuccess(message);
+//           loadTeam();
+//           handleCloseModal();
+//         }}
+//       />
+
+//       <ConfirmSpecificTeamArchive
+//         isOpen={isArchiveModalOpen}
+//         onClose={() => setIsArchiveModalOpen(false)}
+//         onClick={async () => {
+//           try {
+//             setIsArchiveModalOpen(false);
+//           } catch (error) {
+//             console.error("Error in confirmation action:", error);
+//           }
+//           handleSpecificTeamSuccess("Successfully archived team");
+//         }}
+//         description="Are you sure to archive this Team?"
+//         subDescription="All contents of the Business Solutions and Innovation team will be archived. Please ensure all employees are reassigned to new teams to maintain organizational structure."
+//         buttonLabel="Archive Team"
+//         buttonFooterIcon={<ArchiveBox />}
+//       />
+
+//       <SnackbarAlert
+//         isOpen={showSuccessSnackbar}
+//         onClose={() => setShowSuccessSnackbar(false)}
+//         showCloseButton={true}
+//         type="success"
+//         title={snackbarMessage}
+//         animation="slide-up"
+//       />
+//     </>
+//   );
+// };
+
+// export default SpecificTeam;
+

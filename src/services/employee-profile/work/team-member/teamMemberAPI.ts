@@ -2,62 +2,141 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Cookies from "js-cookie";
 
 interface generalProps {
-    queryParameters: string;
-    method?: string;
-    body?: any;
+  queryParameters: string;
+  method?: string;
+  body?: any;
 }
 
-export const teamMemberAPI = createApi({
-    reducerPath: "teamMember",
-    baseQuery: fetchBaseQuery({
-        baseUrl: "http://localhost:4172/api/v1",
-        prepareHeaders: (headers) => {
-            const token = Cookies.get("token");
+export const teamsAPI = createApi({
+  reducerPath: "teams",
+  baseQuery: fetchBaseQuery({
+    baseUrl: VITE_TEAM_AND_POSITION_SERVICE,
+    prepareHeaders: (headers) => {
+      const token = Cookies.get("token");
 
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
 
-            return headers;
-        },
+      return headers;
+    },
+  }),
+  tagTypes: ["teams"],
+  endpoints: (builder) => ({
+    fetchTeams: builder.query({
+      query: (data: generalProps) =>
+        `/api/v1/teams${data.queryParameters}`,
+      transformResponse: (response: any) => response.data,
     }),
-    tagTypes: ["teamMember", "team", "position"],
-    endpoints: (builder) => ({
-        // Get team details
-        fetchTeamDetails: builder.query({
-            query: (data: generalProps) =>
-                `/teams${data.queryParameters}`,
-        }),
-        
-        // Get team members (positions for a specific team)
-        fetchTeamMembers: builder.query({
-            query: (data: generalProps) =>
-                `/position${data.queryParameters}`,
-        }),
-        
-        // Team actions
-        actionTeams: builder.mutation({
-            query: (data: generalProps) => ({
-                url: `/teams${data.queryParameters}`,
-                method: data.method,
-                body: data.body ?? undefined,
-            }),
-        }),
-        
-        // Position actions
-        actionPositions: builder.mutation({
-            query: (data: generalProps) => ({
-                url: `/position${data.queryParameters}`,
-                method: data.method,
-                body: data.body ?? undefined,
-            }),
-        }),
+    actionTeams: builder.mutation({
+      query: (data: generalProps) => ({
+        url: `/api/v1/teams${data.queryParameters}`,
+        method: data.method,
+        body: data.body ?? undefined,
+      }),
     }),
+  }),
 });
 
-export const { 
-    useFetchTeamDetailsQuery, 
-    useFetchTeamMembersQuery, 
-    useActionTeamsMutation, 
-    useActionPositionsMutation 
-} = teamMemberAPI;
+// ✅ export hook normally
+export const { useFetchTeamsQuery, useActionTeamsMutation } = teamsAPI;
+
+// ✅ custom service function using the hook without redefining it
+export const useTeamMemberService = () => {
+  const [
+    generalAction,
+    {
+      data: actionData,
+      isError: actionIsError,
+      isLoading: actionIsLoading,
+      isSuccess: actionIsSuccess,
+      error: actionError,
+      reset: actionReset,
+    },
+  ] = useActionTeamsMutation();
+
+  // ✅ Declare updateTeam properly here
+  const updateTeam = async (teamData: any) => {
+    return generalAction({
+      queryParameters: "/update",
+      method: "PUT",
+      body: teamData,
+    });
+  };
+
+  const createTeamMember = async (teamMemberData: any) => {
+    return generalAction({
+      queryParameters: "/create",
+      method: "POST",
+      body: teamMemberData,
+    });
+  };
+
+  const updateTeamMember = async (teamMemberData: any) => {
+    return generalAction({
+      queryParameters: "/update",
+      method: "PUT",
+      body: teamMemberData,
+    });
+  };
+
+  const viewTeamMembers = async (filters: any) => {
+    return generalAction({
+      queryParameters: "/list",
+      method: "POST",
+      body: filters,
+    });
+  };
+
+  const viewTeamMemberDetails = async (tm_ID: string) => {
+    return generalAction({
+      queryParameters: `/details/${tm_ID}`,
+      method: "GET",
+    });
+  };
+
+  const viewTeamMembersByEmployee = async (emp_ID: string) => {
+    return generalAction({
+      queryParameters: `/employee/${emp_ID}`,
+      method: "GET",
+    });
+  };
+
+  const viewTeamMembersByTeam = async (team_ID: string) => {
+    return generalAction({
+      queryParameters: `/team/${team_ID}`,
+      method: "GET",
+    });
+  };
+
+  const getTeamMember = async (tm_ID: string) => {
+    return generalAction({
+      queryParameters: `/list?tm_ID=${tm_ID}`,
+      method: "POST",
+      body: { tm_ID },
+    });
+  };
+
+  // ✅ Now it's safe to return updateTeam
+  return {
+    generalAction,
+    actionData,
+    actionIsError,
+    actionIsLoading,
+    actionIsSuccess,
+    actionError,
+    actionReset,
+    createTeamMember,
+    updateTeamMember,
+    updateTeam, // ✅ fixed
+    viewTeamMembers,
+    viewTeamMemberDetails,
+    viewTeamMembersByEmployee,
+    viewTeamMembersByTeam,
+    getTeamMember,
+  };
+};
+
+
+
+
