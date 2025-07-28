@@ -29,6 +29,7 @@ const EmployeeFilterModal: React.FC<EmployeeFilterModalProps> = ({
     };
 
     const handleApply = () => {
+        console.log("Modal applying filters:", filters);
         onApply(filters);
         onClose();
     };
