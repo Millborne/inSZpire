@@ -464,12 +464,12 @@ const ContactModal: React.FC<ContactModalProps> = ({
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px]">
-          <Inputs label="LAST NAME" placeholder="Lee" value={formData.lastName} onChange={e => setFormData((f:any) => ({ ...f, lastName: e.target.value }))} />
-          <Inputs label="FIRST NAME" placeholder="Keith Lloyd" value={formData.firstName} onChange={e => setFormData((f:any)  => ({ ...f, firstName: e.target.value }))} />
-          <Inputs label="MIDDLE NAME" placeholder="RIDGLEY" value={formData.middleName} onChange={e => setFormData((f:any)  => ({ ...f, middleName: e.target.value }))} />
+          <Inputs label="LAST NAME" placeholder="" value={formData.lastName} onChange={e => setFormData((f:any) => ({ ...f, lastName: e.target.value }))} />
+          <Inputs label="FIRST NAME" placeholder="" value={formData.firstName} onChange={e => setFormData((f:any)  => ({ ...f, firstName: e.target.value }))} />
+          <Inputs label="MIDDLE NAME" placeholder="" value={formData.middleName} onChange={e => setFormData((f:any)  => ({ ...f, middleName: e.target.value }))} />
           <Inputs label="EXTENSION" placeholder="" value={formData.extension} onChange={e => setFormData((f:any)  => ({ ...f, extension: e.target.value }))} />
-          <Inputs label="CONTACT NUMBER" placeholder="0955-021-1889" value={formData.contactNumber} onChange={e => setFormData((f:any)  => ({ ...f, contactNumber: e.target.value }))} />
-          <Inputs label="EMAIL" placeholder="freddyhill@gmail.com" value={formData.email} onChange={e => setFormData((f:any)  => ({ ...f, email: e.target.value }))} />
+          <Inputs label="CONTACT NUMBER" placeholder="" value={formData.contactNumber} onChange={e => setFormData((f:any)  => ({ ...f, contactNumber: e.target.value }))} />
+          <Inputs label="EMAIL" placeholder="" value={formData.email} onChange={e => setFormData((f:any)  => ({ ...f, email: e.target.value }))} />
          
           <div className="col-span-1 sm:col-span-2">
             <p className="text-caption-all-caps uppercase mb-[16px] text-szGrey500">
@@ -514,7 +514,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
               <div className="sm:col-span-4 col-span-1">
                 <Inputs
                   label="STREET / HOUSE NUMBER / LOT"
-                  placeholder="Blk 5 Lot 3, Villa Luz Subdivision"
+                  placeholder=""
                   value={formData.street}
                   onChange={e => setFormData((f: any) => ({ ...f, street: e.target.value }))}
                 />
@@ -522,7 +522,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
               <div className="sm:col-span-1 col-span-2">
                 <Inputs
                   label="POSTAL CODE"
-                  placeholder="9000"
+                  placeholder=""
                   value={formData.postalCode}
                   onChange={e => setFormData((f: any) => ({ ...f, postalCode: e.target.value }))}
                 />
