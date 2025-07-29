@@ -960,23 +960,25 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
                                         usePortal={true}
                                         size="small"
                                     />
-                                    <Dropdown
+                                     <Dropdown
                                         label="POSITION STATUS"
                                         placeholder="Select position status"
                                         options={[
-                                            { label: "Active", value: "ACTIVE" },
-                                            { label: "Training", value: "TRAINING" },
-                                            { label: "Promoted", value: "PROMOTED" },
-                                            { label: "Transferred", value: "TRANSFERRED" },
-                                            { label: "Closed", value: "CLOSED" }
+                                            { label: "Trainee", value: "TRAINEE" },
+                                            { label: "Probationary", value: "PROBATIONARY" },
+                                            { label: "Regular", value: "REGULAR" },
+                                            { label: "Contract", value: "CONTRACT" },
+                                            { label: "Part-time", value: "PART_TIME" },
+                                            { label: "Intern", value: "INTERN" }
                                         ]}
                                         onSelectionChange={(selected: any) => handleNestedInputChange('work', 'positionStatus', selected?.value || '')}
                                         value={getDropdownValue(formData.work.positionStatus, [
-                                            { label: "Active", value: "ACTIVE" },
-                                            { label: "Training", value: "TRAINING" },
-                                            { label: "Promoted", value: "PROMOTED" },
-                                            { label: "Transferred", value: "TRANSFERRED" },
-                                            { label: "Closed", value: "CLOSED" }
+                                            { label: "Trainee", value: "TRAINEE" },
+                                            { label: "Probationary", value: "PROBATIONARY" },
+                                            { label: "Regular", value: "REGULAR" },
+                                            { label: "Contract", value: "CONTRACT" },
+                                            { label: "Part-time", value: "PART_TIME" },
+                                            { label: "Intern", value: "INTERN" }
                                         ])}
                                     />
                                 </div>
