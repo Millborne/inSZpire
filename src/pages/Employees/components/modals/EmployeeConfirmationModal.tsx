@@ -4,7 +4,6 @@ import { InfoCircle, Warning2 } from "iconsax-reactjs";
 import { useCreateEmployeeMutation } from "../../../../services/employee/create/employeeCreateAPI";
 import { addEmployeeData } from "./EmployeeModal";
 import SZOfficialLogo from "../../../../assets/SZ Official Logo_circle.png";
-import { useCreateEmployeeMutation } from "../../../../services/employee/create/employeeCreateAPI";
 import { getReligionId } from "../../../../utils/employeeTransformers";
 import { safeFormatDateForBackend } from "../../../../utils";
 

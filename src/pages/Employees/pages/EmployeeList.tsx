@@ -32,6 +32,8 @@ import EmployeeModal from "../components/modals/EmployeeModal";
 import EmployeePositionModal from "../components/modals/EmployeePositionModal";
 import { setSelectedEmployee as setSelectedEmployeeAction } from "../../../reducers/employeeSlice";
 import { useDispatch } from "react-redux";
+import { useEmployeeFilters } from "../../../services/employee/list";
+import { type FrontendFilters } from "../../../services/employee/list/filterAPI";
 
 const EmployeeList = () => {
     const navigate = useNavigate();
@@ -58,9 +60,9 @@ const EmployeeList = () => {
     const [getEmployeeById] = useGetEmployeeByIdMutation();
 
     // State management
-    const [employees, setEmployees] = useState<EmployeeData[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    // const [employees, setEmployees] = useState<EmployeeData[]>([]);
+    // const [isLoading, setIsLoading] = useState(true);
+    // const [error, setError] = useState<string | null>(null);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<"add" | "edit">("add");
@@ -72,31 +74,39 @@ const EmployeeList = () => {
     // Success message state
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+      const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+      const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] =
+        useState(false);
+    const [snackbarAction, setSnackbarAction] = useState<
+        "add" | "edit" | "update" | null
+>(null);
+const [openFilter, setOpenFilter] = useState(false);
+const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
 
     // Load employees function
-    const loadData = async () => {
-        try {
-            setIsLoading(true);
-            setError(null);
+    // const loadData = async () => {
+    //     try {
+    //         setIsLoading(true);
+    //         setError(null);
 
-            console.log("Loading employee list...");
-            const employeesResponse = await employeeService.listEmployees({});
-            console.log("Employees response:", employeesResponse);
+    //         console.log("Loading employee list...");
+    //         const employeesResponse = await employeeService.listEmployees({});
+    //         console.log("Employees response:", employeesResponse);
 
-            if (employeesResponse.data?.success && employeesResponse.data?.data?.employees) {
-                const responseData = employeesResponse.data.data;
-                setEmployees(responseData.employees || []);
-            } else {
-                console.error("No employee data received");
-                setEmployees([]);
-            }
-        } catch (err) {
-            console.error("Error loading employees:", err);
-            setError("Failed to load employees. Please try again.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    //         if (employeesResponse.data?.success && employeesResponse.data?.data?.employees) {
+    //             const responseData = employeesResponse.data.data;
+    //             setEmployees(responseData.employees || []);
+    //         } else {
+    //             console.error("No employee data received");
+    //             setEmployees([]);
+    //         }
+    //     } catch (err) {
+    //         console.error("Error loading employees:", err);
+    //         setError("Failed to load employees. Please try again.");
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
 
     // New function to handle filter updates atomically
     const handleFilterUpdate = (newFilters: FrontendFilters) => {
@@ -436,7 +446,22 @@ const EmployeeList = () => {
                                 tableHeight="h-[400px]"
                                 onRowClick={handleRowClick}
                             />
+                            
                         </div>
+                        <div className="flex justify-end">
+<Pagination
+                                currentPage={
+                                    Math.floor(
+                                        pagination.offset / pagination.limit
+                                    ) + 1
+                                }
+                                totalPages={Math.ceil(
+                                    pagination.total / pagination.limit
+                                )}
+                                visiblePages={5}
+                                onChange={handlePageChange}
+                            />
+</div>
                         {/* Removed pagination for now */}
                     </div>
 
@@ -458,13 +483,20 @@ const EmployeeList = () => {
                         }}
                         mode={modalMode}
                         addEmployeeData={
-                            modalMode === "edit" ? selectedEmployee : undefined
+                            modalMode === "edit" ? selectedEmployeeLocal : undefined
                         }
-                        employeeId={
-                            modalMode === "edit" && originalEmployeeData
-                                ? originalEmployeeData.employee_ID
-                                : undefined
-                        }
+                        // employeeId={
+                        //     modalMode === "edit" && originalEmployeeData
+                        //         ? originalEmployeeData.employee_ID
+                        //         : undefined
+                                
+                        // }
+                        originalEmployeeData={originalEmployeeData}
+                            employeeId={
+                                modalMode === "edit" && originalEmployeeData
+                                    ? (originalEmployeeData as any).data?.employee?.employee_ID || originalEmployeeData.employee_ID
+                                    : undefined
+                            }
                         onSubmitSuccess={() => handleSubmitSuccess(modalMode)}
                     />
 

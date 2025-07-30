@@ -198,14 +198,14 @@ const EmployeeUpdateConfirmationModal: React.FC<EmployeeUpdateConfirmationModalP
         { label: "Mobile Number", value: employeeData.others.mobileNumber || "" },
     ].filter(item => item.value.trim() !== "") : [];
 
-    const addressData = employeeData && employeeData.address ? [
-        { label: "Region", value: getDisplayLabel(employeeData.address.region || "", "region") },
-        { label: "Province", value: getDisplayLabel(employeeData.address.province || "", "province") },
-        { label: "City / Municipality", value: getDisplayLabel(employeeData.address.cityMunicipality || "", "city") },
-        { label: "Barangay", value: getDisplayLabel(employeeData.address.barangay || "", "barangay") },
-        { label: "Street / House Number / Lot", value: employeeData.address.streetHouseNoLot || "" },
-        { label: "Postal Code", value: employeeData.address.postalCode || "" },
-    ].filter(item => item.value.trim() !== "") : [];
+    // const addressData = employeeData && employeeData.address ? [
+    //     { label: "Region", value: getDisplayLabel(employeeData.address.region || "", "region") },
+    //     { label: "Province", value: getDisplayLabel(employeeData.address.province || "", "province") },
+    //     { label: "City / Municipality", value: getDisplayLabel(employeeData.address.cityMunicipality || "", "city") },
+    //     { label: "Barangay", value: getDisplayLabel(employeeData.address.barangay || "", "barangay") },
+    //     { label: "Street / House Number / Lot", value: employeeData.address.streetHouseNoLot || "" },
+    //     { label: "Postal Code", value: employeeData.address.postalCode || "" },
+    // ].filter(item => item.value.trim() !== "") : [];
 
     // Get employee full name for display
     const employeeFullName = employeeData && employeeData.fullName ? 

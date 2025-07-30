@@ -56,6 +56,7 @@ export interface addEmployeeData {
         mobileNumber: string;
         personalEmail: string;
     };
+    address?: any
 }
 
 interface EmployeeModalProps {
@@ -68,6 +69,7 @@ interface EmployeeModalProps {
     employeeId?: string; // For edit mode
 }
 const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, originalEmployeeData, mode, employeeId }: EmployeeModalProps) => {
+    console.log("Original employee data:", originalEmployeeData, addEmployeeData, mode, employeeId);
     const [formData, setFormData] = useState<addEmployeeData>({
         fullName: {
             lastName: "",
@@ -126,10 +128,6 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
 
     const [setAsPresentAddress, setSetAsPresentAddress] = useState(false);
 
-    // Positions state
-    const [positions, setPositions] = useState<Array<{ label: string; value: string }>>([]);
-    const [isLoadingPositions, setIsLoadingPositions] = useState(false);
-
     // Fetch positions from API
     const fetchPositions = async () => {
         setIsLoadingPositions(true);
@@ -181,6 +179,8 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
             }));
         }
     };
+
+    console.log("Form data:", formData);
     // const [profileImg, setProfileImg] = useState<string | undefined>();
 
     // Separate state for present address
@@ -204,21 +204,14 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
 
     // Populate form data when in edit mode
     useEffect(() => {
+        console.log("-----------------------------------------------------------------------", mode, addEmployeeData)
         if (mode === "edit" && addEmployeeData) {
             console.log("Setting form data for edit mode:", addEmployeeData);
             setFormData(addEmployeeData);
         }
     }, [mode, addEmployeeData, isOpen]);
 
-    // Handle "Set as present address" checkbox effect
-    useEffect(() => {
-        if (setAsPresentAddress) {
-            // Copy permanent address to present address
-            setPresentAddress({
-                ...formData.address,
-            });
-        }
-    }, [setAsPresentAddress, formData.address]);
+
 
     // Fetch positions when modal opens
     useEffect(() => {
@@ -298,24 +291,24 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
         setCurrentAddEmployeeData(null);
     };
 
-    const handleProceed = () => {
-        // For edit mode, include present address data
-        if (mode === "edit") {
-            const formDataWithPresentAddress = {
-                ...formData,
-                address: {
-                    ...formData.address,
-                    // Include present address data if checkbox is checked
-                    ...(setAsPresentAddress ? presentAddress : {})
-                }
-            };
-            console.log("Edit mode - formData being passed to confirmation:", formDataWithPresentAddress);
-            setCurrentAddEmployeeData(formDataWithPresentAddress);
-            setShowUpdateConfirmationModal(true);
-        } else {
-            setCurrentAddEmployeeData(formData);
-            setShowConfirmationModal(true);
-        }
+  const handleProceed = () => {
+       // For edit mode, include present address data
+       if (mode === "edit") {
+        const formDataWithPresentAddress = {
+            ...formData,
+            address: {
+                ...formData.address,
+                // Include present address data if checkbox is checked
+                ...(setAsPresentAddress ? presentAddress : {})
+            }
+        };
+        console.log("Edit mode - formData being passed to confirmation:", formDataWithPresentAddress);
+        setCurrentAddEmployeeData(formDataWithPresentAddress);
+        setShowUpdateConfirmationModal(true);
+    } else {
+        setCurrentAddEmployeeData(formData);
+        setShowConfirmationModal(true);
+    }
     };
 
     // Handle input changes for form fields
@@ -342,6 +335,16 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
         const option = options.find(opt => opt.value === value);
         return option ? { label: option.label, value: option.value } : undefined;
     };
+
+    // Handle "Set as present address" checkbox effect
+    useEffect(() => {
+        if (setAsPresentAddress) {
+            // Copy permanent address to present address
+            setPresentAddress({
+                ...formData.permanentAddress,
+            });
+        }
+    }, [setAsPresentAddress, formData.permanentAddress]);
 
     return (
         <div>
@@ -734,7 +737,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
                                 <h6 className="text-body-regular font-medium text-szGrey700">Present Address</h6>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-4 gap-[16px] items-center">
-                                <Dropdown 
+                            <Dropdown 
                                     label="REGION" 
                                     placeholder="Select region" 
                                     options={[
@@ -774,6 +777,7 @@ const EmployeeModal = ({ isOpen, onClose, onSubmitSuccess, addEmployeeData, orig
                                         usePortal={true}
                                         size="small"
                                 />
+ 
                                 <Dropdown 
                                     label="PROVINCE" 
                                     placeholder="Select province" 
