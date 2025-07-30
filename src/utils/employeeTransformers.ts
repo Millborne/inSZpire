@@ -22,15 +22,25 @@ export const transformEmployeeToFormData = (employee: any): addEmployeeData => {
     const permanentAddress = addressesData.find((addr: any) => addr.address_type_ID === 1) || {};
     const presentAddress = addressesData.find((addr: any) => addr.address_type_ID === 2) || {};
     
-    // Use permanent address as the main address, fallback to present address if no permanent
-    const addressData = {
-        region: permanentAddress.region_state_ID?.toString() || presentAddress.region_state_ID?.toString() || "",
-        province: permanentAddress.province_ID?.toString() || presentAddress.province_ID?.toString() || "",
-        cityMunicipality: permanentAddress.city_municipality_ID?.toString() || presentAddress.city_municipality_ID?.toString() || "",
-        barangay: permanentAddress.barangay_ID?.toString() || presentAddress.barangay_ID?.toString() || "",
-        streetHouseNoLot: permanentAddress.address_line_1 || presentAddress.address_line_1 || "",
-        postalCode: permanentAddress.postal_code || presentAddress.postal_code || "",
-        country: permanentAddress.country_ID?.toString() || presentAddress.country_ID?.toString() || "",
+    // Create permanent and present address data
+    const permanentAddressData = {
+        region: permanentAddress.region_state_ID?.toString() || "",
+        province: permanentAddress.province_ID?.toString() || "",
+        cityMunicipality: permanentAddress.city_municipality_ID?.toString() || "",
+        barangay: permanentAddress.barangay_ID?.toString() || "",
+        streetHouseNoLot: permanentAddress.address_line_1 || "",
+        postalCode: permanentAddress.postal_code || "",
+        country: permanentAddress.country_ID?.toString() || "",
+    };
+    
+    const presentAddressData = {
+        region: presentAddress.region_state_ID?.toString() || "",
+        province: presentAddress.province_ID?.toString() || "",
+        cityMunicipality: presentAddress.city_municipality_ID?.toString() || "",
+        barangay: presentAddress.barangay_ID?.toString() || "",
+        streetHouseNoLot: presentAddress.address_line_1 || "",
+        postalCode: presentAddress.postal_code || "",
+        country: presentAddress.country_ID?.toString() || "",
     };
     
     // Map position status from employee data
@@ -146,7 +156,8 @@ export const transformEmployeeToFormData = (employee: any): addEmployeeData => {
             employmentStatus: employmentStatus,
             workEmail: employeeData.work_email || "",
         },
-        address: addressData,
+        permanentAddress: permanentAddressData,
+        presentAddress: presentAddressData,
         others: {
             religion: getReligionName(profileData.religion_ID || ""),
             sex: "",
@@ -157,6 +168,7 @@ export const transformEmployeeToFormData = (employee: any): addEmployeeData => {
             birthAddress: profileData.birth_address || "",
             telephoneNumber: profileData.telephone_number || "",
             mobileNumber: profileData.mobile_number || "",
+            personalEmail: profileData.personal_email || "",
         },
     };
     
