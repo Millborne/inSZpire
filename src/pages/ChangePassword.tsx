@@ -27,6 +27,7 @@ const ChangePassword = () => {
                 <p>Enter a new password below to change your password</p>
               </div>
               <div className="flex flex-col gap-[16px] w-[300px] justify-center items-center ">
+                <Inputs placeholder="Current Password" type="password" />
                 <Inputs placeholder="New Password" type="password" />
                 <Inputs placeholder="Confirm Password" type="password" />
               </div>
