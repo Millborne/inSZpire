@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Dropdown, Inputs, Modal, SnackbarAlert } from "enterprisze-global-components";
 import ConfirmationModal from "../../../../components/ConfirmationModal";
-import { useViewTagsMutation } from "../../../../services/settings/tags/list/tagsAPI";
+import { useViewTagsMutation } from "../../../../services/teams/tags/list/tagsAPI";
 import { useActionTeamsMutation } from "../../../../services/teams/list/teamsAPI";
 
 export interface SpecificTeamDataType {
