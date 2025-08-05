@@ -17,6 +17,11 @@ import {
     useReligionService,
 } from "../../../../services/employee-profile/personal/basic-info/use-basic-info";
 import { useLocationsService } from "../../../../services/locations-options/use-locations";
+import { resetAndFetchEmployee } from "../../../../reducers/employeeSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../../reducers/store";
+import { useEmployeeService } from "../../../../services/employee/list/use-employee";
+
 // import BasicInfoConfirmationModal from "./BasicInfoConfirmationModal";
 //   import DeleteConfirmation from "../../../../components/DeleteConfirmation";
 
@@ -69,6 +74,13 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
     employeeId,
     currentData,
 }) => {
+    const dispatch = useDispatch();
+    const selectedEmployee = useSelector(
+        (state: RootState) => state.employeeState.selectedEmployee
+    );
+
+    const employeeService = useEmployeeService();
+
     const [showSnackbar, setShowSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [snackbarType, setSnackbarType] = useState<"success" | "error">(
@@ -764,6 +776,12 @@ const BasicInfoModal: React.FC<BasicInfoModalProps> = ({
                 employee_ID: employeeId,
                 ...updateData,
             });
+
+            await resetAndFetchEmployee(
+                dispatch,
+                selectedEmployee,
+                employeeService
+            );
 
             if (result.data) {
                 setShowSnackbar(true);

@@ -70,18 +70,18 @@ const EmployeeList = () => {
         useState<any>(null);
     const [originalEmployeeData, setOriginalEmployeeData] =
         useState<EmployeeData | null>(null);
-    
+
     // Success message state
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
-      const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
-      const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] =
+    const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+    const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] =
         useState(false);
     const [snackbarAction, setSnackbarAction] = useState<
         "add" | "edit" | "update" | null
->(null);
-const [openFilter, setOpenFilter] = useState(false);
-const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+    >(null);
+    const [openFilter, setOpenFilter] = useState(false);
+    const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
 
     // Load employees function
     // const loadData = async () => {
@@ -111,13 +111,13 @@ const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
     // New function to handle filter updates atomically
     const handleFilterUpdate = (newFilters: FrontendFilters) => {
         console.log("Applying new filters:", newFilters);
-        
+
         // Set filters directly - the hook will handle the API call
         setFilters(newFilters);
     };
 
     const handleRowClick = (index: number) => {
-        dispatch(setSelectedEmployeeAction(employees[index]));
+        dispatch(setSelectedEmployeeAction({ ...employees[index], filters }));
         navigate(`${employees[index]?.employee_ID}/summary`);
         console.log("Row clicked:", employees[index]);
     };
@@ -139,24 +139,24 @@ const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
     const openEditEmployee = async (employee: EmployeeData) => {
         console.log("Opening edit for employee:", employee);
         setModalMode("edit");
-        
+
         try {
             // Fetch complete employee data using get-by-id endpoint
-            const requestBody = { 
-                employee_ID: employee.employee_ID
+            const requestBody = {
+                employee_ID: employee.employee_ID,
             };
             const response = await getEmployeeById(requestBody).unwrap();
-            
+
             // Pass the entire response to the transformation function
             // It will handle the nested structure internally
             const transformedData = transformEmployeeToFormData(response);
-            
+
             setSelectedEmployeeLocal(transformedData);
             setOriginalEmployeeData(response);
             setIsModalOpen(true);
         } catch (error) {
             console.error("Error fetching complete employee data:", error);
-            
+
             // Fallback to original employee data if API call fails
             const transformedData = transformEmployeeToFormData(employee);
             setSelectedEmployeeLocal(transformedData);
@@ -446,10 +446,9 @@ const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
                                 tableHeight="h-[400px]"
                                 onRowClick={handleRowClick}
                             />
-                            
                         </div>
                         <div className="flex justify-end">
-<Pagination
+                            <Pagination
                                 currentPage={
                                     Math.floor(
                                         pagination.offset / pagination.limit
@@ -461,7 +460,7 @@ const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
                                 visiblePages={5}
                                 onChange={handlePageChange}
                             />
-</div>
+                        </div>
                         {/* Removed pagination for now */}
                     </div>
 
@@ -483,20 +482,24 @@ const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
                         }}
                         mode={modalMode}
                         addEmployeeData={
-                            modalMode === "edit" ? selectedEmployeeLocal : undefined
+                            modalMode === "edit"
+                                ? selectedEmployeeLocal
+                                : undefined
                         }
                         // employeeId={
                         //     modalMode === "edit" && originalEmployeeData
                         //         ? originalEmployeeData.employee_ID
                         //         : undefined
-                                
+
                         // }
                         originalEmployeeData={originalEmployeeData}
-                            employeeId={
-                                modalMode === "edit" && originalEmployeeData
-                                    ? (originalEmployeeData as any).data?.employee?.employee_ID || originalEmployeeData.employee_ID
-                                    : undefined
-                            }
+                        employeeId={
+                            modalMode === "edit" && originalEmployeeData
+                                ? (originalEmployeeData as any).data?.employee
+                                      ?.employee_ID ||
+                                  originalEmployeeData.employee_ID
+                                : undefined
+                        }
                         onSubmitSuccess={() => handleSubmitSuccess(modalMode)}
                     />
 
