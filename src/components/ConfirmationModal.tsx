@@ -1,7 +1,7 @@
 import { Modal } from "enterprisze-global-components";
 import { ArchiveBox, InfoCircle } from "iconsax-reactjs";
 import React from "react";
- 
+
 interface ConfirmationModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -13,7 +13,7 @@ interface ConfirmationModalProps {
     buttonFooterIcon?: React.ReactNode;
     contentHeight?: string;
 }
- 
+
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     isOpen,
     onClose,
@@ -26,7 +26,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     contentHeight = "h-auto min-h-[150px] max-h-[55vh]",
 }) => {
     return (
-<Modal
+        <Modal
             isOpen={isOpen}
             onClose={onClose}
             showHeaderDivider={false}
@@ -55,16 +55,16 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 },
             ]}
             content={
-<div className="flex flex-col gap-[8px] items-center">
-<img src={image} alt="confirmation" className="w-[80px]" />
-<p className="text-body-base-strong text-szBlack800 text-center">{description}</p>
-<div className="flex flex-col gap-[8px] w-full">{content}</div>
-</div>
+                <div className="flex flex-col gap-[8px] items-center">
+                    <img src={image} alt="confirmation" className="w-[80px]" />
+                    <p className="text-body-base-strong text-szBlack800 text-center">{description}</p>
+                    <div className="flex flex-col gap-[8px] w-full">{content}</div>
+                </div>
             }
         />
     );
 };
- 
+
 export default ConfirmationModal;
 
 
