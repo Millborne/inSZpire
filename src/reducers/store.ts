@@ -1,7 +1,7 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 // import { persistReducer, persistStore } from 'redux-persist';
 // import storage from 'redux-persist/lib/storage';
-
+ 
 // API
 import { teamsAPI } from "../services/teams/list/teamsAPI";
 import { accountsAPI } from "../services/settings/accounts/list/accountsAPI";
@@ -26,14 +26,14 @@ import { workSetupAPI } from "../services/settings/work-setup/list/workSetupAPI"
 import { locationsAPI } from "../services/locations-options/locationsAPI";
 import { religionAPI } from "../services/employee-profile/personal/basic-info/religionAPI";
 import { profilePictureAPI } from "../services/employee-profile/profile-picture/profilePictureAPI";
-
+ 
 // Slices
 import employeeReducer from "./employeeSlice";
-
+ 
 const rootReducer = combineReducers({
     // Slices
     employeeState: employeeReducer,
-
+ 
     // API Reducers
     [teamsAPI.reducerPath]: teamsAPI.reducer,
     [accountsAPI.reducerPath]: accountsAPI.reducer,
@@ -59,7 +59,7 @@ const rootReducer = combineReducers({
     [religionAPI.reducerPath]: religionAPI.reducer,
     [profilePictureAPI.reducerPath]: profilePictureAPI.reducer,
 });
-
+ 
 const configStore = configureStore({
     reducer: rootReducer,
     middleware: (getDefaultMiddleware: any) =>
@@ -89,7 +89,7 @@ const configStore = configureStore({
             profilePictureAPI.middleware
         ),
 });
-
+ 
 export { configStore };
 export type RootState = ReturnType<typeof configStore.getState>; //to get states from slices
 export type AppDispatch = typeof configStore.dispatch; //to get dispatch type
