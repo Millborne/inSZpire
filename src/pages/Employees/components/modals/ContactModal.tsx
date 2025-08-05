@@ -77,6 +77,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
   profileId,
   employeeId,
 }) => {
+  const employeeService = useEmployeeService();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [showInputContainer, setShowInputContainer] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -226,7 +227,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
       }
 
       onClose();
-      resetAndFetchEmployee(dispatch, selectedEmployee, useEmployeeService);
+      resetAndFetchEmployee(dispatch, selectedEmployee, employeeService);
       onSubmitSuccess && onSubmitSuccess("Contact information updated successfully");
     } catch (err) {
       onError && onError("Failed to update contact information");
