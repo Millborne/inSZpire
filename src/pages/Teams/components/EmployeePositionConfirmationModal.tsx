@@ -1,7 +1,7 @@
 import { ConfirmationContent, Modal } from "enterprisze-global-components";
 import { InfoCircle } from "iconsax-reactjs";
 import { useState } from "react";
-import { useUpdateEmployeeMutation } from "../../../services/employee-profile/work/employee-history/employeeHistoryAPI";
+import { useUpdateEmployeeMutation } from "../../../services/teams/employee-history/employeeHistoryAPI";
 import type { EmployeePositionData } from "./EmployeePositionModal";
 import Layer2 from "../../../../assets/Layer_2.svg";
 
