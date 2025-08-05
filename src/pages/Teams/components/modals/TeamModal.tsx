@@ -300,6 +300,7 @@ export interface TeamDataType {
   created_by?: string;
   updated_by?: string;
   tag_IDs?: string[];
+  acc_ID?: any;
 }
 
 export type ModalMode = "view" | "edit" | "add";

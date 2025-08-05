@@ -1,5 +1,9 @@
-import { useEffect, useState } from "react";
-import { useTeamMemberService } from "./teamMemberAPI"; // rename to useTeamService if you've done that
+import {
+    useFetchTeamDetailsQuery,
+    useFetchTeamMembersQuery,
+    useActionTeamsMutation,
+    useActionPositionsMutation,
+} from "./teamMemberAPI";
 
 // Team details hook
 export const useTeamDetails = ({
@@ -33,86 +37,264 @@ export const useTeamDetails = ({
 
 // Team members hook
 export const useTeamMembers = ({
-  queryParameters,
-  method = "POST",
-  disableFetch = false,
+    queryParameters,
+    method,
+    disableFetch = false,
 }: {
-  queryParameters?: string;
-  method?: string;
-  disableFetch?: boolean;
+    queryParameters?: string;
+    method?: string;
+    disableFetch?: boolean;
 }) => {
-  const {
-    viewTeamMembers,
-    generalAction,
-    actionData,
-    actionIsError,
-    actionIsLoading,
-    actionIsSuccess,
-    actionError,
-    actionReset,
-  } = useTeamMemberService(); // or useTeamService if renamed
+    const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
+        useFetchTeamMembersQuery(
+            {
+                queryParameters: queryParameters ?? "",
+                method: method,
+            },
+            { skip: disableFetch }
+        );
 
-  const [data, setData] = useState<any>(null);
-  const [isFetching, setIsFetching] = useState(false);
-  const [error, setError] = useState<any>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+    return {
+        data,
+        isSuccess,
+        isError,
+        isLoading,
+        isFetching,
+        error,
+        refetch,
+    };
+};
 
-  // ✅ Define updateTeam here
-  const updateTeam = async (teamData: any) => {
-    return generalAction({
-      queryParameters: "/update",
-      method: "PUT",
-      body: teamData,
-    });
-  };
+// Team-specific interfaces based on backend database schema
+export interface TeamData {
+    team_ID: string;           // 32-char hex UUID
+    node_reference: number;    // Node reference number
+    team_code: string;         // e.g., "bsi", "spt"
+    team_name: string;         // e.g., "Business Solutions and Innovation"
+    team_description: string;  // Team description
+    team_logo: string | null;  // filename or null
+    acc_ID: string | null;     // account ID or null
+    parent_team_ID: string | null; // parent team UUID or null
+    node: string;              // hierarchy path e.g., "1.4", "1.4.5"
+    is_archived: number;       // 0 = active, 1 = archived
+    created_by: string;        // Created by UUID
+    updated_by: string;        // Updated by UUID
+    created_at: string;        // ISO date string
+    updated_at: string;        // ISO date string
+    tags?: string;             // Associated tags (comma-separated)
+}
 
-  const refetch = async () => {
-    if (disableFetch) return;
-    try {
-      setIsLoading(true);
-      setIsFetching(true);
-      const result = await viewTeamMembers({
-        search: queryParameters ?? "",
-      });
-      setData(result);
-      setIsSuccess(true);
-      setIsError(false);
-      setError(null);
-    } catch (err: any) {
-      setError(err);
-      setIsError(true);
-    } finally {
-      setIsFetching(false);
-      setIsLoading(false);
-    }
-  };
+export interface PositionData {
+    position_ID: string;       // 32-char hex UUID
+    node_reference: number;    // Node reference number
+    position_code: string;     // Position code
+    position_name: string;     // Position name
+    team_ID: string;           // Links to the team
+    site_ID: string | null;    // Site ID
+    job_ID: string;            // Links to job title
+    reports_to_position_ID: string | null; // Reports to position ID
+    reports_to_node: string | null; // Reports to node
+    team_level: string;        // Team level
+    position_type_ID: string;  // Position type ID
+    work_setup_ID: string;     // Work setup ID
+    basic_salary: number;      // Basic salary
+    is_approved: number;       // Approval status
+    is_archived: number;       // Archive status
+    created_by: string;        // Created by UUID
+    updated_by: string;        // Updated by UUID
+    created_at: string;        // ISO date string
+    updated_at: string;        // ISO date string
+    
+    // Additional fields from view (vw_position_details)
+    job_title?: string;        // Job title (e.g., "Web Dev", "UX Designer")
+    job_code?: string;         // Job code
+    team_name?: string;        // Team name
+    team_code?: string;        // Team code
+    position_type?: string;    // Position type
+    work_setup?: string;       // Work setup
+    company_ID?: string;       // Company ID
+    company_name?: string;     // Company name
+    site_name?: string;        // Site name
+    position_status?: string;  // Position status
+    reports_to_position?: string; // Reports to position
+    employee_number?: string;  // Employee number
+    employee_name?: string;    // Employee name
+    preferred_name?: string;   // Preferred name
+    first_name?: string;       // Employee first name
+    last_name?: string;        // Employee last name
+    middle_name?: string;      // Employee middle name
+    reports_to_employee_name?: string; // Reports to employee name
+    reports_to_preferred_name?: string; // Reports to preferred name
+    reports_to_employee_number?: string; // Reports to employee number
+    tags?: string;             // Associated tags
+}
 
-  useEffect(() => {
-    refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryParameters, method]);
+export interface ViewTeamRequest {
+    search?: string;
+    team_ID?: string;
+    is_archived?: number;
+    offset?: number;
+    limit?: number;
+    node_root?: string;
+}
 
-  return {
-    data,
-    isSuccess,
-    isError,
-    isLoading,
-    isFetching,
-    error,
-    refetch,
+export interface ViewPositionsRequest {
+    search?: string;
+    is_archived?: number;
+    position_ID?: string;
+    team_ID?: string;
+    offset?: number;
+    limit?: number;
+}
 
-    // mutation actions
-    generalAction,
-    updateTeam, // ✅ now safely exposed
-    actionData,
-    actionIsError,
-    actionIsLoading,
-    actionIsSuccess,
-    actionError,
-    actionReset,
-  };
+// Specific team member service methods based on API documentation
+export const useTeamMemberService = () => {
+    const [
+        teamAction,
+        {
+            data: teamActionData,
+            isError: teamActionIsError,
+            isLoading: teamActionIsLoading,
+            isSuccess: teamActionIsSuccess,
+            error: teamActionError,
+            reset: teamActionReset,
+        },
+    ] = useActionTeamsMutation();
+
+    const [
+        positionAction,
+        {
+            data: positionActionData,
+            isError: positionActionIsError,
+            isLoading: positionActionIsLoading,
+            isSuccess: positionActionIsSuccess,
+            error: positionActionError,
+            reset: positionActionReset,
+        },
+    ] = useActionPositionsMutation();
+
+    // Get team details
+    const getTeamDetails = async (filters: ViewTeamRequest) => {
+        console.log("🔍 Calling getTeamDetails with filters:", filters);
+        console.log("🔍 API URL will be: http://localhost:4172/api/v1/teams/view");
+        
+        try {
+            const response = await teamAction({
+                queryParameters: "/view",
+                method: "POST",
+                body: filters,
+            });
+            
+            console.log("✅ getTeamDetails response:", response);
+            return response;
+        } catch (error) {
+            console.error("❌ getTeamDetails error:", error);
+            throw error;
+        }
+    };
+
+    // Get team members (positions for a specific team)
+    const getTeamMembers = async (filters: ViewPositionsRequest) => {
+        console.log("🔍 Calling getTeamMembers with filters:", filters);
+        console.log("🔍 API URL will be: http://localhost:4172/api/v1/position/getPositions");
+        
+        try {
+            const response = await positionAction({
+                queryParameters: "/getPositions",
+                method: "POST",
+                body: filters,
+            });
+            
+            console.log("✅ getTeamMembers response:", response);
+            return response;
+        } catch (error) {
+            console.error("❌ getTeamMembers error:", error);
+            throw error;
+        }
+    };
+
+    // Get employee's position by employee ID
+    const getEmployeePosition = async (employee_ID: string) => {
+        console.log("🔍 Calling getEmployeePosition with employee_ID:", employee_ID);
+        console.log("🔍 API URL will be: http://localhost:4172/api/v1/position/getPositions");
+        
+        // Clean employee_ID - remove 0x prefix if present
+        const cleanEmployeeId = employee_ID?.replace(/^0x/, '');
+        console.log("🔍 Clean employee_ID for API call:", cleanEmployeeId);
+        
+        // The backend expects employee_ID as a parameter
+        const requestBody = {
+            employee_ID: cleanEmployeeId,
+            is_archived: 0,
+            offset: 0,
+            limit: 10
+        };
+        
+        console.log("🔍 Request body:", requestBody);
+        
+        try {
+            const response = await positionAction({
+                queryParameters: "/getPositions",
+                method: "POST",
+                body: requestBody,
+            });
+            
+            console.log("✅ getEmployeePosition response:", response);
+            return response;
+        } catch (error) {
+            console.error("❌ getEmployeePosition error:", error);
+            throw error;
+        }
+    };
+
+    // Get team by position ID
+    const getTeamByPosition = async (position_ID: string) => {
+        console.log("🔍 Calling getTeamByPosition with position_ID:", position_ID);
+        console.log("🔍 API URL will be: http://localhost:4172/api/v1/position/getPositions");
+        
+        try {
+            const response = await positionAction({
+                queryParameters: "/getPositions",
+                method: "POST",
+                body: {
+                    position_ID: position_ID,
+                    is_archived: 0,
+                    offset: 0,
+                    limit: 10
+                },
+            });
+            
+            console.log("✅ getTeamByPosition response:", response);
+            return response;
+        } catch (error) {
+            console.error("❌ getTeamByPosition error:", error);
+            throw error;
+        }
+    };
+
+    return {
+        // team mutation
+        teamActionData,
+        teamActionIsError,
+        teamActionIsLoading,
+        teamActionIsSuccess,
+        teamActionError,
+        teamActionReset,
+
+        // position mutation
+        positionActionData,
+        positionActionIsError,
+        positionActionIsLoading,
+        positionActionIsSuccess,
+        positionActionError,
+        positionActionReset,
+
+        // methods
+        getTeamDetails,
+        getTeamMembers,
+        getEmployeePosition,
+        getTeamByPosition,
+    };
 };
 
 

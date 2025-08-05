@@ -1,33 +1,6 @@
-// import TeamCard from "../components/TeamCard";
-// import TeamsTable from "../components/TeamsTable";
-// import { Employee } from "..";
-
-// interface Team {
-//     id: number | string;
-//     name: string;
-//     employees: Employee[];
-// }
-
-// interface TeamsListProps {
-//     teams: Team[];
-//     viewType: "card" | "table";
-//     onTeamSave?: (data: any) => void;
-// }
-
-// const TeamsList = ({ teams, viewType = "card", onTeamSave }: TeamsListProps) => {
-//     return (
-//         <div className="grid grid-cols-1 gap-[20px] w-full">
-//             {viewType === "card"
-//                 ? teams.map((team) => <TeamCard id={team.id} teamName={team.name} employees={team.employees} onSave={onTeamSave} />)
-//                 : teams.map((team) => <TeamsTable key={team.id} teamName={team.name} employees={team.employees} onSave={onTeamSave} />)}
-//         </div>
-//     );
-// };
-
-// export default TeamsList;
-
 import { Team } from "../../../types/team";
 import TeamCard from "../../Teams/components/TeamCard";
+import TeamsTable from "../components/TeamsTable";
 
 interface TeamsListProps {
   teams: Team[];
@@ -39,7 +12,15 @@ const TeamsList = ({ teams, viewType, onTeamSave }: TeamsListProps) => {
   if (viewType === "table") {
     return (
       <div className="text-center text-body-base-strong text-gray-500">
-        Table view is not yet implemented.
+        {teams.map((team) => (
+<TeamsTable
+                        key={team.team_ID} 
+                        id={team.team_ID}
+                        teamName={team.team_name} 
+                        employees={team.employees} 
+                        onSave={onTeamSave} 
+                    />
+                ))}
       </div>
     );
   }
