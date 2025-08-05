@@ -154,7 +154,6 @@ const TeamCard: React.FC<TeamCardProps> = ({ team, onTeamSave }) => {
     team_name: team.team_name,
     team_description: team.team_description || "",
     parent_team_ID: team.parent_team_ID || null,
-    acc_ID: team.acc_ID || null,
     team_logo: team.team_logo || "",
     node: team.node,
     is_archived: team.is_archived,
@@ -191,6 +190,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ team, onTeamSave }) => {
     }
   };
 
+  // Fetch team references when the modal is open
   useEffect(() => {
     if (!isModalOpen) return;
 
@@ -201,6 +201,9 @@ const TeamCard: React.FC<TeamCardProps> = ({ team, onTeamSave }) => {
     })
       .unwrap()
       .then((res) => {
+        // Log the members for debugging
+        console.log("Members:", res.members);
+
         const options = res.data.map((t: any) => ({
           label: t.team_name,
           value: t.team_ID,
@@ -217,7 +220,11 @@ const TeamCard: React.FC<TeamCardProps> = ({ team, onTeamSave }) => {
     <>
       <div
         className="relative flex flex-col gap-[12px] p-[16px] border border-szPrimary200 rounded-lg cursor-pointer"
-        onClick={() => navigate(`/home/teams/${team.team_ID}/specificteam`)}
+        onClick={() => {
+          console.log("🟢 TeamCard clicked! team_ID:", team.team_ID);
+          console.log("📦 Full team object:", team);
+          navigate(`/home/teams/${team.team_ID}/specificteam`, { state: { team } });
+        }}
       >
         {/* 3-dot menu */}
         <div
@@ -250,9 +257,6 @@ const TeamCard: React.FC<TeamCardProps> = ({ team, onTeamSave }) => {
 
         {/* Team Info */}
         <p className="text-body-base-strong">{team.team_name}</p>
-        {team.team_description && (
-          <p className="text-body-small text-szGray500">{team.team_description}</p>
-        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[12px]">
           {displayedEmployees.map((emp, idx) => (
@@ -294,13 +298,14 @@ const TeamCard: React.FC<TeamCardProps> = ({ team, onTeamSave }) => {
         mode="edit"
         selectedTeam={teamData}
         onSave={handleSave}
-        teamReferenceOptions={teamReferenceOptions}
       />
     </>
   );
 };
 
 export default TeamCard;
+
+
 
 
 

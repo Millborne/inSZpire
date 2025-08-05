@@ -14,7 +14,7 @@ export const useTeams = ({
         useFetchTeamsQuery(
             {
                 queryParameters: queryParameters ?? "",
-                method: method,
+                method: "POST",
             },
             { skip: disableFetch }
         );
@@ -72,12 +72,16 @@ export interface CreateTeamRequest {
 }
 
 export interface UpdateTeamRequest {
-    team_ID: string;
-    team_name?: string;
-    team_description?: string;
-    team_status?: "active" | "inactive";
-    is_archived?: number;
+  team_ID: string;
+  team_name?: string;
+  team_code?: string;  // Add team_code here
+  team_description?: string;
+  team_status?: "active" | "inactive";
+  is_archived?: number;
+  node_reference?: string;
+  tag_IDs?: string[];
 }
+
 
 export interface ViewTeamsRequest {
     search?: string;

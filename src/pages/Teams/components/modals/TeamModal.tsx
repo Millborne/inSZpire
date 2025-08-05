@@ -282,21 +282,18 @@
 // };
 
 // export default TeamModal;
-
 import React, { useEffect, useState, useCallback } from "react";
-import { Inputs, Modal } from "enterprisze-global-components";
+import { Inputs, Modal, Dropdown } from "enterprisze-global-components";
 import ConfirmationModal from "../../../../components/ConfirmationModal";
 import { useActionTeamsMutation } from "../../../../services/teams/list/teamsAPI";
 import { useViewTagsMutation } from "../../../../services/settings/tags/list/tagsAPI";
-import Select from "react-select";
 
 export interface TeamDataType {
   team_ID?: string;
   team_code: string;
   team_name: string;
   team_description?: string;
-  team_logo?: string;
-  acc_ID?: string | null;
+  team_logo?: string | File;
   parent_team_ID?: string | null;
   node?: string;
   is_archived?: number;
@@ -313,7 +310,6 @@ interface TeamModalProps {
   mode: ModalMode;
   selectedTeam?: TeamDataType | null;
   onSave?: (data: TeamDataType) => void;
-  teamReferenceOptions?: { label: string; value: string }[];
 }
 
 interface TagOption {
@@ -327,37 +323,51 @@ const TeamModal: React.FC<TeamModalProps> = ({
   mode,
   selectedTeam,
   onSave,
-  teamReferenceOptions = [],
 }) => {
   const [formData, setFormData] = useState<TeamDataType>({
     team_code: "",
     team_name: "",
     team_description: "",
     parent_team_ID: null,
-    acc_ID: null,
     tag_IDs: [],
   });
 
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
-  const [confirmationAction, setConfirmationAction] = useState<"update" | "add" | "archive">("add");
+  const [confirmationAction, setConfirmationAction] = useState<"update" | "add">("add");
 
   const [actionTeams] = useActionTeamsMutation();
   const [viewTags, { data: tagData }] = useViewTagsMutation();
-  const [teams, setTeams] = useState([]);
+  const [teamReferenceOptions, setTeamReferenceOptions] = useState<{ label: string; value: string }[]>([]);
 
   useEffect(() => {
     if (!isOpen) return;
 
     viewTags({ tag_type: "team", is_archived: 0, offset: 0, limit: 1000 });
 
+    // Fetch team references internally
+    actionTeams({
+      queryParameters: "/view",
+      method: "POST",
+      body: { is_archived: 0, offset: 0, limit: 1000 },
+    })
+      .unwrap()
+      .then((res) => {
+        const options = res.data.map((team: any) => ({
+          label: team.team_name,
+          value: team.team_ID,
+        }));
+        setTeamReferenceOptions(options);
+      })
+      .catch(() => setTeamReferenceOptions([]));
+
+    // Reset form
     if (mode === "add" && !selectedTeam) {
       setFormData({
         team_code: "",
         team_name: "",
         team_description: "",
         parent_team_ID: null,
-        acc_ID: null,
         tag_IDs: [],
       });
     } else if (selectedTeam) {
@@ -367,7 +377,6 @@ const TeamModal: React.FC<TeamModalProps> = ({
         team_name: selectedTeam.team_name || "",
         team_description: selectedTeam.team_description || "",
         parent_team_ID: selectedTeam.parent_team_ID || null,
-        acc_ID: selectedTeam.acc_ID || null,
         team_logo: selectedTeam.team_logo || "",
         node: selectedTeam.node,
         is_archived: selectedTeam.is_archived,
@@ -376,23 +385,12 @@ const TeamModal: React.FC<TeamModalProps> = ({
         tag_IDs: selectedTeam.tag_IDs || [],
       });
     }
-
-    actionTeams({
-      queryParameters: "/view",
-      method: "POST",
-      body: { is_archived: 0, offset: 0, limit: 9999 },
-    })
-      .unwrap()
-      .then((res) => setTeams(res.data || []))
-      .catch((err) => {
-        console.error("❌ Failed to fetch teams:", err);
-        setTeams([]);
-      });
   }, [isOpen, selectedTeam, mode]);
 
-  const getTitle = () => (mode === "add" ? "Add Team" : mode === "edit" ? "Edit Team" : "View Team");
+  const getTitle = () =>
+    mode === "add" ? "Add Team" : mode === "edit" ? "Edit Team Info" : "View Team Info";
 
-  const handleInputChange = (field: keyof TeamDataType, value: string | string[] | null) => {
+  const handleInputChange = (field: keyof TeamDataType, value: any) => {
     setFormErrors((prev) => ({ ...prev, [field]: "" }));
     setFormData((prev) => ({ ...prev, [field]: value ?? "" }));
   };
@@ -405,110 +403,48 @@ const TeamModal: React.FC<TeamModalProps> = ({
     return Object.keys(errors).length === 0;
   };
 
-  // ✅ This is a trimmed and clarified update section of your TeamModal.tsx
-// Replace your entire existing file with this if you'd like full consistency.
+  const handleSave = useCallback(async () => {
+    if (!validateFields()) return;
 
-const handleSave = useCallback(async () => {
-  console.log("🟢🛠 handleSave STARTED");
-  console.log("🧠 Current formData:", formData);
+    const cleanedTagIDs = Array.isArray(formData.tag_IDs)
+      ? formData.tag_IDs.filter(Boolean)
+      : [];
 
-  if (!validateFields()) return;
+    const isUpdate = confirmationAction === "update" || mode === "edit";
+    const bodyToSend = {
+      ...formData,
+      tag_IDs: cleanedTagIDs,
+      ...(isUpdate ? { team_ID: formData.team_ID } : {}),
+      parent_team_ID: formData.parent_team_ID || null,
+    };
 
-  // Safety check for edit
-  if ((mode === "edit" || confirmationAction === "update") && !formData.team_ID) {
-    alert("⚠️ Cannot update without a team_ID");
-    console.warn("⚠️ Missing team_ID:", formData);
-    return;
-  }
+    const method = isUpdate ? "PUT" : "POST";
+    const endpoint = isUpdate ? "/update" : "/";
 
-  const isUpdate = confirmationAction === "update" || mode === "edit";
+    try {
+      const response = await actionTeams({
+        queryParameters: endpoint,
+        method,
+        body: bodyToSend,
+      }).unwrap();
 
-  const payload: TeamDataType = {
-    ...formData,
-    ...(isUpdate ? { team_ID: formData.team_ID } : {}),
-    parent_team_ID: formData.parent_team_ID || null,
-    tag_IDs: formData.tag_IDs || [],
-  };
+      if (onSave) onSave(response.data || formData);
 
-  const method = isUpdate ? "PUT" : "POST";
-  const endpoint = isUpdate ? "/update" : "/";
-
-  console.log("📤 Submitting payload:", JSON.stringify(payload, null, 2));
-  console.log("📡 Method:", method, "→ Endpoint:", endpoint);
-
-  try {
-    const response = await actionTeams({
-      queryParameters: endpoint,
-      method,
-      body: payload,
-    }).unwrap();
-
-    console.log("✅ Team saved:", response);
-
-    if (onSave) {
-      const responseData = response.data || payload;
-      console.log("📦 Calling onSave with:", responseData);
-      onSave(responseData);
+      setIsConfirmationModalOpen(false);
+      onClose();
+    } catch (err) {
+      console.error(`❌ Error ${isUpdate ? "updating" : "creating"} team:`, err);
     }
-
-    setIsConfirmationModalOpen(false);
-    onClose();
-  } catch (err) {
-    console.error("❌ Error saving team:", err);
-  }
-}, [formData, mode, confirmationAction, actionTeams, onSave, onClose]);
-
-
-  const handleConfirmationClick = () => {
-    console.log("✅ Confirm button clicked → Calling handleSave()");
-    handleSave();
-  };
-
-  const handleConfirmationOpen = (action: "update" | "add" | "archive") => {
-    console.log("⚠️ Opening confirmation for:", action);
-    setConfirmationAction(action);
-    setIsConfirmationModalOpen(true);
-  };
-
-  const footerButtons = [
-    {
-      label: "Cancel",
-      variant: "ghost" as const,
-      onClick: onClose,
-      size: "medium" as const,
-    },
-    ...(mode !== "view"
-      ? [
-          {
-            label: mode === "add" ? "Add Team" : "Update Team",
-            variant: "primary" as const,
-            onClick: () => {
-              console.log("🟦 Triggering confirmation modal");
-              handleConfirmationOpen(mode === "add" ? "add" : "update");
-            },
-            size: "medium" as const,
-          },
-        ]
-      : []),
-  ];
+  }, [formData, mode, confirmationAction, actionTeams, onSave, onClose]);
 
   const tags: TagOption[] = (tagData?.data || []).map((tag: any) => ({
     label: tag.tag_name,
     value: tag.tag_ID,
   }));
 
-  const selectedTagOptions: TagOption[] = tags.filter((tag) =>
-    formData.tag_IDs?.includes(tag.value)
+  const selectedTags: TagOption[] = tags.filter((tag) =>
+    (formData.tag_IDs ?? []).includes(tag.value)
   );
-
-  const referenceOptions = teamReferenceOptions.length
-    ? teamReferenceOptions
-    : teams
-        .filter((team: any) => team.team_ID !== formData.team_ID)
-        .map((team: any) => ({
-          label: team.team_name,
-          value: team.team_ID,
-        }));
 
   return (
     <>
@@ -516,22 +452,24 @@ const handleSave = useCallback(async () => {
         isOpen={isOpen}
         onClose={onClose}
         title={getTitle()}
-        showButton={mode === "view"}
-        buttonLabel="Edit Team"
+        showButton={false}
         modalWidth="w-[900px]"
         contentHeight="h-[400px] min-h-[120px] max-h-[55vh]"
-        headerOptions="left"
-        footerOptions="stacked-left"
-        footerButtons={footerButtons}
+        footerButtons={[
+          { label: "Cancel", variant: "ghost" as const, onClick: onClose },
+          ...(mode !== "view"
+            ? [
+                {
+                  label: mode === "add" ? "Add Team" : "Save",
+                  variant: "primary" as const,
+                  onClick: () => setIsConfirmationModalOpen(true),
+                },
+              ]
+            : []),
+        ]}
         content={
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] mt-1 z-60">
             <div className="flex flex-col gap-[24px]">
-              <Inputs
-                label="TEAM CODE"
-                value={formData.team_code}
-                error={!!formErrors.team_code}
-                onChange={(e) => handleInputChange("team_code", e.target.value)}
-              />
               <Inputs
                 label="TEAM NAME"
                 value={formData.team_name}
@@ -539,67 +477,88 @@ const handleSave = useCallback(async () => {
                 onChange={(e) => handleInputChange("team_name", e.target.value)}
               />
               <Inputs
-                label="TEAM DESCRIPTION"
-                isTextarea
-                maxCharacter={200}
-                value={formData.team_description || ""}
-                onChange={(e) => handleInputChange("team_description", e.target.value)}
+                label="TEAM CODE"
+                value={formData.team_code}
+                error={!!formErrors.team_code}
+                onChange={(e) => handleInputChange("team_code", e.target.value)}
               />
-              <div className="flex flex-col gap-[4px]">
-                <label className="text-label-sm text-gray-500">TEAM REFERENCE</label>
-                <select
-                  className="w-full border border-gray-300 rounded-lg px-3 py-[10px] text-body-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
-                  value={formData.parent_team_ID || ""}
-                  onChange={(e) => handleInputChange("parent_team_ID", e.target.value)}
-                >
-                  <option value="">No Reference</option>
-                  {referenceOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col gap-[4px]">
-                <label className="text-label-sm text-gray-500">TAGS</label>
-                <Select
-                  isMulti
-                  options={tags}
-                  value={selectedTagOptions}
-                  onChange={(selected: readonly TagOption[]) =>
-                    handleInputChange("tag_IDs", selected.map((s) => s.value))
-                  }
-                  className="text-body-md"
-                  classNamePrefix="select"
-                />
-              </div>
-              {import.meta.env.MODE !== "production" && (
-                <pre className="text-xs text-gray-400 overflow-x-auto max-h-[100px] mt-2">
-                  {JSON.stringify(formData, null, 2)}
-                </pre>
-              )}
+              <Dropdown
+                label="TEAM REFERENCE"
+                size="small"
+                options={teamReferenceOptions}
+                placeholder="Select team reference"
+                value={
+                  formData.parent_team_ID
+                    ? teamReferenceOptions.find(opt => opt.value === formData.parent_team_ID)
+                    : undefined
+                }
+                onSelectionChange={(value) => {
+                  const ref = Array.isArray(value) ? value[0]?.value : value?.value;
+                  handleInputChange("parent_team_ID", ref || "");
+                }}
+                usePortal
+              />
+              <Dropdown
+                label="TAGS"
+                placeholder="Select tags"
+                options={tags}
+                value={selectedTags}
+                onSelectionChange={(value) => {
+                  const ids = Array.isArray(value) ? value.map(v => v.value) : value ? [value.value] : [];
+                  handleInputChange("tag_IDs", ids);
+                }}
+                multiSelect
+                size="small"
+                usePortal
+              />
+            </div>
+            <div className="z-0 mt-[40px] sm:mt-0">
+              <Inputs
+                label="TEAM DESCRIPTION"
+                className="h-[256px]"
+                maxCharacter={200}
+                isTextarea
+                value={formData.team_description || ""}
+                onChange={(e) =>
+                  handleInputChange("team_description", e.target.value)
+                }
+              />
             </div>
           </div>
         }
       />
-
       <ConfirmationModal
         isOpen={isConfirmationModalOpen}
         onClose={() => setIsConfirmationModalOpen(false)}
-        onClick={handleConfirmationClick}
+        onClick={handleSave}
         description={
           confirmationAction === "add"
             ? "Are you sure you want to add this team?"
             : "Are you sure you want to update this team?"
         }
         buttonLabel={confirmationAction === "add" ? "Add Team" : "Update Team"}
-        image={undefined}
       />
     </>
   );
 };
 
 export default TeamModal;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

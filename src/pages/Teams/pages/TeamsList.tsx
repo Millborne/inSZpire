@@ -50,8 +50,8 @@ const TeamsList = ({ teams, viewType, onTeamSave }: TeamsListProps) => {
         <p className="text-body-base text-center text-gray-500">No teams found.</p>
       ) : (
         teams.map((team) => {
-          console.log("🟡 Rendering team:", team.team_name);
-          console.log("👥 team.employees:", team.employees);
+          // console.log("🟡 Rendering team:", team.team_name);
+          // console.log("👥 team.employees:", team.employees);
 
           return (
             <TeamCard

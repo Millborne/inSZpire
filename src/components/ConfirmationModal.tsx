@@ -124,6 +124,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onClick: () => {
     console.log("🟢 Confirm button clicked → Calling onClick()");
     try {
+      console.log("try test")
       onClick(); // <--- this is the handleConfirmationClick
     } catch (err) {
       console.error("🔥 Error calling onClick:", err);
