@@ -1,161 +1,181 @@
 import React, { useState } from "react";
 import { ArrowUp2, ArrowDown2 } from "iconsax-reactjs";
 import { Employee } from "../../../types/team";
+import { Team } from "./TeamCard";
 import { Avatar } from "enterprisze-global-components";
 import TeamModal, { TeamDataType } from "./modals/TeamModal";
 import { useNavigate } from "react-router-dom";
 
 interface TeamsTableProps {
-  id: string;
-  teamName: string;
-  employees: Employee[];
-  isSelected?: boolean;
-  onSave?: (data: TeamDataType) => void;
-  onArchive?: (data: TeamDataType) => void;
+    id: string;
+    teamName: string;
+    employees: Employee[];
+    isSelected?: boolean;
+    onSave?: (data: TeamDataType) => void;
+    onArchive?: (data: TeamDataType) => void;
+    team?: Team;
 }
 
 const TeamsTable: React.FC<TeamsTableProps> = ({
-  id,
-  teamName,
-  employees,
-  isSelected,
-  onSave,
+    id,
+    teamName,
+    employees,
+    isSelected,
+    onSave,
+    team,
 }) => {
-  const navigate = useNavigate();
-  const [showAll, setShowAll] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+    const navigate = useNavigate();
+    const [showAll, setShowAll] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const displayedEmployees = showAll ? employees : employees.slice(0, 4);
+    const displayedEmployees = showAll ? employees : employees.slice(0, 4);
 
-  const teamData: TeamDataType = {
-  team_ID: id, // ✅ was `id: id` before
-  team_name: teamName,
-  team_code: "",
-  team_description: "",
-  parent_team_ID: null,
-  acc_ID: null,
-};
+    const teamData: TeamDataType = {
+        team_ID: id, // ✅ was `id: id` before
+        team_name: teamName,
+        team_code: "",
+        team_description: "",
+        parent_team_ID: null,
+        acc_ID: null,
+    };
 
+    const handleSave = async (data: TeamDataType) => {
+        console.log("Saving team data:", data);
+        if (onSave) {
+            onSave(data);
+        }
+    };
 
-  const handleSave = async (data: TeamDataType) => {
-    console.log("Saving team data:", data);
-    if (onSave) {
-      onSave(data);
-    }
-  };
+    const columns = [
+        {
+            label: "Name",
+            key: "name",
+            render: (employee: Employee) => (
+                <div className="flex flex-row items-center gap-[10px]">
+                    <Avatar src={employee.avatar} size="medium" />
+                    <span className="text-body-small-reg font-dmSans">
+                        {employee.name}
+                    </span>
+                </div>
+            ),
+        },
+        { label: "Position", key: "position" },
+        { label: "Subordinates", key: "subordinates_count" },
+        { label: "Years in Position", key: "years_in_position" },
+    ];
 
-  const columns = [
-    {
-      label: "Name",
-      key: "name",
-      render: (employee: Employee) => (
-        <div className="flex flex-row items-center gap-[10px]">
-          <Avatar src={employee.avatar} size="medium" />
-          <span className="text-body-small-reg font-dmSans">
-            {employee.name}
-          </span>
-        </div>
-      ),
-    },
-    { label: "Position", key: "position" },
-    { label: "Subordinates", key: "subordinates" },
-    { label: "Years in Position", key: "yearsOfPosition" },
-  ];
+    return (
+        <>
+            <div
+                className="w-full max-w-full flex flex-col gap-[12px] p-[16px] border border-szPrimary200 rounded-lg cursor-pointer"
+                onClick={() =>
+                    navigate(`/home/teams/${id}/specificteam`, {
+                        state: { team },
+                    })
+                }
+                onDoubleClick={() => setIsModalOpen(true)} // ✅ Add way to trigger modal
+            >
+                <p className="text-body-base-strong text-left">{teamName}</p>
 
-  return (
-    <>
-      <div
-        className="w-full max-w-full flex flex-col gap-[12px] p-[16px] border border-szPrimary200 rounded-lg cursor-pointer"
-        onClick={() => navigate(`/home/teams/${id}/specificteam`)}
-        onDoubleClick={() => setIsModalOpen(true)} // ✅ Add way to trigger modal
-      >
-        <p className="text-body-base-strong">{teamName}</p>
+                <div className="w-full overflow-x-auto">
+                    {employees.length > 0 && (
+                        <table className="min-w-[700px] w-full table-fixed">
+                            <thead>
+                                <tr>
+                                    {columns.map((col) => (
+                                        <th
+                                            key={col.key}
+                                            className="text-body-small-strong text-left py-[8px] font-dmSans border-b border-szGrey200"
+                                        >
+                                            {col.label}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {displayedEmployees.map((employee, index) => (
+                                    <tr
+                                        key={index}
+                                        className="group"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <td
+                                            colSpan={columns.length}
+                                            className="p-0"
+                                        >
+                                            <div
+                                                className={`flex overflow-hidden items-center
+                                                  ${
+                                                      isSelected
+                                                          ? "border border-szPrimary700 rounded-lg"
+                                                          : "border-b border-szGrey200"
+                                                  }
+                                                  ${
+                                                      !isSelected
+                                                          ? "hover:rounded-lg hover:border-2 hover:border-szPrimary700"
+                                                          : ""
+                                                  }
+                                                  cursor-pointer transition-all`}
+                                            >
+                                                {columns.map((col) => (
+                                                    <div
+                                                        key={col.key}
+                                                        className="flex-1 py-[8px] text-body-small-reg font-dmSans text-left"
+                                                    >
+                                                        {col.render
+                                                            ? col.render(
+                                                                  employee
+                                                              )
+                                                            : employee[
+                                                                  col.key as keyof Employee
+                                                              ]}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
 
-        <div className="w-full overflow-x-auto">
-          <table className="min-w-[700px] w-full table-fixed">
-            <thead>
-              <tr>
-                {columns.map((col) => (
-                  <th
-                    key={col.key}
-                    className="text-body-small-strong text-left py-[8px] font-dmSans border-b border-szGrey200"
-                  >
-                    {col.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {displayedEmployees.map((employee, index) => (
-                <tr
-                  key={index}
-                  className="group"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <td colSpan={columns.length} className="p-0">
+                {employees.length > 4 && (
                     <div
-                      className={`flex overflow-hidden items-center
-                      ${isSelected
-                        ? "border border-szPrimary700 rounded-lg"
-                        : "border-b border-szGrey200"}
-                      ${
-                        !isSelected
-                          ? "hover:rounded-lg hover:border-2 hover:border-szPrimary700"
-                          : ""
-                      }
-                      cursor-pointer transition-all`}
+                        className="flex gap-[8px] py-[8px] items-center justify-center cursor-pointer"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setShowAll(!showAll);
+                        }}
                     >
-                      {columns.map((col) => (
-                        <div
-                          key={col.key}
-                          className="flex-1 py-[8px] text-body-small-reg font-dmSans"
-                        >
-                          {col.render
-                            ? col.render(employee)
-                            : employee[col.key as keyof Employee]}
-                        </div>
-                      ))}
+                        {showAll ? (
+                            <>
+                                <ArrowUp2 className="icon-md" />
+                                <p className="text-body-small-strong">
+                                    See Less
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <ArrowDown2 className="icon-md" />
+                                <p className="text-body-small-strong">
+                                    See More
+                                </p>
+                            </>
+                        )}
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                )}
+            </div>
 
-        {employees.length > 4 && (
-          <div
-            className="flex gap-[8px] py-[8px] items-center justify-center cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowAll(!showAll);
-            }}
-          >
-            {showAll ? (
-              <>
-                <ArrowUp2 className="icon-md" />
-                <p className="text-body-small-strong">See Less</p>
-              </>
-            ) : (
-              <>
-                <ArrowDown2 className="icon-md" />
-                <p className="text-body-small-strong">See More</p>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-
-      <TeamModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        mode="edit"
-        selectedTeam={teamData}
-        onSave={handleSave}
-      />
-    </>
-  );
+            <TeamModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                mode="edit"
+                selectedTeam={teamData}
+                onSave={handleSave}
+            />
+        </>
+    );
 };
 
 export default TeamsTable;
-

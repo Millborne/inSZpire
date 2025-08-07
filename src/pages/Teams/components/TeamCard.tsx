@@ -15,7 +15,7 @@ interface Employee {
   nodeReference: number;
 }
 
-interface Team {
+export interface Team {
   team_ID: string;
   team_name: string;
   team_code: string;
