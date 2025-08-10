@@ -33,30 +33,30 @@ import ChangePassword from "./pages/ChangePassword";
 import { useSharedAuth } from './hooks/authentication/useSharedAuth';
 
 function App() {
-  const { 
-    user, 
-    isAuthenticated, 
-    loading, 
-    error, 
-    logout, 
-    source,
-    hasAuth 
-    } = useSharedAuth();
+  // const { 
+  //   user, 
+  //   isAuthenticated, 
+  //   loading, 
+  //   error, 
+  //   logout, 
+  //   source,
+  //   hasAuth 
+  //   } = useSharedAuth();
     
-    // Console log to check current user
-    console.log('Current user:', user);
-    console.log('Authentication status:', { isAuthenticated, hasAuth, source });
+  //   // Console log to check current user
+  //   console.log('Current user:', user);
+  //   console.log('Authentication status:', { isAuthenticated, hasAuth, source });
     
-    if (loading) {
-        return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50">
-            <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Checking authentication...</p>
-            </div>
-        </div>
-        );
-    }
+  //   if (loading) {
+  //       return (
+  //       <div className="flex items-center justify-center min-h-screen bg-gray-50">
+  //           <div className="text-center">
+  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+  //           <p className="text-gray-600">Checking authentication...</p>
+  //           </div>
+  //       </div>
+  //       );
+  //   }
 
     // if (!hasAuth) {
     //     return (
@@ -105,7 +105,7 @@ function App() {
                 <Route path="/home/*" element={<Home />}>
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="employees" element={<EmployeeList />} />
-                    <Route path="employees/:id/*" element={<Employees />}>
+                    <Route path="employees/:employee_ID/*" element={<Employees />}>
                         <Route path="summary" element={<Summary />} />
                         <Route path="personal" element={<Personal />} />
                         <Route path="documents" element={<Documents />} />

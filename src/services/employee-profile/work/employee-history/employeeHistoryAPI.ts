@@ -1,6 +1,17 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import Cookies from "js-cookie";
 
-// Types for the new employee history API
+const { VITE_EMPLOYMENT_SERVICE } = import.meta.env;
+
+// Debug: Log the environment variable to see what URL is being used
+console.log('🔧 VITE_EMPLOYMENT_SERVICE:', VITE_EMPLOYMENT_SERVICE);
+
+// Fallback to localhost:3000 if environment variable is not set
+const baseUrl = VITE_EMPLOYMENT_SERVICE || 'http://localhost:3000';
+
+console.log('🔧 Using base URL:', baseUrl);
+
+// Types for the new employee history API (Company History feature)
 export interface EmployeeHistoryViewRequest {
   employee_ID: string;
   offset?: number;
@@ -46,62 +57,107 @@ export interface EmployeeHistoryViewData {
   updated_at: string;
 }
 
-// Base API configuration - using the working endpoint pattern
-const baseQuery = fetchBaseQuery({
-  baseUrl: 'http://localhost:3000/api/v1',
-  prepareHeaders: (headers) => {
-    headers.set('Content-Type', 'application/json');
-    return headers;
-  },
-});
-
-// Create the API slice
 export const employeeHistoryAPI = createApi({
-  reducerPath: 'employeeHistoryAPI',
-  baseQuery,
-  tagTypes: ['EmployeeHistory'],
+  reducerPath: "employeeHistory",
+  baseQuery: fetchBaseQuery({
+    baseUrl: baseUrl,
+    prepareHeaders: (headers) => {
+      const token = Cookies.get("token");
+      if (token) headers.set("Authorization", `Bearer ${token}`);
+      console.log('🔧 Making API call with baseUrl:', baseUrl);
+      return headers;
+    },
+  }),
+  tagTypes: ["employeeHistory"],
   endpoints: (builder) => ({
-    // The working endpoint from your second image
+    // ✅ mark the history query as providing a tag per employee (Workmate's existing endpoint)
+    fetchEmployeeHistory: builder.query<any, { body: any }>({
+      query: (data) => {
+        console.log('🔧 Calling fetchEmployeeHistory with URL:', `${baseUrl}/api/v1/employee-history/current-and-company`);
+        console.log('🔧 Request body:', data.body);
+        return {
+          url: "/api/v1/employee-history/current-and-company",
+          method: "POST",
+          body: data.body,
+        };
+      },
+      providesTags: (_res, _err, args) => [
+        { type: "employeeHistory", id: args.body?.employee_ID ?? "LIST" },
+      ],
+    }),
+
+    // 🆕 NEW: Company History endpoint (for the timeline feature)
     fetchEmployeeHistoryView: builder.mutation<EmployeeHistoryViewResponse, EmployeeHistoryViewRequest>({
-      query: (request) => ({
-        url: '/employee-history/view',
-        method: 'POST',
-        body: request,
-      }),
-      invalidatesTags: ['EmployeeHistory'],
+      query: (request) => {
+        console.log('🔧 Calling fetchEmployeeHistoryView with URL:', `${baseUrl}/api/v1/employee-history/view`);
+        console.log('🔧 Request body:', request);
+        return {
+          url: "/api/v1/employee-history/view",
+          method: "POST",
+          body: request,
+        };
+      },
+      invalidatesTags: (_res, _err, args) => [
+        { type: "employeeHistory", id: args.employee_ID ?? "LIST" },
+      ],
     }),
 
-    // Alternative endpoint - try this if the above doesn't work
+    // 🆕 NEW: Alternative Company History endpoint using query
     fetchEmployeeHistoryByEmployee: builder.query<EmployeeHistoryViewResponse, string>({
-      query: (employeeId) => `/employee-history/employee/${employeeId}`,
-      providesTags: ['EmployeeHistory'],
+      query: (employeeId) => {
+        console.log('🔧 Calling fetchEmployeeHistoryByEmployee with URL:', `${baseUrl}/api/v1/employee-history/get-by-employee`);
+        console.log('🔧 Employee ID:', employeeId);
+        return {
+          url: "/api/v1/employee-history/get-by-employee",
+          method: "POST",
+          body: { employee_ID: employeeId }
+        };
+      },
+      providesTags: (_res, _err, employeeId) => [
+        { type: "employeeHistory", id: employeeId },
+      ],
     }),
 
-    // Existing endpoints (keeping for compatibility)
-    fetchEmployeeHistory: builder.query<any, { queryParameters: string; method: string }>({
+    // 🆕 NEW: Generic query for backward compatibility
+    fetchEmployeeHistoryGeneric: builder.query<any, { queryParameters: string; method: string }>({
       query: ({ queryParameters, method }) => ({
         url: queryParameters,
         method,
       }),
-      providesTags: ['EmployeeHistory'],
+      providesTags: ["employeeHistory"],
     }),
 
-    actionEmployeeHistory: builder.mutation<any, { queryParameters: string; method: string; body?: any }>({
+    // (optional) your dropdown aggregator stays as-is
+    getEmployeeDropdowns: builder.query<
+      { positionOptions: {value:string;label:string}[]; statusOptions:{value:string;label:string}[] },
+      void
+    >({
+      query: () => ({ url: "/api/v1/employee-history/dropdowns", method: "POST" }),
+    }),
+
+    // ✅ generic mutation: invalidate the same tag so the page refetches
+    actionEmployeeHistory: builder.mutation<
+      any,
+      { queryParameters: string; method: string; body?: any }
+    >({
       query: ({ queryParameters, method, body }) => ({
-        url: queryParameters,
+        url: `/api/v1/employee-history${queryParameters}`,
         method,
         body,
       }),
-      invalidatesTags: ['EmployeeHistory'],
+      invalidatesTags: (_res, _err, args) => [
+        { type: "employeeHistory", id: args.body?.employee_ID ?? "LIST" },
+      ],
     }),
   }),
 });
 
-// Export hooks
 export const {
+  useFetchEmployeeHistoryQuery,
   useFetchEmployeeHistoryViewMutation,
   useFetchEmployeeHistoryByEmployeeQuery,
-  useFetchEmployeeHistoryQuery,
+  useFetchEmployeeHistoryGenericQuery,
+  useGetEmployeeDropdownsQuery,
   useActionEmployeeHistoryMutation,
 } = employeeHistoryAPI;
 

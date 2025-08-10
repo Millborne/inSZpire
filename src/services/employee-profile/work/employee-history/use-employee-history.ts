@@ -3,26 +3,22 @@ import {
     useActionEmployeeHistoryMutation,
     useFetchEmployeeHistoryViewMutation,
     useFetchEmployeeHistoryByEmployeeQuery,
+    useFetchEmployeeHistoryGenericQuery,
     EmployeeHistoryViewRequest,
     EmployeeHistoryViewResponse,
 } from "./employeeHistoryAPI";
 
 export const useEmployeeHistory = ({
-    queryParameters,
-    method,
+    body,
     disableFetch = false,
 }: {
-    queryParameters?: string;
-    method?: string;
+    body: any;
     disableFetch?: boolean;
 }) => {
     // fetch
     const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
         useFetchEmployeeHistoryQuery(
-            {
-                queryParameters: queryParameters ?? "",
-                method: method,
-            },
+            { body },
             { skip: disableFetch }
         );
 
@@ -60,7 +56,7 @@ export const useEmployeeHistory = ({
     };
 };
 
-// New hook for employee history view with fallback options
+// New hook for employee history view with fallback options (NEEDED FOR COMPANY HISTORY)
 export const useEmployeeHistoryView = () => {
     const [fetchEmployeeHistoryView, { 
         data: mutationData, 
@@ -121,6 +117,36 @@ export const useEmployeeHistoryByEmployee = (employeeId: string, enabled: boolea
     };
 };
 
+// Generic hook for backward compatibility (for the old queryParameters/method pattern)
+export const useEmployeeHistoryGeneric = ({
+    queryParameters,
+    method,
+    disableFetch = false,
+}: {
+    queryParameters?: string;
+    method?: string;
+    disableFetch?: boolean;
+}) => {
+    const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
+        useFetchEmployeeHistoryGenericQuery(
+            {
+                queryParameters: queryParameters ?? "",
+                method: method ?? "GET",
+            },
+            { skip: disableFetch }
+        );
+
+    return {
+        data,
+        isSuccess,
+        isError,
+        isLoading,
+        isFetching,
+        error,
+        refetch,
+    };
+};
+
 // Employee History-specific interfaces
 export interface EmployeeHistoryData {
     eh_ID?: string;
@@ -156,14 +182,13 @@ export interface EmployeeHistoryData {
     };
 }
 
-// Request interfaces
 export interface ListEmployeeHistoryRequest {
-    employee_ID?: string;
+    emp_ID?: string;
     position_ID?: string;
     department_ID?: string;
-    status?: string;
-    start_date?: string;
-    end_date?: string;
+    eh_status?: "active" | "inactive" | "pending";
+    search?: string;
+    is_archived?: number;
     offset?: number;
     limit?: number;
 }
@@ -176,7 +201,7 @@ export interface UpdateEmployeePositionRequest {
     eh_end_date?: string;
     eh_reason?: string;
     eh_notes?: string;
-    eh_status: "active" | "inactive" | "pending";
+    eh_status?: "active" | "inactive" | "pending";
 }
 
 export interface EmployeeHistoryDetailsRequest {
@@ -246,17 +271,20 @@ export const useEmployeeHistoryService = () => {
     };
 
     return {
-        listEmployeeHistory,
-        updateEmployeePosition,
-        viewEmployeeHistoryDetails,
-        viewEmployeeHistoryByEmployee,
-        viewEmployeeHistoryByPosition,
-        viewEmployeeHistoryByDepartment,
+        // mutation
         actionData,
         actionIsError,
         actionIsLoading,
         actionIsSuccess,
         actionError,
         actionReset,
+
+        // methods
+        listEmployeeHistory,
+        updateEmployeePosition,
+        viewEmployeeHistoryDetails,
+        viewEmployeeHistoryByEmployee,
+        viewEmployeeHistoryByPosition,
+        viewEmployeeHistoryByDepartment,
     };
 };
