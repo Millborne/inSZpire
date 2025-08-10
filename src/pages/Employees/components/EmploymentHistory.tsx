@@ -20,6 +20,7 @@ const EmploymentHistory = () => {
   const [timelineHistory, setTimelineHistory] = useState<any[]>([]);
   const [timelineError, setTimelineError] = useState<string | null>(null);
   const [hasAttemptedTimelineFetch, setHasAttemptedTimelineFetch] = useState(false);
+  const [employeeName, setEmployeeName] = useState<string>("Employee");
   const { employee_ID } = useParams();
 
   const shouldSkip = !employee_ID;
@@ -51,6 +52,15 @@ const EmploymentHistory = () => {
         const sortedHistory = sortHistoryByDate(response.data.history);
         const transformedData = transformToTimelineData(sortedHistory);
         setTimelineHistory(transformedData);
+        
+        // Extract employee name from the first history record
+        if (response.data.history && response.data.history.length > 0) {
+          const firstRecord = response.data.history[0];
+          const fullName = firstRecord.employee_full_name || 
+            `${firstRecord.first_name || ''} ${firstRecord.last_name || ''}`.trim();
+          setEmployeeName(fullName || "Employee");
+        }
+        
         console.log('✅ Timeline data loaded:', transformedData);
       } else {
         setTimelineError(response.message || "Failed to fetch timeline data");
@@ -70,6 +80,18 @@ const EmploymentHistory = () => {
     fetchTimelineData();
   }, [fetchTimelineData]);
 
+  // Set employee name from existing data if timeline API didn't provide it
+  useEffect(() => {
+    if (employeeName === "Employee" && data?.data?.currentPosition) {
+      const currentPos = data.data.currentPosition;
+      const fullName = currentPos.employee_full_name || 
+        `${currentPos.first_name || ''} ${currentPos.last_name || ''}`.trim();
+      if (fullName) {
+        setEmployeeName(fullName);
+      }
+    }
+  }, [data, employeeName]);
+
   if (shouldSkip) return <div>Loading employee details...</div>;
   if (isLoading) return <div>Loading...</div>;
   if (isError || !data?.data) return <div>Error loading employee history.</div>;
@@ -77,8 +99,24 @@ const EmploymentHistory = () => {
   const rawCurrentPosition = data.data.currentPosition;
   const companyHistory = data.data.companyHistory || [];
 
+  // Use timeline data for current position if available (more up-to-date)
+  const timelineCurrentPosition = timelineHistory.length > 0 ? timelineHistory[0] : null;
+  
   // include the current position ID so we can optionally filter it in the modal
-  const currentPosition = rawCurrentPosition
+  const currentPosition = timelineCurrentPosition 
+    ? {
+        id: timelineCurrentPosition.position_ID || timelineCurrentPosition.id,
+        position_name: (timelineCurrentPosition.position || timelineCurrentPosition.position_name) ?? "N/A",
+        position_code: (timelineCurrentPosition.positionCode || timelineCurrentPosition.position_code) ?? "N/A",
+        employment_status: (timelineCurrentPosition.employmentStatus || timelineCurrentPosition.employment_status) ?? "N/A",
+        employee_status: (timelineCurrentPosition.employeeStatus || timelineCurrentPosition.employee_status) ?? "N/A",
+        start_date: timelineCurrentPosition.startDate 
+          ? new Date(timelineCurrentPosition.startDate).toDateString()
+          : timelineCurrentPosition.start_date
+          ? new Date(timelineCurrentPosition.start_date).toDateString()
+          : "N/A",
+      }
+    : rawCurrentPosition
     ? {
         id: rawCurrentPosition.current_position_ID
           ? String(rawCurrentPosition.current_position_ID)
@@ -262,14 +300,30 @@ const EmploymentHistory = () => {
             isOpen={isUpdatePositionModalOpen}
             onClose={() => setIsUpdatePositionModalOpen(false)}
             onSubmitSuccess={() => {
-              refetch();                 // refresh after update
+              console.log('🔄 Refreshing employee history data...');
+              // Force multiple refetches to ensure data is fresh
+              refetch().then((result) => {
+                console.log('✅ Employee history refetch result:', result);
+                if (result.data?.data?.currentPosition) {
+                  console.log('📊 Current position after refetch:', result.data.data.currentPosition);
+                }
+                // Try another refetch after a short delay
+                setTimeout(() => {
+                  console.log('🔄 Second refetch attempt...');
+                  refetch().then((result2) => {
+                    console.log('✅ Second refetch result:', result2);
+                    if (result2.data?.data?.currentPosition) {
+                      console.log('📊 Current position after second refetch:', result2.data.data.currentPosition);
+                    }
+                  });
+                }, 1000);
+              });
+              setHasAttemptedTimelineFetch(false); // reset flag to allow timeline refetch
+              fetchTimelineData();       // refresh timeline data too
               setIsUpdatePositionModalOpen(false);
             }}
-            employeePositionData={{
-              startDate: currentPosition?.start_date || "",
-              position: currentPosition?.position_name || "",
-              positionStatus: currentPosition?.employment_status || ""
-            }}
+            employee_ID={employee_ID}
+            employeeName={employeeName}
           />
         </div>
       }

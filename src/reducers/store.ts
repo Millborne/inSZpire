@@ -20,6 +20,7 @@ import { idsAPI } from "../services/employee-profile/personal/ids/idsAPI";
 import { employeeDetailsAPI } from "../services/employee-profile/work/employee-details/employeeDetailsAPI";
 import { teamMemberAPI } from "../services/employee-profile/work/team-member/teamMemberAPI";
 import { employeeHistoryAPI } from "../services/employee-profile/work/employee-history/employeeHistoryAPI";
+import { externalPositionsAPI } from "../services/employee-profile/work/employee-history/positionsAPI";
 import { personalDocumentsAPI } from "../services/employee-profile/work/documents/personal/personalDocumentsAPI";
 import { positionTypeAPI } from "../services/settings/positions/type/positionTypeAPI";
 import { workSetupAPI } from "../services/settings/work-setup/list/workSetupAPI";
@@ -52,6 +53,7 @@ const rootReducer = combineReducers({
     [employeeDetailsAPI.reducerPath]: employeeDetailsAPI.reducer,
     [teamMemberAPI.reducerPath]: teamMemberAPI.reducer,
     [employeeHistoryAPI.reducerPath]: employeeHistoryAPI.reducer,
+    [externalPositionsAPI.reducerPath]: externalPositionsAPI.reducer,
     [personalDocumentsAPI.reducerPath]: personalDocumentsAPI.reducer,
     [positionTypeAPI.reducerPath]: positionTypeAPI.reducer,
     [workSetupAPI.reducerPath]: workSetupAPI.reducer,
@@ -81,6 +83,7 @@ const configStore = configureStore({
             employeeDetailsAPI.middleware,
             teamMemberAPI.middleware,
             employeeHistoryAPI.middleware,
+            externalPositionsAPI.middleware,
             personalDocumentsAPI.middleware,
             positionTypeAPI.middleware,
             workSetupAPI.middleware,

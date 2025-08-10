@@ -57,6 +57,40 @@ export interface EmployeeHistoryViewData {
   updated_at: string;
 }
 
+// Types for position API
+export interface PositionData {
+  position_ID: string;
+  position_code: string;
+  position_name: string;
+  position_description?: string;
+  is_active?: boolean;
+}
+
+export interface PositionResponse {
+  success: boolean;
+  message: string;
+  data: PositionData[];
+}
+
+// Types for employee update
+export interface EmployeeUpdateRequest {
+  employee_ID: string;
+  employment_status_ID?: string;
+  employee_status_ID?: string;
+  position_status_ID?: string;
+  current_position_ID?: string;
+  basic_salary?: number;
+  change_type_ID?: string;
+  reason_for_change?: string;
+  updated_by?: string;
+}
+
+export interface EmployeeUpdateResponse {
+  success: boolean;
+  message: string;
+  data?: any;
+}
+
 export const employeeHistoryAPI = createApi({
   reducerPath: "employeeHistory",
   baseQuery: fetchBaseQuery({
@@ -68,7 +102,7 @@ export const employeeHistoryAPI = createApi({
       return headers;
     },
   }),
-  tagTypes: ["employeeHistory"],
+  tagTypes: ["employeeHistory", "positions"],
   endpoints: (builder) => ({
     // ✅ mark the history query as providing a tag per employee (Workmate's existing endpoint)
     fetchEmployeeHistory: builder.query<any, { body: any }>({
@@ -118,6 +152,23 @@ export const employeeHistoryAPI = createApi({
       ],
     }),
 
+    // 🆕 NEW: Update employee
+    updateEmployee: builder.mutation<EmployeeUpdateResponse, EmployeeUpdateRequest>({
+      query: (request) => {
+        console.log('🔧 Calling updateEmployee with URL:', `${baseUrl}/api/v1/employee/update`);
+        console.log('🔧 Update request:', request);
+        return {
+          url: "/api/v1/employee/update",
+          method: "PUT",
+          body: request,
+        };
+      },
+      invalidatesTags: (_res, _err, args) => [
+        { type: "employeeHistory", id: args.employee_ID ?? "LIST" },
+        { type: "positions", id: "LIST" },
+      ],
+    }),
+
     // 🆕 NEW: Generic query for backward compatibility
     fetchEmployeeHistoryGeneric: builder.query<any, { queryParameters: string; method: string }>({
       query: ({ queryParameters, method }) => ({
@@ -159,6 +210,7 @@ export const {
   useFetchEmployeeHistoryGenericQuery,
   useGetEmployeeDropdownsQuery,
   useActionEmployeeHistoryMutation,
+  useUpdateEmployeeMutation,
 } = employeeHistoryAPI;
 
 
