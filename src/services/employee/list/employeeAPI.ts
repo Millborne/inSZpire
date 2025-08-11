@@ -28,11 +28,11 @@ export const employeeAPI = createApi({
     endpoints: (builder) => ({
         fetchEmployees: builder.query({
             query: (data: generalProps) =>
-                `/employee${data.queryParameters}`,
+                `/api/v1/employee${data.queryParameters}`,
         }),
         actionEmployees: builder.mutation({
             query: (data: generalProps) => ({
-                url: `/employee${data.queryParameters}`,
+                url: `/api/v1/employee${data.queryParameters}`,
                 method: data.method,
                 body: data.body ?? undefined,
             }),
