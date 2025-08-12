@@ -1,24 +1,34 @@
 import { ConfirmationContent, Modal } from "enterprisze-global-components";
 import { InfoCircle } from "iconsax-reactjs";
-import { useState } from "react";
-import BasicInfoPendingModal from "./BasicInfoPendingModal";
 import { employeePositionData } from "./EmployeePositionModal";
 import Layer2 from "../../../../assets/Layer_2.svg";
-
+ 
 interface EmployeePositionConfirmationModalProps {
     isOpen: boolean;
     onClose: () => void;
-    employeePositionData: employeePositionData[];
+    employeePositionData: employeePositionData | null;
+    employeeName?: string;
+    currentPositionName?: string;
+    currentPositionStatus?: string;
     onSubmitSuccess?: () => void;
 }
-
-const EmployeePositionConfirmationModal: React.FC<EmployeePositionConfirmationModalProps> = ({ isOpen, onClose, onSubmitSuccess }) => {
-    const [isBasicInfoPendingModalOpen, setIsBasicInfoPendingModalOpen] = useState(false);
-
-    const handlePendingCheck = () => {
-        setIsBasicInfoPendingModalOpen(true);
+ 
+const EmployeePositionConfirmationModal: React.FC<EmployeePositionConfirmationModalProps> = ({
+    isOpen,
+    onClose,
+    employeePositionData,
+    employeeName = "Employee",
+    currentPositionName = "Current Position",
+    currentPositionStatus = "Current Status",
+    onSubmitSuccess
+}) => {
+    const handleUpdatePosition = () => {
+        onClose();
+        if (onSubmitSuccess) {
+            onSubmitSuccess();
+        }
     };
-
+ 
     return (
         <>
             <Modal
@@ -44,7 +54,7 @@ const EmployeePositionConfirmationModal: React.FC<EmployeePositionConfirmationMo
                     {
                         label: "Update Position",
                         variant: "primary",
-                        onClick: handlePendingCheck,
+                        onClick: handleUpdatePosition,
                         size: "medium",
                     },
                 ]}
@@ -53,7 +63,7 @@ const EmployeePositionConfirmationModal: React.FC<EmployeePositionConfirmationMo
                         <div className="flex flex-col gap-[8px]">
                             <img src={Layer2} alt="Layer 2" className="w-[80px] h-[80px] mx-auto" />
                             <p className="text-body-base-strong text-szBlack800 text-center">
-                                You are about to update the position of John Smith Fernandez
+                                You are about to update the position of {employeeName}
                             </p>
                             <div className="flex flex-col gap-[16px]">
                                 <ConfirmationContent
@@ -63,14 +73,14 @@ const EmployeePositionConfirmationModal: React.FC<EmployeePositionConfirmationMo
                                         {
                                             label: "POSITION",
                                             value: "",
-                                            oldValue: "Junior Software Developer",
-                                            newValue: "Senior Software Developer",
+                                            oldValue: currentPositionName,
+                                            newValue: employeePositionData?.position || "New Position",
                                         },
                                         {
                                             label: "POSITION STATUS",
                                             value: "",
-                                            oldValue: "Regular",
-                                            newValue: "Trainee",
+                                            oldValue: currentPositionStatus,
+                                            newValue: employeePositionData?.positionStatus || "New Status",
                                         },
                                     ]}
                                 />
@@ -79,17 +89,8 @@ const EmployeePositionConfirmationModal: React.FC<EmployeePositionConfirmationMo
                     </div>
                 }
             />
-            <BasicInfoPendingModal
-                isOpen={isBasicInfoPendingModalOpen}
-                onClose={() => setIsBasicInfoPendingModalOpen(false)}
-                onCloseConfirmation={onClose}
-                onSubmitSuccess={onSubmitSuccess}
-            />
         </>
     );
 };
-
+ 
 export default EmployeePositionConfirmationModal;
-
-
-

@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
- 
+
 // Types for position API
 export interface PositionData {
   position_ID: string;
@@ -25,12 +25,12 @@ export interface PositionData {
   is_archived?: number;
   position_status?: string;
 }
- 
+
 export interface PositionResponse {
   positions: PositionData[];
   total?: number;
 }
- 
+
 // Types for update position
 export interface UpdatePositionRequest {
   position_ID: string;
@@ -48,13 +48,13 @@ export interface UpdatePositionRequest {
   updated_by?: string;
   node_reference?: number;
 }
- 
+
 export interface UpdatePositionResponse {
   success: boolean;
   message: string;
   data?: any;
 }
- 
+
 export const externalPositionsAPI = createApi({
   reducerPath: "externalPositions",
   baseQuery: fetchBaseQuery({
@@ -78,7 +78,7 @@ export const externalPositionsAPI = createApi({
       },
       providesTags: ["externalPositions"],
     }),
- 
+
     // Update position
     updatePosition: builder.mutation<UpdatePositionResponse, UpdatePositionRequest>({
       query: (request) => {
@@ -94,7 +94,7 @@ export const externalPositionsAPI = createApi({
     }),
   }),
 });
- 
+
 export const {
   useFetchPositionsQuery,
   useUpdatePositionMutation,

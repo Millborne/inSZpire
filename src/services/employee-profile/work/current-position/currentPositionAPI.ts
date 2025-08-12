@@ -1,8 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Cookies from "js-cookie";
 
-// Use the correct backend URL - your backend is running on localhost:4172
-const baseURL = import.meta.env.VITE_EMPLOYMENT_SERVICE || "http://localhost:3000/api/v1";
+const { VITE_EMPLOYMENT_SERVICE } = import.meta.env;
 
 interface generalProps {
     queryParameters: string;
@@ -10,10 +9,10 @@ interface generalProps {
     body?: any;
 }
 
-export const employeeAPI = createApi({
-    reducerPath: "employee",
+export const currentPositionAPI = createApi({
+    reducerPath: "currentPosition",
     baseQuery: fetchBaseQuery({
-        baseUrl: baseURL,
+        baseUrl: VITE_EMPLOYMENT_SERVICE || "http://localhost:3000/api/v1",
         prepareHeaders: (headers) => {
             const token = Cookies.get("token");
 
@@ -24,13 +23,13 @@ export const employeeAPI = createApi({
             return headers;
         },
     }),
-    tagTypes: ["employee"],
+    tagTypes: ["currentPosition"],
     endpoints: (builder) => ({
-        fetchEmployees: builder.query({
+        fetchCurrentPosition: builder.query({
             query: (data: generalProps) =>
                 `/api/v1/employee${data.queryParameters}`,
         }),
-        actionEmployees: builder.mutation({
+        actionCurrentPosition: builder.mutation({
             query: (data: generalProps) => ({
                 url: `/api/v1/employee${data.queryParameters}`,
                 method: data.method,
@@ -40,5 +39,4 @@ export const employeeAPI = createApi({
     }),
 });
 
-export const { useFetchEmployeesQuery, useActionEmployeesMutation } =
-    employeeAPI;
+export const { useFetchCurrentPositionQuery, useActionCurrentPositionMutation } = currentPositionAPI; 

@@ -1,24 +1,24 @@
 import {
     useFetchEmployeeHistoryQuery,
     useActionEmployeeHistoryMutation,
+    useFetchEmployeeHistoryViewMutation,
+    useFetchEmployeeHistoryByEmployeeQuery,
+    useFetchEmployeeHistoryGenericQuery,
+    EmployeeHistoryViewRequest,
+    EmployeeHistoryViewResponse,
 } from "./employeeHistoryAPI";
 
 export const useEmployeeHistory = ({
-    queryParameters,
-    method,
+    body,
     disableFetch = false,
 }: {
-    queryParameters?: string;
-    method?: string;
+    body: any;
     disableFetch?: boolean;
 }) => {
     // fetch
     const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
         useFetchEmployeeHistoryQuery(
-            {
-                queryParameters: queryParameters ?? "",
-                method: method,
-            },
+            { body },
             { skip: disableFetch }
         );
 
@@ -53,6 +53,97 @@ export const useEmployeeHistory = ({
         actionIsSuccess,
         actionError,
         actionReset,
+    };
+};
+
+// New hook for employee history view with fallback options (NEEDED FOR COMPANY HISTORY)
+export const useEmployeeHistoryView = () => {
+    const [fetchEmployeeHistoryView, { 
+        data: mutationData, 
+        isSuccess: mutationSuccess, 
+        isError: mutationError, 
+        isLoading: mutationLoading, 
+        error: mutationErrorData 
+    }] = useFetchEmployeeHistoryViewMutation();
+
+    const fetchEmployeeHistory = async (request: EmployeeHistoryViewRequest) => {
+        try {
+            console.log('Attempting to fetch employee history with:', request);
+            const response = await fetchEmployeeHistoryView(request).unwrap();
+            console.log('Employee history response:', response);
+            return response;
+        } catch (err: any) {
+            console.error('Employee history fetch error:', err);
+            
+            // Check if it's a 404 error
+            if (err?.status === 404) {
+                throw new Error('Employee history endpoint not found. Please check if the backend API is implemented.');
+            }
+            
+            throw new Error(err?.data?.message || err?.error || "Failed to fetch employee history");
+        }
+    };
+
+    return {
+        fetchEmployeeHistory,
+        data: mutationData,
+        isSuccess: mutationSuccess,
+        isError: mutationError,
+        isLoading: mutationLoading,
+        error: mutationErrorData,
+    };
+};
+
+// Alternative hook using query instead of mutation
+export const useEmployeeHistoryByEmployee = (employeeId: string, enabled: boolean = true) => {
+    const { 
+        data, 
+        isSuccess, 
+        isError, 
+        isLoading, 
+        error,
+        refetch 
+    } = useFetchEmployeeHistoryByEmployeeQuery(employeeId, {
+        skip: !enabled || !employeeId
+    });
+
+    return {
+        data,
+        isSuccess,
+        isError,
+        isLoading,
+        error,
+        refetch,
+    };
+};
+
+// Generic hook for backward compatibility (for the old queryParameters/method pattern)
+export const useEmployeeHistoryGeneric = ({
+    queryParameters,
+    method,
+    disableFetch = false,
+}: {
+    queryParameters?: string;
+    method?: string;
+    disableFetch?: boolean;
+}) => {
+    const { data, isSuccess, isError, isLoading, isFetching, error, refetch } =
+        useFetchEmployeeHistoryGenericQuery(
+            {
+                queryParameters: queryParameters ?? "",
+                method: method ?? "GET",
+            },
+            { skip: disableFetch }
+        );
+
+    return {
+        data,
+        isSuccess,
+        isError,
+        isLoading,
+        isFetching,
+        error,
+        refetch,
     };
 };
 

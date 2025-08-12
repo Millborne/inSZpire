@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CardContainer, Tabs } from "enterprisze-global-components";
+import { useParams } from "react-router-dom";
 import EmployeeDetails from "../components/EmployeeDetails";
 import TeamMember from "../components/TeamMember";
 import EmploymentHistory from "../components/EmploymentHistory";
@@ -22,14 +23,15 @@ const tabOptions = [
     },
 ];
 
-const tabContentMap: Record<string, JSX.Element> = {
-    "Employee Details": <EmployeeDetails />,
-    "Team Members": <TeamMember />,
-    "Employment History": <EmploymentHistory />,
-};
-
 const Work = () => {
     const [activeTabIndex, setActiveTabIndex] = useState(0);
+    const { id: employeeId } = useParams(); // Get employee ID from URL params
+
+    const tabContentMap: Record<string, JSX.Element> = {
+        "Employee Details": <EmployeeDetails />,
+        "Team Members": <TeamMember />,
+        "Employment History": <EmploymentHistory employeeId={employeeId} />, // Pass employeeId prop
+    };
 
     return (
         <div className="flex flex-col gap-6 h-full">

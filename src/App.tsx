@@ -105,7 +105,7 @@ function App() {
                 <Route path="/home/*" element={<Home />}>
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="employees" element={<EmployeeList />} />
-                    <Route path="employees/:id/*" element={<Employees />}>
+                    <Route path="employees/:employee_ID/*" element={<Employees />}>
                         <Route path="summary" element={<Summary />} />
                         <Route path="personal" element={<Personal />} />
                         <Route path="documents" element={<Documents />} />
