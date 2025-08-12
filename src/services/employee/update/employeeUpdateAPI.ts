@@ -96,7 +96,7 @@ export const employeeUpdateAPI = createApi({
         }),
         getEmployeeById: builder.mutation<any, GetEmployeeByIdRequest>({
             query: (request) => ({
-                url: '/employee/get-by-id-view',
+                url: '/employee/get-by-id',
                 method: 'POST',
                 body: request,
             }),
