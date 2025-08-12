@@ -2,7 +2,7 @@ import { ConfirmationContent, Modal } from "enterprisze-global-components";
 import { InfoCircle } from "iconsax-reactjs";
 import { employeePositionData } from "./EmployeePositionModal";
 import Layer2 from "../../../../assets/Layer_2.svg";
-
+ 
 interface EmployeePositionConfirmationModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -12,15 +12,15 @@ interface EmployeePositionConfirmationModalProps {
     currentPositionStatus?: string;
     onSubmitSuccess?: () => void;
 }
-
-const EmployeePositionConfirmationModal: React.FC<EmployeePositionConfirmationModalProps> = ({ 
-    isOpen, 
-    onClose, 
+ 
+const EmployeePositionConfirmationModal: React.FC<EmployeePositionConfirmationModalProps> = ({
+    isOpen,
+    onClose,
     employeePositionData,
     employeeName = "Employee",
     currentPositionName = "Current Position",
     currentPositionStatus = "Current Status",
-    onSubmitSuccess 
+    onSubmitSuccess
 }) => {
     const handleUpdatePosition = () => {
         onClose();
@@ -28,7 +28,7 @@ const EmployeePositionConfirmationModal: React.FC<EmployeePositionConfirmationMo
             onSubmitSuccess();
         }
     };
-
+ 
     return (
         <>
             <Modal
@@ -92,8 +92,5 @@ const EmployeePositionConfirmationModal: React.FC<EmployeePositionConfirmationMo
         </>
     );
 };
-
+ 
 export default EmployeePositionConfirmationModal;
-
-
-

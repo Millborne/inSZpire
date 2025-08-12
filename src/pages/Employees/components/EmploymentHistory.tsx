@@ -11,10 +11,10 @@ import { useParams } from "react-router-dom";
 import { useFetchEmployeeHistoryQuery } from "../../../services/employee-profile/work/employee-history/employeeHistoryAPI";
 import { useEmployeeHistoryView } from "../../../services/employee-profile/work/employee-history/use-employee-history";
 import { transformToTimelineData, sortHistoryByDate } from "../../../utils/employeeHistoryUtils";
-
+ 
 // 🚧 TEMPORARY: Set to false to disable timeline API calls while backend is being developed
 const ENABLE_TIMELINE_API = true;
-
+ 
 const EmploymentHistory = () => {
   const [isUpdatePositionModalOpen, setIsUpdatePositionModalOpen] = useState(false);
   const [timelineHistory, setTimelineHistory] = useState<any[]>([]);
@@ -22,45 +22,45 @@ const EmploymentHistory = () => {
   const [hasAttemptedTimelineFetch, setHasAttemptedTimelineFetch] = useState(false);
   const [employeeName, setEmployeeName] = useState<string>("Employee");
   const { employee_ID } = useParams();
-
+ 
   const shouldSkip = !employee_ID;
-
+ 
   // 🆕 NEW: Company History timeline API (for the new timeline feature)
   const { fetchEmployeeHistory, isLoading: timelineLoading, error: timelineApiError } = useEmployeeHistoryView();
-
+ 
   // ✅ EXISTING: Current and company history API (workmate's existing endpoint)
   const { data, isLoading, isError, refetch } = useFetchEmployeeHistoryQuery(
     { body: { employee_ID } },
     { skip: shouldSkip }
   );
-
+ 
   // Memoize the fetch function to prevent infinite re-renders
   const fetchTimelineData = useCallback(async () => {
     if (!employee_ID || hasAttemptedTimelineFetch || !ENABLE_TIMELINE_API) return;
-
+ 
     try {
       console.log('🔍 Fetching timeline data for employee:', employee_ID);
       setHasAttemptedTimelineFetch(true);
-      
+     
       const response = await fetchEmployeeHistory({
         employee_ID: employee_ID,
         offset: 0,
         limit: 25
       });
-
+ 
       if (response.success) {
         const sortedHistory = sortHistoryByDate(response.data.history);
         const transformedData = transformToTimelineData(sortedHistory);
         setTimelineHistory(transformedData);
-        
+       
         // Extract employee name from the first history record
         if (response.data.history && response.data.history.length > 0) {
           const firstRecord = response.data.history[0];
-          const fullName = firstRecord.employee_full_name || 
+          const fullName = firstRecord.employee_full_name ||
             `${firstRecord.first_name || ''} ${firstRecord.last_name || ''}`.trim();
           setEmployeeName(fullName || "Employee");
         }
-        
+       
         console.log('✅ Timeline data loaded:', transformedData);
       } else {
         setTimelineError(response.message || "Failed to fetch timeline data");
@@ -74,43 +74,43 @@ const EmploymentHistory = () => {
       }
     }
   }, [employee_ID, fetchEmployeeHistory, hasAttemptedTimelineFetch]);
-
+ 
   // Fetch timeline data only once when component mounts
   useEffect(() => {
     fetchTimelineData();
   }, [fetchTimelineData]);
-
+ 
   // Set employee name from existing data if timeline API didn't provide it
   useEffect(() => {
     if (employeeName === "Employee" && data?.data?.currentPosition) {
       const currentPos = data.data.currentPosition;
-      const fullName = currentPos.employee_full_name || 
+      const fullName = currentPos.employee_full_name ||
         `${currentPos.first_name || ''} ${currentPos.last_name || ''}`.trim();
       if (fullName) {
         setEmployeeName(fullName);
       }
     }
   }, [data, employeeName]);
-
+ 
   if (shouldSkip) return <div>Loading employee details...</div>;
   if (isLoading) return <div>Loading...</div>;
   if (isError || !data?.data) return <div>Error loading employee history.</div>;
-
+ 
   const rawCurrentPosition = data.data.currentPosition;
   const companyHistory = data.data.companyHistory || [];
-
+ 
   // Use timeline data for current position if available (more up-to-date)
   const timelineCurrentPosition = timelineHistory.length > 0 ? timelineHistory[0] : null;
-  
+ 
   // include the current position ID so we can optionally filter it in the modal
-  const currentPosition = timelineCurrentPosition 
+  const currentPosition = timelineCurrentPosition
     ? {
         id: timelineCurrentPosition.position_ID || timelineCurrentPosition.id,
         position_name: (timelineCurrentPosition.position || timelineCurrentPosition.position_name) ?? "N/A",
         position_code: (timelineCurrentPosition.positionCode || timelineCurrentPosition.position_code) ?? "N/A",
         employment_status: (timelineCurrentPosition.employmentStatus || timelineCurrentPosition.employment_status) ?? "N/A",
         employee_status: (timelineCurrentPosition.employeeStatus || timelineCurrentPosition.employee_status) ?? "N/A",
-        start_date: timelineCurrentPosition.startDate 
+        start_date: timelineCurrentPosition.startDate
           ? new Date(timelineCurrentPosition.startDate).toDateString()
           : timelineCurrentPosition.start_date
           ? new Date(timelineCurrentPosition.start_date).toDateString()
@@ -130,7 +130,7 @@ const EmploymentHistory = () => {
           : "N/A",
       }
     : null;
-
+ 
   return (
     <CardContainer
       backgroundColor="bg-white"
@@ -147,7 +147,7 @@ const EmploymentHistory = () => {
                 onClick={() => setIsUpdatePositionModalOpen(true)}
               />
             </div>
-
+ 
             {currentPosition ? (
               <PurpleTaggedCard
                 label={currentPosition.position_name}
@@ -168,11 +168,11 @@ const EmploymentHistory = () => {
               <div className="text-szGray500">No current position found.</div>
             )}
           </div>
-
+ 
           {/* Company History - Timeline Version (NEW) */}
           <div className="flex flex-col gap-2">
             <h6 className="text-h6 text-szPrimary700">Company History</h6>
-            
+           
             {!ENABLE_TIMELINE_API && (
               <div className="text-blue-600 text-sm py-2 bg-blue-50 rounded p-3">
                 <strong>Timeline Feature:</strong> Timeline API is currently disabled while backend is being developed.
@@ -182,13 +182,13 @@ const EmploymentHistory = () => {
                 </small>
               </div>
             )}
-            
+           
             {timelineLoading && (
               <div className="flex justify-center py-4">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-szPrimary500"></div>
               </div>
             )}
-
+ 
             {(timelineError || timelineApiError) && (
               <div className="text-amber-600 text-sm py-2 bg-amber-50 rounded p-3">
                 <strong>Timeline API Note:</strong> The new timeline feature is not yet implemented on the backend.
@@ -198,20 +198,20 @@ const EmploymentHistory = () => {
                 </small>
               </div>
             )}
-
+ 
             {!timelineLoading && !timelineError && !timelineApiError && timelineHistory.length === 0 && (
               <div className="text-gray-500 text-sm py-2">
                 No timeline history found for employee: {employee_ID}
               </div>
             )}
-
+ 
             {!timelineLoading && !timelineError && !timelineApiError && timelineHistory.map((item, index) => (
               <div key={index} className="flex h-full">
                 <div className="flex flex-col h-full items-center w-[32px] gap-2">
                   <div>
                     <div className="h-[8px] w-[8px] rounded-full bg-szPrimary500"></div>
                   </div>
-
+ 
                   {index < timelineHistory.length - 1 && (
                     <div className="h-full">
                       <div className="h-full w-[1px] bg-szPrimary200"></div>
@@ -223,7 +223,7 @@ const EmploymentHistory = () => {
                 </div>
               </div>
             ))}
-
+ 
             {/* Fallback to existing company history if timeline is empty */}
             {!timelineLoading && (timelineError || timelineApiError || timelineHistory.length === 0 || !ENABLE_TIMELINE_API) && companyHistory.length > 0 && (
               <div className="mt-4">
@@ -242,7 +242,7 @@ const EmploymentHistory = () => {
                     employment_status: item.employment_status ?? "N/A",
                     employee_status: item.employee_status ?? "N/A",
                   };
-
+ 
                   return (
                     <div key={index} className="flex h-full">
                       <div className="flex flex-col h-full items-center w-[32px] gap-2">
@@ -262,7 +262,7 @@ const EmploymentHistory = () => {
               </div>
             )}
           </div>
-
+ 
           {/* Other Employee History (unchanged) */}
           <div className="flex flex-col gap-2 mt-8">
             <h6 className="text-h6 text-szPrimary700">Other Employee History</h6>
@@ -294,7 +294,7 @@ const EmploymentHistory = () => {
               </div>
             </div>
           </div>
-
+ 
           {/* Position Update Modal */}
           <EmployeePositionModal
             isOpen={isUpdatePositionModalOpen}
@@ -330,7 +330,7 @@ const EmploymentHistory = () => {
     />
   );
 };
-
+ 
 export default EmploymentHistory;
 
 
