@@ -1,8 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import Cookies from "js-cookie";
+import { prepareSharedAuthHeaders } from "../../../utils/rtkQueryAuth";
 
 // Use the correct backend URL - your backend is running on localhost:4172
-const baseURL = import.meta.env.VITE_EMPLOYMENT_SERVICE || "http://localhost:3000/api/v1";
+const baseURL =
+    import.meta.env.VITE_EMPLOYMENT_SERVICE || "http://localhost:3000/api/v1";
 
 interface generalProps {
     queryParameters: string;
@@ -15,13 +16,7 @@ export const employeeAPI = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: baseURL,
         prepareHeaders: (headers) => {
-            const token = Cookies.get("token");
-
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
-
-            return headers;
+            return prepareSharedAuthHeaders(headers);
         },
     }),
     tagTypes: ["employee"],

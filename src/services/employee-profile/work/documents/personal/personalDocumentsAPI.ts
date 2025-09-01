@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import Cookies from "js-cookie";
+import { prepareSharedAuthHeaders } from "../../../../../utils/rtkQueryAuth";
 
 const { VITE_DOCUMENT_SERVICE } = import.meta.env;
 
@@ -20,19 +20,14 @@ export const personalDocumentsAPI = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: VITE_DOCUMENT_SERVICE,
         prepareHeaders: (headers) => {
-            const token = Cookies.get("token");
-
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
-
-            return headers;
+            return prepareSharedAuthHeaders(headers);
         },
     }),
     tagTypes: ["personalDocuments"],
     endpoints: (builder) => ({
         fetchPersonalDocuments: builder.query({
-            query: (data: generalProps) => `api/v1/documents${data.queryParameters}`,
+            query: (data: generalProps) =>
+                `api/v1/documents${data.queryParameters}`,
         }),
         actionPersonalDocuments: builder.mutation({
             query: (data: generalProps) => ({
@@ -42,7 +37,13 @@ export const personalDocumentsAPI = createApi({
             }),
         }),
         fetchDocumentByType: builder.mutation({
-            query: ({ employee_ID, doc_type_ID }: { employee_ID: string; doc_type_ID: string }) => ({
+            query: ({
+                employee_ID,
+                doc_type_ID,
+            }: {
+                employee_ID: string;
+                doc_type_ID: string;
+            }) => ({
                 url: `/api/v1/documents/fetch`,
                 method: "POST",
                 body: {
