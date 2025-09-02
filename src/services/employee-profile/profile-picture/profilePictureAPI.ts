@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import Cookies from "js-cookie";
+import { prepareSharedAuthHeaders } from "../../../utils/rtkQueryAuth";
 
 const { VITE_DOCUMENT_SERVICE } = import.meta.env;
 
@@ -14,19 +14,14 @@ export const profilePictureAPI = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: VITE_DOCUMENT_SERVICE,
         prepareHeaders: (headers) => {
-            const token = Cookies.get("token");
-
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
-
-            return headers;
+            return prepareSharedAuthHeaders(headers);
         },
     }),
     tagTypes: ["profilePicture"],
     endpoints: (builder) => ({
         fetchProfilePicture: builder.query({
-            query: (data: generalProps) => `api/v1/documents${data.queryParameters}`,
+            query: (data: generalProps) =>
+                `api/v1/documents${data.queryParameters}`,
         }),
         uploadProfilePicture: builder.mutation({
             query: (data: generalProps) => ({
@@ -44,4 +39,8 @@ export const profilePictureAPI = createApi({
     }),
 });
 
-export const { useFetchProfilePictureQuery, useUploadProfilePictureMutation, useDeleteProfilePictureMutation } = profilePictureAPI;
+export const {
+    useFetchProfilePictureQuery,
+    useUploadProfilePictureMutation,
+    useDeleteProfilePictureMutation,
+} = profilePictureAPI;

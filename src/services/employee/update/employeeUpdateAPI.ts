@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { prepareSharedAuthHeaders } from "../../../utils/rtkQueryAuth";
 
 // Update employee request interface - matches backend structure
 export interface UpdateEmployeeRequest {
@@ -75,33 +76,35 @@ export interface GetEmployeeByIdRequest {
     employee_ID: string; // Consistent with backend using employee_ID
 }
 
-const baseUrl = import.meta.env.VITE_EMPLOYMENT_SERVICE || 'http://localhost:3000';
+const baseUrl =
+    import.meta.env.VITE_EMPLOYMENT_SERVICE || "http://localhost:3000";
 
 export const employeeUpdateAPI = createApi({
-    reducerPath: 'employeeUpdateAPI',
-    baseQuery: fetchBaseQuery({ 
+    reducerPath: "employeeUpdateAPI",
+    baseQuery: fetchBaseQuery({
         baseUrl: `${baseUrl}/api/v1`,
         prepareHeaders: (headers) => {
-            headers.set('Content-Type', 'application/json');
-            return headers;
+            headers.set("Content-Type", "application/json");
+            return prepareSharedAuthHeaders(headers);
         },
     }),
     endpoints: (builder) => ({
         updateEmployee: builder.mutation<any, UpdateEmployeeRequest>({
             query: (employeeData) => ({
-                url: '/employee/update',
-                method: 'PUT',
+                url: "/employee/update",
+                method: "PUT",
                 body: employeeData,
             }),
         }),
         getEmployeeById: builder.mutation<any, GetEmployeeByIdRequest>({
             query: (request) => ({
-                url: '/employee/get-by-id',
-                method: 'POST',
+                url: "/employee/get-by-id",
+                method: "POST",
                 body: request,
             }),
         }),
     }),
 });
 
-export const { useUpdateEmployeeMutation, useGetEmployeeByIdMutation } = employeeUpdateAPI; 
+export const { useUpdateEmployeeMutation, useGetEmployeeByIdMutation } =
+    employeeUpdateAPI;

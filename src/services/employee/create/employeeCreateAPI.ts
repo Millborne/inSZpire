@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { prepareSharedAuthHeaders } from "../../../utils/rtkQueryAuth";
 
 // Define the backend API structure
 interface CreateEmployeeRequest {
@@ -64,26 +65,27 @@ interface CreateEmployeeRequest {
     };
 }
 
-const baseUrl = import.meta.env.VITE_EMPLOYMENT_SERVICE || 'http://localhost:4172';
+const baseUrl =
+    import.meta.env.VITE_EMPLOYMENT_SERVICE || "http://localhost:4172";
 
 export const employeeCreateAPI = createApi({
-    reducerPath: 'employeeCreateAPI',
-    baseQuery: fetchBaseQuery({ 
+    reducerPath: "employeeCreateAPI",
+    baseQuery: fetchBaseQuery({
         baseUrl: `${baseUrl}/api/v1`,
         prepareHeaders: (headers) => {
-            headers.set('Content-Type', 'application/json');
-            return headers;
+            headers.set("Content-Type", "application/json");
+            return prepareSharedAuthHeaders(headers);
         },
     }),
     endpoints: (builder) => ({
         createEmployee: builder.mutation<any, CreateEmployeeRequest>({
             query: (employeeData) => ({
-                url: '/employee/create',
-                method: 'POST',
+                url: "/employee/create",
+                method: "POST",
                 body: employeeData,
             }),
         }),
     }),
 });
 
-export const { useCreateEmployeeMutation } = employeeCreateAPI; 
+export const { useCreateEmployeeMutation } = employeeCreateAPI;

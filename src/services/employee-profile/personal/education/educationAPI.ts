@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import Cookies from "js-cookie";
+import { prepareSharedAuthHeaders } from "../../../../utils/rtkQueryAuth";
 import { RootState } from "../../../../reducers/store";
 
 const { VITE_IDENTITY_SERVICE } = import.meta.env;
@@ -64,19 +64,17 @@ export const educationAPI = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: VITE_IDENTITY_SERVICE || "http://localhost:4172/api/v1",
         prepareHeaders: (headers, { getState }) => {
-            const token = Cookies.get("token");
             const state = getState() as RootState;
             const profileId = state.employeeState.selectedEmployee?.profile_ID;
 
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
+            // Use shared auth headers
+            const authHeaders = prepareSharedAuthHeaders(headers);
 
             if (profileId) {
-                headers.set("x-profile-id", profileId);
+                authHeaders.set("x-profile-id", profileId);
             }
 
-            return headers;
+            return authHeaders;
         },
     }),
     tagTypes: ["education", "educationLevels"],

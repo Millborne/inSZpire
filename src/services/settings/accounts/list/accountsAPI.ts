@@ -1,26 +1,20 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import Cookies from "js-cookie";
- 
+import { prepareSharedAuthHeaders } from "../../../../utils/rtkQueryAuth";
+
 const { VITE_CLIENT_SERVICE } = import.meta.env;
- 
+
 interface generalProps {
     queryParameters: string;
     method?: string;
     body?: any;
 }
- 
+
 export const accountsAPI = createApi({
     reducerPath: "accounts",
     baseQuery: fetchBaseQuery({
         baseUrl: VITE_CLIENT_SERVICE,
         prepareHeaders: (headers) => {
-            const token = Cookies.get("token");
- 
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
- 
-            return headers;
+            return prepareSharedAuthHeaders(headers);
         },
     }),
     tagTypes: ["accounts"],
@@ -38,9 +32,5 @@ export const accountsAPI = createApi({
         }),
     }),
 });
- 
+
 export const { useFetchAccountsQuery, useActionAccountsMutation } = accountsAPI;
-
-
-
-

@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import Cookies from "js-cookie";
+import { prepareSharedAuthHeaders } from "../../../../utils/rtkQueryAuth";
 
 const { VITE_IDENTITY_SERVICE } = import.meta.env;
 
@@ -14,13 +14,7 @@ export const religionAPI = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: VITE_IDENTITY_SERVICE || "http://localhost:8000",
         prepareHeaders: (headers) => {
-            const token = Cookies.get("token");
-
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
-
-            return headers;
+            return prepareSharedAuthHeaders(headers);
         },
     }),
     tagTypes: ["religion"],

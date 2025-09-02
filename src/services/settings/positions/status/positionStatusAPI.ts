@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import Cookies from "js-cookie";
+import { prepareSharedAuthHeaders } from "../../../../utils/rtkQueryAuth";
 
 const baseURL = "http://localhost:3000/api/v1";
 
@@ -14,20 +14,13 @@ export const positionStatusAPI = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: baseURL,
         prepareHeaders: (headers) => {
-            const token = Cookies.get("token");
-
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
-
-            return headers;
+            return prepareSharedAuthHeaders(headers);
         },
     }),
     tagTypes: ["positionStatus"],
     endpoints: (builder) => ({
         fetchPositionStatuses: builder.query({
-            query: (data: generalProps) =>
-                `/employee${data.queryParameters}`,
+            query: (data: generalProps) => `/employee${data.queryParameters}`,
         }),
         actionPositionStatuses: builder.mutation({
             query: (data: generalProps) => ({
@@ -39,5 +32,7 @@ export const positionStatusAPI = createApi({
     }),
 });
 
-export const { useFetchPositionStatusesQuery, useActionPositionStatusesMutation } =
-    positionStatusAPI;
+export const {
+    useFetchPositionStatusesQuery,
+    useActionPositionStatusesMutation,
+} = positionStatusAPI;
