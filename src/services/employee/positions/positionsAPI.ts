@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { prepareSharedAuthHeaders } from "../../../utils/rtkQueryAuth";
  
 // Types for position API
 export interface PositionData {
@@ -61,7 +62,7 @@ export const externalPositionsAPI = createApi({
     baseUrl: "https://erp-team-and-position-api-dev.supportzebra.net",
     prepareHeaders: (headers) => {
       console.log('🔧 Making external positions API call');
-      return headers;
+      return prepareSharedAuthHeaders(headers);
     },
   }),
   tagTypes: ["externalPositions"],
