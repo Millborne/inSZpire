@@ -3,7 +3,7 @@ import { prepareSharedAuthHeaders } from "../../../utils/rtkQueryAuth";
 
 // Use the correct backend URL - your backend is running on localhost:4172
 const baseURL =
-    import.meta.env.VITE_EMPLOYMENT_SERVICE || "http://localhost:3000/api/v1";
+    import.meta.env.VITE_EMPLOYMENT_SERVICE || "http://localhost:3001/api/v1";
 
 interface generalProps {
     queryParameters: string;

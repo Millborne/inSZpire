@@ -53,7 +53,7 @@ import Cookies from "js-cookie";
  */
 export const prepareAuthHeaders = (
     headers: any,
-    tokenType: "sharedAuthToken"
+    tokenType: "authToken"  // Changed to match the actual cookie name from main portal
 ) => {
     const token = Cookies.get(tokenType);
     // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMTIzRTQ1NjdFODlCMTJEM0E0NTY0MjY2NTU0NDAwMDEiLCJlbWFpbCI6ImRvbnNhbXBsZUBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoiZG9uc2FtcGxlIiwicm9sZXMiOltdLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzU2NzIwNTAwLCJleHAiOjE3NTY3MjE0MDAsImF1ZCI6IndlYi1hcHBzIiwiaXNzIjoiYXV0aC1hcGkifQ.4ZDSBCdbr4WchMT3TSjUz-PRB56osotYhFSW9XhsyYM"
@@ -69,12 +69,12 @@ export const prepareAuthHeaders = (
  * Convenience function for standard token authentication
  */
 export const prepareStandardAuthHeaders = (headers: any) => {
-    return prepareAuthHeaders(headers, "sharedAuthToken");
+    return prepareAuthHeaders(headers, "authToken");  // Changed to match actual cookie name
 };
 
 /**
  * Convenience function for shared auth token authentication
  */
 export const prepareSharedAuthHeaders = (headers: any) => {
-    return prepareAuthHeaders(headers, "sharedAuthToken");
+    return prepareAuthHeaders(headers, "authToken");  // Changed to match actual cookie name
 };

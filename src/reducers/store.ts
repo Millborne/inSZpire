@@ -27,6 +27,7 @@ import { workSetupAPI } from "../services/settings/work-setup/list/workSetupAPI"
 import { locationsAPI } from "../services/locations-options/locationsAPI";
 import { religionAPI } from "../services/employee-profile/personal/basic-info/religionAPI";
 import { profilePictureAPI } from "../services/employee-profile/profile-picture/profilePictureAPI";
+import { changePasswordAPI } from "../services/authentication/changePasswordAPI";
  
 // Slices
 import employeeReducer from "./employeeSlice";
@@ -60,6 +61,7 @@ const rootReducer = combineReducers({
     [locationsAPI.reducerPath]: locationsAPI.reducer,
     [religionAPI.reducerPath]: religionAPI.reducer,
     [profilePictureAPI.reducerPath]: profilePictureAPI.reducer,
+    [changePasswordAPI.reducerPath]: changePasswordAPI.reducer,
 });
  
 const configStore = configureStore({
@@ -89,7 +91,8 @@ const configStore = configureStore({
             workSetupAPI.middleware,
             locationsAPI.middleware,
             religionAPI.middleware,
-            profilePictureAPI.middleware
+            profilePictureAPI.middleware,
+            changePasswordAPI.middleware
         ),
 });
  

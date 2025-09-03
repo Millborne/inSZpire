@@ -14,6 +14,9 @@ export const useSharedAuth = () => {
       setLoading(true);
       setError(null);
 
+      // Debug: Check what's available in storage
+      sharedStorageService.debugStorage();
+
       try {
         const data = sharedStorageService.getAuthData();
         if (data && sharedStorageService.validateAuthData(data)) {
