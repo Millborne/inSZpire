@@ -9,13 +9,16 @@ import {
   TextContent,
 } from "enterprisze-global-components";
 import {
+  Add,
   ArchiveBox,
   ArrowLeft,
+  ArrowSwapHorizontal,
   Data2,
   Edit2,
   Hierarchy2,
   People,
   Tag,
+  UserAdd,
 } from "iconsax-reactjs";
 import SpecificTeamCard from "../components/SpecificTeamCard";
 import SpecificTeamModal, {
@@ -23,6 +26,9 @@ import SpecificTeamModal, {
   SpecificTeamDataType,
 } from "../components/modals/SpecificTeamModal";
 import ConfirmSpecificTeamArchive from "../components/modals/ConfirmSpecificTeamArchive";
+import AddTeamMemberModal from "../components/modals/Add Team Members Modal/AddTeamMemberModal";
+import AddPositionModal from "../components/modals/Add Position Modal/AddPositionModal";
+import TransferEmployeeModal from "../components/modals/Transfer Employee Modal/TransferEmployeeModal";
 import { useActionTeamsMutation } from "../../../services/teams/list/teamsAPI";
 
 const SpecificTeam = () => {
@@ -35,6 +41,11 @@ const SpecificTeam = () => {
   const [teamData, setTeamData] = useState<SpecificTeamDataType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
+  const [isAddTeamMemberModalOpen, setIsAddTeamMemberModalOpen] =
+    useState(false);
+  const [isAddPositionModalOpen, setIsAddPositionModalOpen] = useState(false);
+  const [isTransferEmployeeModalOpen, setIsTransferEmployeeModalOpen] =
+    useState(false);
   const [modalMode, setModalMode] = useState<ModalMode>("add");
   const [viewType, setViewType] = useState<"team" | "underlings">("team");
   const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
@@ -90,6 +101,18 @@ const SpecificTeam = () => {
     setIsArchiveModalOpen(true);
   };
 
+  const handleOpenAddTeamMemberModal = () => {
+    setIsAddTeamMemberModalOpen(true);
+  };
+
+  const handleOpenAddPositionModal = () => {
+    setIsAddPositionModalOpen(true);
+  };
+
+  const handleOpenTransferEmployeeModal = () => {
+    setIsTransferEmployeeModalOpen(true);
+  };
+
   const members = teamData?.employees || [];
 
   return (
@@ -113,6 +136,21 @@ const SpecificTeam = () => {
                       label: "Edit Team Info",
                       icon: <Edit2 />,
                       onClick: () => handleOpenModal("edit"),
+                    },
+                    {
+                      label: "Add Team Member",
+                      icon: <UserAdd />,
+                      onClick: handleOpenAddTeamMemberModal,
+                    },
+                    {
+                      label: "Add Position",
+                      icon: <Add />,
+                      onClick: handleOpenAddPositionModal,
+                    },
+                    {
+                      label: "Transfer Employee",
+                      icon: <ArrowSwapHorizontal />,
+                      onClick: handleOpenTransferEmployeeModal,
                     },
                     {
                       label: "Archive Team",
@@ -143,7 +181,9 @@ const SpecificTeam = () => {
                   </div>
                   <div className="flex flex-col gap-[8px] items-start">
                     <div className="flex flex-row gap-[8px] w-full justify-end">
-                      <p className="text-caption-all-caps text-szGrey500">TAGS</p>
+                      <p className="text-caption-all-caps text-szGrey500">
+                        TAGS
+                      </p>
                       <Tag className="text-szPrimary700" />
                     </div>
                     <div className="flex flex-col lg:flex-row gap-[8px]">
@@ -151,7 +191,10 @@ const SpecificTeam = () => {
                         <div key={index} className="relative group">
                           <Chip label={tag.tag_name} />
                           <div className="absolute z-50 hidden group-hover:block top-full mt-2 w-[220px] bg-[#EBEFFF] rounded-lg shadow-md p-3 text-sm text-gray-700">
-                            <TextContent header="Tag Name" text={tag.tag_name} />
+                            <TextContent
+                              header="Tag Name"
+                              text={tag.tag_name}
+                            />
                             <TextContent
                               header="Tag Description"
                               text={tag.description || "No description."}
@@ -265,6 +308,33 @@ const SpecificTeam = () => {
         buttonFooterIcon={<ArchiveBox />}
       />
 
+      <AddTeamMemberModal
+        isOpen={isAddTeamMemberModalOpen}
+        onClose={() => setIsAddTeamMemberModalOpen(false)}
+        onSave={(data) => {
+          console.log("Add Team Member data:", data);
+          handleSpecificTeamSuccess("Successfully added team member");
+        }}
+      />
+
+      <AddPositionModal
+        isOpen={isAddPositionModalOpen}
+        onClose={() => setIsAddPositionModalOpen(false)}
+        onSave={(data) => {
+          console.log("Add Position data:", data);
+          handleSpecificTeamSuccess("Successfully added position");
+        }}
+      />
+
+      <TransferEmployeeModal
+        isOpen={isTransferEmployeeModalOpen}
+        onClose={() => setIsTransferEmployeeModalOpen(false)}
+        onSave={(data) => {
+          console.log("Transfer Employee data:", data);
+          handleSpecificTeamSuccess("Successfully transferred employee");
+        }}
+      />
+
       <SnackbarAlert
         isOpen={showSuccessSnackbar}
         onClose={() => setShowSuccessSnackbar(false)}
@@ -278,7 +348,3 @@ const SpecificTeam = () => {
 };
 
 export default SpecificTeam;
-
-
-
-

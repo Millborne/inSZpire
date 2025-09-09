@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Dropdown, Inputs, Modal, SnackbarAlert } from "enterprisze-global-components";
+import {
+  Dropdown,
+  Inputs,
+  Modal,
+  SnackbarAlert,
+} from "enterprisze-global-components";
 import ConfirmationModal from "../../../../components/ConfirmationModal";
 import { useViewTagsMutation } from "../../../../services/teams/tags/list/tagsAPI";
 import { useActionTeamsMutation } from "../../../../services/teams/list/teamsAPI";
@@ -50,11 +55,17 @@ const SpecificTeamModal: React.FC<SpecificTeamModalProps> = ({
     tags: [],
   });
 
-  const [tagOptions, setTagOptions] = useState<{ label: string; value: string }[]>([]);
-  const [teamReferenceOptions, setTeamReferenceOptions] = useState<{ label: string; value: string }[]>([]);
+  const [tagOptions, setTagOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
+  const [teamReferenceOptions, setTeamReferenceOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
 
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
-  const [confirmationAction, setConfirmationAction] = useState<"update" | "add" | "archive">("add");
+  const [confirmationAction, setConfirmationAction] = useState<
+    "update" | "add" | "archive"
+  >("add");
 
   const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -109,7 +120,8 @@ const SpecificTeamModal: React.FC<SpecificTeamModalProps> = ({
   // 🔹 Populate form when modal opens
   useEffect(() => {
     if (selectedTeam) {
-      const currentTagIDs = selectedTeam.tags?.map((tag: any) => tag.tag_ID) || [];
+      const currentTagIDs =
+        selectedTeam.tags?.map((tag: any) => tag.tag_ID) || [];
       setFormData({
         team_ID: selectedTeam.team_ID || "",
         team_code: selectedTeam.team_code || "",
@@ -137,13 +149,19 @@ const SpecificTeamModal: React.FC<SpecificTeamModalProps> = ({
   };
 
   const footerButtons = [
-    { label: "Cancel", variant: "ghost" as const, onClick: onClose, size: "medium" as const },
+    {
+      label: "Cancel",
+      variant: "ghost" as const,
+      onClick: onClose,
+      size: "medium" as const,
+    },
     ...(mode !== "view"
       ? [
           {
             label: mode === "add" ? "Add" : "Save",
             variant: "primary" as const,
-            onClick: () => handleConfirmationOpen(mode === "edit" ? "update" : "add"),
+            onClick: () =>
+              handleConfirmationOpen(mode === "edit" ? "update" : "add"),
             size: "medium" as const,
           },
         ]
@@ -154,10 +172,14 @@ const SpecificTeamModal: React.FC<SpecificTeamModalProps> = ({
     const updateData: any = {};
     if (formData.team_code) updateData.team_code = formData.team_code;
     if (formData.team_name) updateData.team_name = formData.team_name;
-    if (formData.team_description) updateData.team_description = formData.team_description;
-    if (formData.is_archived !== undefined) updateData.is_archived = formData.is_archived;
-    if (formData.parent_team_ID) updateData.parent_team_ID = formData.parent_team_ID;
-    if (formData.tags && formData.tags.length > 0) updateData.tag_IDs = formData.tags;
+    if (formData.team_description)
+      updateData.team_description = formData.team_description;
+    if (formData.is_archived !== undefined)
+      updateData.is_archived = formData.is_archived;
+    if (formData.parent_team_ID)
+      updateData.parent_team_ID = formData.parent_team_ID;
+    if (formData.tags && formData.tags.length > 0)
+      updateData.tag_IDs = formData.tags;
 
     try {
       // 🔄 Update API
@@ -201,17 +223,31 @@ const SpecificTeamModal: React.FC<SpecificTeamModalProps> = ({
         isOpen={isOpen}
         onClose={onClose}
         title={
-          mode === "add" ? "Add Team Info" : mode === "edit" ? "Edit Team Info" : "View Team Info"
+          mode === "add"
+            ? "Add Team Info"
+            : mode === "edit"
+            ? "Edit Team Info"
+            : "View Team Info"
         }
+        showButton={false}
         modalWidth="w-[900px]"
         contentHeight="h-[400px] min-h-[120px] max-h-[55vh]"
         headerOptions="left"
+        footerOptions="stacked-left"
         footerButtons={footerButtons}
         content={
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] mt-1">
             <div className="flex flex-col gap-[24px]">
-              <Inputs label="TEAM NAME" value={formData.team_name} onChange={(e) => handleInputChange("team_name", e.target.value)} />
-              <Inputs label="TEAM CODE" value={formData.team_code} onChange={(e) => handleInputChange("team_code", e.target.value)} />
+              <Inputs
+                label="TEAM NAME"
+                value={formData.team_name}
+                onChange={(e) => handleInputChange("team_name", e.target.value)}
+              />
+              <Inputs
+                label="TEAM CODE"
+                value={formData.team_code}
+                onChange={(e) => handleInputChange("team_code", e.target.value)}
+              />
               <Dropdown
                 label="TEAM REFERENCE"
                 size="small"
@@ -219,11 +255,15 @@ const SpecificTeamModal: React.FC<SpecificTeamModalProps> = ({
                 placeholder="Select team reference"
                 value={
                   formData.parent_team_ID
-                    ? teamReferenceOptions.find(opt => opt.value === formData.parent_team_ID)
+                    ? teamReferenceOptions.find(
+                        (opt) => opt.value === formData.parent_team_ID
+                      )
                     : undefined
                 }
                 onSelectionChange={(value) => {
-                  const ref = Array.isArray(value) ? value[0]?.value : value?.value;
+                  const ref = Array.isArray(value)
+                    ? value[0]?.value
+                    : value?.value;
                   handleInputChange("parent_team_ID", ref || "");
                 }}
                 usePortal
@@ -239,14 +279,20 @@ const SpecificTeamModal: React.FC<SpecificTeamModalProps> = ({
                 value={
                   formData.is_archived !== undefined
                     ? {
-                        label: formData.is_archived === 0 ? "Active" : "Archived",
+                        label:
+                          formData.is_archived === 0 ? "Active" : "Archived",
                         value: formData.is_archived.toString(),
                       }
                     : undefined
                 }
                 onSelectionChange={(value) => {
-                  const selectedValue = Array.isArray(value) ? value[0]?.value : value?.value;
-                  handleInputChange("is_archived", selectedValue === "1" ? 1 : 0);
+                  const selectedValue = Array.isArray(value)
+                    ? value[0]?.value
+                    : value?.value;
+                  handleInputChange(
+                    "is_archived",
+                    selectedValue === "1" ? 1 : 0
+                  );
                 }}
                 usePortal
               />
@@ -255,11 +301,17 @@ const SpecificTeamModal: React.FC<SpecificTeamModalProps> = ({
                 placeholder="Select tags"
                 options={tagOptions}
                 value={formData.tags?.map((tagID) => ({
-                  label: tagOptions.find(opt => opt.value === tagID)?.label || tagID,
+                  label:
+                    tagOptions.find((opt) => opt.value === tagID)?.label ||
+                    tagID,
                   value: tagID,
                 }))}
                 onSelectionChange={(value) => {
-                  const tags = Array.isArray(value) ? value.map(v => v.value) : value ? [value.value] : [];
+                  const tags = Array.isArray(value)
+                    ? value.map((v) => v.value)
+                    : value
+                    ? [value.value]
+                    : [];
                   handleInputChange("tags", tags);
                 }}
                 multiSelect
@@ -274,7 +326,9 @@ const SpecificTeamModal: React.FC<SpecificTeamModalProps> = ({
                 maxCharacter={200}
                 isTextarea
                 value={formData.team_description || ""}
-                onChange={(e) => handleInputChange("team_description", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("team_description", e.target.value)
+                }
               />
             </div>
           </div>
@@ -287,7 +341,9 @@ const SpecificTeamModal: React.FC<SpecificTeamModalProps> = ({
         onClick={handleUpdate}
         image="/src/assets/team_confirmation.png"
         description={
-          confirmationAction === "add" ? "Are you sure you want to add this team?" : "Are you sure you want to update this team?"
+          confirmationAction === "add"
+            ? "Are you sure you want to add this team?"
+            : "Are you sure you want to update this team?"
         }
         buttonLabel={confirmationAction === "add" ? "Add Team" : "Update Team"}
       />
@@ -305,35 +361,3 @@ const SpecificTeamModal: React.FC<SpecificTeamModalProps> = ({
 };
 
 export default SpecificTeamModal;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
