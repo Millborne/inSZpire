@@ -30,6 +30,7 @@ import AddTeamMemberModal from "../components/modals/Add Team Members Modal/AddT
 import AddPositionModal from "../components/modals/Add Position Modal/AddPositionModal";
 import TransferEmployeeModal from "../components/modals/Transfer Employee Modal/TransferEmployeeModal";
 import { useActionTeamsMutation } from "../../../services/teams/list/teamsAPI";
+import AddTeamMemberModalSingleEmployee from "../components/modals/AddTeamMemberModalSingleEmployee";
 
 const SpecificTeam = () => {
   const navigate = useNavigate();
