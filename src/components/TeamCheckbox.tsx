@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 
 import { Checkbox, Chip } from "enterprisze-global-components";
 
-interface TeamCheckboxProps {
+export interface TeamCheckboxProps {
   teamName: string;
   managedBy: string;
   selectedCount: number;
@@ -55,7 +55,7 @@ const TeamCheckbox: React.FC<TeamCheckboxProps> = ({
 
   return (
     <div
-      className={`flex items-center gap-[4px] p-3 ${
+      className={`flex items-center gap-[4px] ${
         disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
       } ${className}`}
     >
@@ -72,7 +72,7 @@ const TeamCheckbox: React.FC<TeamCheckboxProps> = ({
           <div>
             <p className="text-body-small-strong text-gray-900">{teamName}</p>
             <p className="text-caption-all-caps uppercase text-gray-500 ">
-              Managed by: {managedBy} • {totalCount} members
+              Managed by {managedBy} • {totalCount} members
             </p>
           </div>
           <Chip label={`${selectedCount} / ${totalCount} selected`} />

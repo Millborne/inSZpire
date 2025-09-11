@@ -1,14 +1,16 @@
 import React, { useCallback, useState } from "react";
 import { Avatar, Checkbox } from "enterprisze-global-components";
 
-interface EmployeeeChecboxProps {
+export interface EmployeeeChecboxProps {
   name: string;
   team: string;
   role: string;
   disabled?: boolean;
   className?: string;
   avatar?: string;
-  onChange: (checked: boolean, teamName: string) => void;
+  showRole?: boolean;
+  showTeam?: boolean;
+  onChange?: (checked: boolean, teamName: string) => void;
   onToggle?: (teamName: string) => void;
 }
 
@@ -19,6 +21,8 @@ const EmployeeeChecbox: React.FC<EmployeeeChecboxProps> = ({
   disabled = false,
   className = "",
   avatar,
+  showRole = true,
+  showTeam = true,
   onChange,
   onToggle,
 }) => {
@@ -30,7 +34,7 @@ const EmployeeeChecbox: React.FC<EmployeeeChecboxProps> = ({
       if (disabled) return;
 
       setIsChecked(isChecked);
-      onChange(isChecked, name);
+      onChange?.(isChecked, name);
 
       // Call onToggle if provided for additional functionality
       if (onToggle) {
@@ -49,7 +53,7 @@ const EmployeeeChecbox: React.FC<EmployeeeChecboxProps> = ({
 
   return (
     <div
-      className={`flex items-center gap-[4px] p-3 ${
+      className={`flex items-center gap-[4px] ${
         disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
       } ${className}`}
     >
@@ -65,9 +69,12 @@ const EmployeeeChecbox: React.FC<EmployeeeChecboxProps> = ({
         <Avatar src={avatar} size="small" />
         <div>
           <p className="text-body-small-strong text-gray-900">{name}</p>
-          <p className="text-caption-all-caps uppercase text-szPrimary900">
-            {team} - <span className="text-szGrey500"> {role} </span>
-          </p>
+          {showRole && (
+            <p className="text-caption-all-caps uppercase text-szPrimary900">
+              {showTeam && team && `${team} - `}
+              <span className="text-szGrey500"> {role} </span>
+            </p>
+          )}
         </div>
       </div>
     </div>

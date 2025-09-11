@@ -28,7 +28,7 @@ const AddEmployeesStep = () => {
           />
         </div>
 
-        <img src={PapaZ} alt="PapaZ" className="w-[120px] h-[120px]" />
+        {/* <img src={PapaZ} alt="PapaZ" className="w-[120px] h-[120px]" />
         <p className="max-w-[343px] text-center text-body-base-strong text-szBlack800">
           I’ll search for your employees and team. You could also search the
           word{" "}
@@ -36,7 +36,7 @@ const AddEmployeesStep = () => {
             “Unaffiliated”
           </span>{" "}
           to reveal employees with no team.
-        </p>
+        </p> */}
       </div>
     </div>
   );
