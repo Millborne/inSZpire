@@ -18,17 +18,28 @@ import {
     MinusCirlce,
     TickCircle,
     Trash,
+    Warning2,
 } from "iconsax-reactjs";
 
 const AddTeamMemberModalSingleEmployee = () => {
     const [employeeTeamMember, setEmployeeTeamMember] = useState<any>([
         {
             employee_ID: "",
+            employee_first_name: "",
+            employee_last_name: "",
             team_ID: "",
             position_ID: "",
+            position_name: "",
             saved: false,
         },
     ]);
+
+    const [onRemoveEmployeeIndex, setOnRemoveEmployeeIndex] =
+        useState<Number | null>(null);
+
+    const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
+
+    const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
 
     return (
         <>
@@ -49,7 +60,9 @@ const AddTeamMemberModalSingleEmployee = () => {
                     {
                         label: "Team Member",
                         variant: "primary",
-                        onClick: () => {},
+                        onClick: () => {
+                            setConfirmationModalOpen(true);
+                        },
                         leftIcon: <Add />,
                     },
                 ]}
@@ -65,35 +78,90 @@ const AddTeamMemberModalSingleEmployee = () => {
                         {employeeTeamMember.map(
                             (employee: any, index: number) =>
                                 employee.saved ? (
-                                    <div className="w-full border border-szGrey300 rounded-lg p-2 flex flex-col gap-2">
-                                        <div className="flex items-center justify-between gap-2">
-                                            <div className="flex gap-5 items-center">
-                                                <TextContent
-                                                    icon={
-                                                        <Avatar
-                                                            src="/src/assets/noAvatar.png"
-                                                            size="small"
-                                                        />
-                                                    }
-                                                    header={"Employee name"}
-                                                    text={
-                                                        "Stephanie Germanotta"
-                                                    }
-                                                />
-                                                <div>
-                                                    <ArrowRight className="text-szPrimary900" />
-                                                </div>
-                                                <TextContent
-                                                    header={"position"}
-                                                    text={"Junior Web Dev"}
-                                                />
+                                    onRemoveEmployeeIndex === index ? (
+                                        <div className="w-full border border-error700 rounded-lg p-2 flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-error700">
+                                                    <Warning2 />
+                                                </span>
+                                                <span className="text-body-small-strong">
+                                                    Are you sure you want to
+                                                    cancel adding Rigor, John
+                                                    Daryll?
+                                                </span>
                                             </div>
 
-                                            <div>
-                                                <MinusCirlce className="text-szPrimary900 hover:text-szPrimary700 cursor-pointer" />
+                                            <div className="flex items-center justify-end gap-1">
+                                                <Button
+                                                    label="Cancel"
+                                                    variant="ghost"
+                                                    size="medium"
+                                                    onClick={() =>
+                                                        setOnRemoveEmployeeIndex(
+                                                            null
+                                                        )
+                                                    }
+                                                />
+                                                <Button
+                                                    label="Confirm"
+                                                    variant="ghost"
+                                                    size="medium"
+                                                    leftIcon={<MinusCirlce />}
+                                                    onClick={() => {
+                                                        setEmployeeTeamMember(
+                                                            employeeTeamMember.filter(
+                                                                (
+                                                                    member: any,
+                                                                    i: number
+                                                                ) => i !== index
+                                                            )
+                                                        );
+                                                        setOnRemoveEmployeeIndex(
+                                                            null
+                                                        );
+                                                    }}
+                                                    className="text-error700"
+                                                />
                                             </div>
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className="w-full border border-szGrey300 rounded-lg p-2 flex flex-col gap-2">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <div className="flex gap-5 items-center">
+                                                    <TextContent
+                                                        icon={
+                                                            <Avatar
+                                                                src="/src/assets/noAvatar.png"
+                                                                size="small"
+                                                            />
+                                                        }
+                                                        header={"Employee name"}
+                                                        text={
+                                                            "Stephanie Germanotta"
+                                                        }
+                                                    />
+                                                    <div>
+                                                        <ArrowRight className="text-szPrimary900" />
+                                                    </div>
+                                                    <TextContent
+                                                        header={"position"}
+                                                        text={"Junior Web Dev"}
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <MinusCirlce
+                                                        className="text-szPrimary900 hover:text-szPrimary700 cursor-pointer"
+                                                        onClick={() =>
+                                                            setOnRemoveEmployeeIndex(
+                                                                index
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
                                 ) : (
                                     <div className="w-full border border-szGrey300 rounded-lg p-2 flex flex-col gap-2">
                                         <span className="text-caption-strong text-[#1D973C]">
@@ -232,8 +300,11 @@ const AddTeamMemberModalSingleEmployee = () => {
                                             ...employeeTeamMember,
                                             {
                                                 employee_ID: "",
+                                                employee_first_name: "",
+                                                employee_last_name: "",
                                                 team_ID: "",
                                                 position_ID: "",
+                                                position_name: "",
                                                 saved: false,
                                             },
                                         ]);
@@ -255,17 +326,91 @@ const AddTeamMemberModalSingleEmployee = () => {
             />
 
             <ConfirmationModal
-                isOpen={false}
-                onClose={() => {}}
-                onClick={() => {}}
-                image="/src/assets/team_confirmation.png"
-                description={"Are you sure you want to add this team?"}
-                buttonLabel={"Add Team"}
+                isOpen={confirmationModalOpen}
+                onClose={() => {
+                    setConfirmationModalOpen(false);
+                }}
+                onClick={() => {
+                    setConfirmationModalOpen(false);
+                    setShowSuccessSnackbar(true);
+                }}
+                description={""}
+                content={
+                    <div className="flex flex-col gap-2">
+                        <span className="text-body-base-strong text-szBlack800 text-center">
+                            You are about to add these employees to{" "}
+                            <span className="text-szPrimary700">Team Name</span>
+                            .
+                        </span>
+
+                        <div className="flex flex-col gap-2">
+                            <div className="flex justify-between items-center gap-5">
+                                <div className="flex-1">
+                                    <TextContent
+                                        header="Employee Name"
+                                        text="John Doe"
+                                    />
+                                </div>
+
+                                <span>
+                                    <ArrowRight />
+                                </span>
+                                <div className="flex-1">
+                                    <TextContent
+                                        header="Position"
+                                        text="Junior Web Developer"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex justify-between items-center gap-5">
+                                <div className="flex-1">
+                                    <TextContent
+                                        header="Employee Name"
+                                        text="John Doe"
+                                    />
+                                </div>
+
+                                <span>
+                                    <ArrowRight />
+                                </span>
+                                <div className="flex-1">
+                                    <TextContent
+                                        header="Position"
+                                        text="Junior Web Developer"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex justify-between items-center gap-5">
+                                <div className="flex-1">
+                                    <TextContent
+                                        header="Employee Name"
+                                        text="John Doe"
+                                    />
+                                </div>
+
+                                <span>
+                                    <ArrowRight />
+                                </span>
+                                <div className="flex-1">
+                                    <TextContent
+                                        header="Position"
+                                        text="Junior Web Developer"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                buttonLabel={"Add Employee(s)"}
             />
 
             <SnackbarAlert
-                isOpen={false}
-                onClose={() => {}}
+                isOpen={showSuccessSnackbar}
+                onClose={() => {
+                    setShowSuccessSnackbar(false);
+                }}
                 showCloseButton={true}
                 type="success"
                 title={"Successfully added team members"}
