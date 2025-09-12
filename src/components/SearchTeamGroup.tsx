@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 //components
 import TeamCheckbox, { TeamCheckboxProps } from "./TeamCheckbox";
@@ -11,6 +11,12 @@ interface SearchTeamGroupProps {
   accessModeFilter: "all" | "specific";
   unaffiliated?: boolean;
   employees: EmployeeeChecboxProps[];
+  disabled?: boolean;
+  checked?: boolean;
+  teamId?: string;
+  onTeamSelection?: (teamId: string, checked: boolean) => void;
+  onEmployeeSelection?: (employeeId: string, checked: boolean) => void;
+  selectedEmployees?: Set<string>;
 }
 
 const SearchTeamGroup: React.FC<SearchTeamGroupProps> = ({
@@ -18,40 +24,113 @@ const SearchTeamGroup: React.FC<SearchTeamGroupProps> = ({
   accessModeFilter,
   unaffiliated = false,
   employees,
+  disabled = false,
+  checked,
+  teamId,
+  onTeamSelection,
+  onEmployeeSelection,
+  selectedEmployees = new Set(),
 }) => {
   const [accessMode, setAccessMode] = useState<"all" | "specific">(
     accessModeFilter
   );
-  const [isTeamChecked, setIsTeamChecked] = useState(false);
+
+  // Use external checked state if provided, otherwise use internal state
+  const [internalTeamChecked, setInternalTeamChecked] = useState(false);
+  const isTeamChecked = checked !== undefined ? checked : internalTeamChecked;
+
+  // Auto-update access mode based on employee selection
+  useEffect(() => {
+    if (isTeamChecked && employees.length > 0) {
+      const selectedCount = employees.filter((emp) =>
+        selectedEmployees.has(emp.id || "")
+      ).length;
+      const totalCount = employees.length;
+
+      // If all employees are selected, set to "all"
+      if (selectedCount === totalCount) {
+        setAccessMode("all");
+      }
+      // If some but not all employees are selected, set to "specific"
+      else if (selectedCount > 0 && selectedCount < totalCount) {
+        setAccessMode("specific");
+      }
+      // If no employees are selected, keep current mode
+    }
+  }, [selectedEmployees, employees, isTeamChecked]);
 
   const handleAccessModeChange = (value: "all" | "specific") => {
     setAccessMode(value);
+
+    // If switching to "all" mode and team is checked, select all employees
+    if (value === "all" && isTeamChecked && onEmployeeSelection) {
+      employees.forEach((employee) => {
+        if (employee.id) {
+          onEmployeeSelection(employee.id, true);
+        }
+      });
+    }
+
+    // If switching to "specific" mode and team is checked, deselect all employees
+    if (value === "specific" && isTeamChecked && onEmployeeSelection) {
+      employees.forEach((employee) => {
+        if (employee.id) {
+          onEmployeeSelection(employee.id, false);
+        }
+      });
+    }
   };
 
   const handleTeamCheckboxChange = (checked: boolean, teamName: string) => {
-    setIsTeamChecked(checked);
+    // Update internal state if not controlled externally
+    if (checked === undefined) {
+      setInternalTeamChecked(checked);
+    }
+
+    // Handle team selection with access mode logic
+    if (onTeamSelection && teamId) {
+      onTeamSelection(teamId, checked);
+
+      // If access mode is "all", select/deselect all employees in the team
+      if (accessMode === "all" && onEmployeeSelection) {
+        employees.forEach((employee) => {
+          if (employee.id) {
+            onEmployeeSelection(employee.id, checked);
+          }
+        });
+      }
+    }
+
     // Call the original onChange if provided
     if (teamCheckboxes.onChange) {
       teamCheckboxes.onChange(checked, teamName);
     }
   };
 
+  // Calculate actual selected count based on selectedEmployees
+  const actualSelectedCount = employees.filter((emp) =>
+    selectedEmployees.has(emp.id || "")
+  ).length;
+
   return (
     <div className="flex flex-col w-full gap-[12px] border border-szGrey300 rounded-[8px] px-[16px] py-[8px]">
       {!unaffiliated ? (
         <TeamCheckbox
           {...teamCheckboxes}
+          selectedCount={actualSelectedCount}
           checked={isTeamChecked}
           onChange={handleTeamCheckboxChange}
+          disabled={disabled}
         />
       ) : (
         <TeamCheckbox
-          teamName="Unaffiliated"
+          team_name="Unaffiliated"
           managedBy="none"
           selectedCount={0}
           totalCount={0}
           checked={isTeamChecked}
           onChange={handleTeamCheckboxChange}
+          disabled={disabled}
         />
       )}
       {isTeamChecked && (
@@ -80,10 +159,35 @@ const SearchTeamGroup: React.FC<SearchTeamGroupProps> = ({
           </div>
 
           <EmployeeSearchDropdown
-            onSearch={() => {}}
+            onSearch={(searchTerm) => {
+              // Optional: Add any additional search handling logic here
+              console.log("Searching employees:", searchTerm);
+            }}
             employees={employees.map((employee) => ({
               ...employee,
-              onChange: () => {},
+              checked: selectedEmployees.has(employee.id || ""),
+              onChange: (checked: boolean) => {
+                if (employee.id && onEmployeeSelection) {
+                  onEmployeeSelection(employee.id, checked);
+
+                  // If access mode is "all" and an employee is unchecked, change to "specific"
+                  if (accessMode === "all" && !checked) {
+                    setAccessMode("specific");
+                  }
+
+                  // If access mode is "specific" and all employees are now checked, change to "all"
+                  if (accessMode === "specific" && checked) {
+                    const allEmployeesSelected = employees.every((emp) =>
+                      emp.id === employee.id
+                        ? checked
+                        : selectedEmployees.has(emp.id || "")
+                    );
+                    if (allEmployeesSelected) {
+                      setAccessMode("all");
+                    }
+                  }
+                }
+              },
             }))}
             unaffiliated={unaffiliated}
           />

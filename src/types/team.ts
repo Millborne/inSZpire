@@ -21,6 +21,7 @@ export interface Employee {
   name: string;
   position: string;
   jobTitle: string;
+  team?: string;
   avatar?: string;
   nodeReference: number;
 }
@@ -30,6 +31,7 @@ export interface Team {
   team_name: string;
   team_code: string;
   team_description?: string;
+  managedBy: string;
   employees: Employee[];
 }
 

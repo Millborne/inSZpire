@@ -3,7 +3,7 @@ import React, { useCallback, useState } from "react";
 import { Checkbox, Chip } from "enterprisze-global-components";
 
 export interface TeamCheckboxProps {
-  teamName: string;
+  team_name: string;
   managedBy: string;
   selectedCount: number;
   totalCount: number;
@@ -17,7 +17,7 @@ export interface TeamCheckboxProps {
 }
 
 const TeamCheckbox: React.FC<TeamCheckboxProps> = ({
-  teamName,
+  team_name,
   managedBy,
   selectedCount,
   totalCount,
@@ -28,35 +28,42 @@ const TeamCheckbox: React.FC<TeamCheckboxProps> = ({
   onChange,
   onToggle,
 }) => {
-  const [isChecked, setIsChecked] = useState(checked);
+  const [internalChecked, setInternalChecked] = useState(false);
+
+  // Use external checked prop if provided, otherwise use internal state
+  const isChecked = checked !== undefined ? checked : internalChecked;
 
   // Handle checkbox change with dynamic selection
   const handleCheckboxChange = useCallback(
-    (isChecked: boolean) => {
+    (newChecked: boolean) => {
       if (disabled) return;
 
-      setIsChecked(isChecked);
-      onChange(isChecked, teamName);
+      // Only update internal state if not controlled externally
+      if (checked === undefined) {
+        setInternalChecked(newChecked);
+      }
+
+      onChange(newChecked, team_name);
 
       // Call onToggle if provided for additional functionality
       if (onToggle) {
-        onToggle(teamName);
+        onToggle(team_name);
       }
     },
-    [disabled, onChange, onToggle, teamName]
+    [disabled, onChange, onToggle, team_name, checked]
   );
 
   // Toggle function for external control
-  const toggleSelection = useCallback(() => {
-    if (disabled) return;
-    const newChecked = !isChecked;
-    handleCheckboxChange(newChecked);
-  }, [disabled, isChecked, handleCheckboxChange]);
+  // const toggleSelection = useCallback(() => {
+  //   if (disabled) return;
+  //   const newChecked = !isChecked;
+  //   handleCheckboxChange(newChecked);
+  // }, [disabled, isChecked, handleCheckboxChange]);
 
   return (
     <div
       className={`flex items-center gap-[4px] ${
-        disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+        disabled ? "opacity-50 cursor-not-allowed" : ""
       } ${className}`}
     >
       <Checkbox
@@ -64,13 +71,10 @@ const TeamCheckbox: React.FC<TeamCheckboxProps> = ({
         onChange={() => handleCheckboxChange(!isChecked)}
         disabled={disabled}
       />
-      <div
-        className={`flex flex-1 ${contentClassName} items-center`}
-        onClick={toggleSelection}
-      >
+      <div className={`flex flex-1 ${contentClassName} items-center`}>
         <div className="flex flex-1 justify-between items-center">
           <div>
-            <p className="text-body-small-strong text-gray-900">{teamName}</p>
+            <p className="text-body-small-strong text-gray-900">{team_name}</p>
             <p className="text-caption-all-caps uppercase text-gray-500 ">
               Managed by {managedBy} • {totalCount} members
             </p>
