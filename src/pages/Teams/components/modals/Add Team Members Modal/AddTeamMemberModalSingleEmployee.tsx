@@ -10,7 +10,7 @@ import {
     Tab,
     TextContent,
 } from "enterprisze-global-components";
-import ConfirmationModal from "./ConfirmationModal";
+import ConfirmationModal from "../ConfirmationModal";
 import React, { useState } from "react";
 import {
     Add,
@@ -21,7 +21,13 @@ import {
     Warning2,
 } from "iconsax-reactjs";
 
-const AddTeamMemberModalSingleEmployee = () => {
+const AddTeamMemberModalSingleEmployee = ({
+    isOpen,
+    onClose,
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+}) => {
     const [employeeTeamMember, setEmployeeTeamMember] = useState<any>([
         {
             employee_ID: "",
@@ -44,9 +50,9 @@ const AddTeamMemberModalSingleEmployee = () => {
     return (
         <>
             <Modal
-                isOpen={true}
+                isOpen={isOpen}
                 showButton={false}
-                onClose={() => {}}
+                onClose={onClose}
                 title={"Add Team Member(s)"}
                 modalWidth="w-[900px]"
                 contentHeight="h-[400px] min-h-[120px] max-h-[55vh]"
@@ -55,7 +61,7 @@ const AddTeamMemberModalSingleEmployee = () => {
                     {
                         label: "Cancel",
                         variant: "ghost",
-                        onClick: () => {},
+                        onClick: onClose,
                     },
                     {
                         label: "Team Member",
@@ -102,7 +108,7 @@ const AddTeamMemberModalSingleEmployee = () => {
                                                         )
                                                     }
                                                 />
-                                                <Button
+                                                {/* <Button
                                                     label="Confirm"
                                                     variant="ghost"
                                                     size="medium"
@@ -121,7 +127,28 @@ const AddTeamMemberModalSingleEmployee = () => {
                                                         );
                                                     }}
                                                     className="text-error700"
-                                                />
+                                                /> */}
+                                                <button
+                                                    type="button"
+                                                    aria-label="Confirm"
+                                                    className="h-fit flex items-center justify-center rounded-custom-md font-semibold transition-all min-h-[44px] px-6 py-3 false bg-transparent active:outline-none  focus:outline focus:outline-1 focus:outline-szSecondary500 focus:bg-szWhite100 cursor-pointer text-error700 hover:text-error900 active:text-szBlack900 focus:text-error700 false"
+                                                    onClick={() => {
+                                                        setEmployeeTeamMember(
+                                                            employeeTeamMember.filter(
+                                                                (member: any, i: number) => i !== index
+                                                            )
+                                                        );
+                                                        setOnRemoveEmployeeIndex(null);
+                                                        setConfirmationModalOpen(false);
+                                                    }}
+                                                >
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <MinusCirlce className="" />
+                                                        <span className="font-dmSans text-body-base-strong leading-none m-0">
+                                                            Confirm
+                                                        </span>
+                                                    </div>
+                                                </button>
                                             </div>
                                         </div>
                                     ) : (
@@ -333,6 +360,7 @@ const AddTeamMemberModalSingleEmployee = () => {
                 onClick={() => {
                     setConfirmationModalOpen(false);
                     setShowSuccessSnackbar(true);
+                    onClose();
                 }}
                 description={""}
                 content={
