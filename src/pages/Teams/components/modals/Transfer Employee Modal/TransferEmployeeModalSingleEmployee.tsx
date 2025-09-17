@@ -2,13 +2,16 @@ import {
     Avatar,
     Button,
     ButtonsIcon,
+    Divider,
     Dropdown,
+    Inputs,
     Modal,
     SnackbarAlert,
+    Tab,
     TextContent,
 } from "enterprisze-global-components";
 import ConfirmationModal from "../ConfirmationModal";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
     Add,
     ArrowRight,
@@ -44,38 +47,12 @@ const TransferEmployeeModalSingleEmployee = ({
 
     const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
 
-    // State for dropdown selections
-    const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
-    const [selectedTeam, setSelectedTeam] = useState<any>(null);
-    const [selectedPosition, setSelectedPosition] = useState<any>(null);
-
-    // Check if all employees are saved
-    const allEmployeesSaved = employeeTeamMember.every(
-        (member: any) => member.saved === true
-    );
-
     return (
         <>
             <Modal
                 isOpen={isOpen}
                 showButton={false}
-                onClose={() => {
-                    setSelectedEmployee(null);
-                    setSelectedTeam(null);
-                    setSelectedPosition(null);
-                    setEmployeeTeamMember([
-                        {
-                            employee_ID: "",
-                            employee_first_name: "",
-                            employee_last_name: "",
-                            team_ID: "",
-                            position_ID: "",
-                            position_name: "",
-                            saved: false,
-                        },
-                    ]);
-                    onClose();
-                }}
+                onClose={onClose}
                 title={"Transfer Employee(s)"}
                 modalWidth="w-[900px]"
                 contentHeight="h-[400px] min-h-[120px] max-h-[55vh]"
@@ -87,12 +64,12 @@ const TransferEmployeeModalSingleEmployee = ({
                         onClick: onClose,
                     },
                     {
-                        label: "Transfer Employee",
+                        label: "Team Member",
                         variant: "primary",
-                        disabled: !allEmployeesSaved,
                         onClick: () => {
                             setConfirmationModalOpen(true);
                         },
+                        leftIcon: <Add />,
                     },
                 ]}
                 content={
@@ -287,50 +264,25 @@ const TransferEmployeeModalSingleEmployee = ({
                                         <div className="w-full border border-szGrey300 rounded-lg p-2 flex flex-col gap-2">
                                             <div className="flex items-center justify-between gap-2">
                                                 <div className="flex gap-5 items-center">
-                                                    <div className="flex flex-col gap-1">
-                                                        <TextContent
-                                                            icon={
-                                                                <Avatar
-                                                                    src="/src/assets/noAvatar.png"
-                                                                    size="small"
-                                                                />
-                                                            }
-                                                            header={
-                                                                "Employee name"
-                                                            }
-                                                            text={
-                                                                `${employee.employee_last_name}, ${employee.employee_first_name}` ||
-                                                                "No Employee Selected"
-                                                            }
-                                                        />
-                                                        <TextContent
-                                                            header={
-                                                                "previous team"
-                                                            }
-                                                            text={
-                                                                "No Previous Team"
-                                                            }
-                                                        />
-                                                    </div>
+                                                    <TextContent
+                                                        icon={
+                                                            <Avatar
+                                                                src="/src/assets/noAvatar.png"
+                                                                size="small"
+                                                            />
+                                                        }
+                                                        header={"Employee name"}
+                                                        text={
+                                                            "Stephanie Germanotta"
+                                                        }
+                                                    />
                                                     <div>
                                                         <ArrowRight className="text-szPrimary900" />
                                                     </div>
-                                                    <div className="flex flex-col gap-1">
-                                                        <TextContent
-                                                            header={"Team"}
-                                                            text={
-                                                                employee.team_ID ||
-                                                                "No Team Selected"
-                                                            }
-                                                        />
-                                                        <TextContent
-                                                            header={"position"}
-                                                            text={
-                                                                employee.position_name ||
-                                                                "No Position Selected"
-                                                            }
-                                                        />
-                                                    </div>
+                                                    <TextContent
+                                                        header={"position"}
+                                                        text={"Junior Web Dev"}
+                                                    />
                                                 </div>
 
                                                 <div>
@@ -349,8 +301,9 @@ const TransferEmployeeModalSingleEmployee = ({
                                 ) : (
                                     <div className="w-full border border-szGrey300 rounded-lg p-2 flex flex-col gap-2">
                                         <span className="text-caption-strong text-[#1D973C]">
-                                            Transferring employee to available
-                                            position
+                                            Assigning Employee to available
+                                            Position from Business Solution &
+                                            Innovation
                                         </span>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                             <Dropdown
@@ -358,61 +311,20 @@ const TransferEmployeeModalSingleEmployee = ({
                                                 size="small"
                                                 options={[
                                                     {
-                                                        label: "Edwards, Perry",
-                                                        value: "Edwards, Perry",
-                                                        showChip: true,
-                                                        chipLabel:
-                                                            "with subordinates",
-                                                        chipColor: "red",
-                                                        textType:
-                                                            "allCapsSmall",
+                                                        label: "Active",
+                                                        value: "0",
                                                     },
                                                     {
-                                                        label: "Kehlani, Kate",
-                                                        value: "Kehlani, Kate",
-                                                    },
-                                                    {
-                                                        label: "Kehlani, Folded",
-                                                        value: "Kehlani, Folded",
+                                                        label: "Archived",
+                                                        value: "1",
                                                     },
                                                 ]}
                                                 placeholder="Select Employee"
-                                                value={selectedEmployee}
+                                                // value={}
                                                 onSelectionChange={(
                                                     value: any
-                                                ) => {
-                                                    setSelectedEmployee(value);
-                                                    // Update employeeTeamMember with selected employee
-                                                    setEmployeeTeamMember(
-                                                        employeeTeamMember.map(
-                                                            (
-                                                                member: any,
-                                                                i: number
-                                                            ) =>
-                                                                i === index
-                                                                    ? {
-                                                                          ...member,
-                                                                          employee_first_name:
-                                                                              value?.value?.split(
-                                                                                  ", "
-                                                                              )[1] ||
-                                                                              "",
-                                                                          employee_last_name:
-                                                                              value?.value?.split(
-                                                                                  ", "
-                                                                              )[0] ||
-                                                                              "",
-                                                                          employee_ID:
-                                                                              value?.value ||
-                                                                              "", // Using value as ID for now
-                                                                      }
-                                                                    : member
-                                                        )
-                                                    );
-                                                }}
+                                                ) => {}}
                                                 disabled={false}
-                                                // multiSelect
-                                                // usePortal={false}
                                             />
                                             {/* {errors.status && (
                               <p className="text-caption-reg text-red-500 mt-1">
@@ -425,43 +337,23 @@ const TransferEmployeeModalSingleEmployee = ({
                                         </span>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                             <Dropdown
-                                                label="Select Team"
+                                                label="Business Solution & Innovation (Default)"
                                                 size="small"
                                                 options={[
                                                     {
-                                                        label: "Business Solutions & Innovation (Default)",
-                                                        value: "Business Solutions & Innovation (Default)",
+                                                        label: "Active",
+                                                        value: "0",
                                                     },
                                                     {
-                                                        label: "AFT",
-                                                        value: "AFT",
+                                                        label: "Archived",
+                                                        value: "1",
                                                     },
                                                 ]}
-                                                // multiSelect
-                                                placeholder="Select Team"
-                                                value={selectedTeam}
+                                                placeholder="Business Solution & Innovation (Default)"
+                                                // value={}
                                                 onSelectionChange={(
                                                     value: any
-                                                ) => {
-                                                    setSelectedTeam(value);
-                                                    // Update employeeTeamMember with selected team
-                                                    setEmployeeTeamMember(
-                                                        employeeTeamMember.map(
-                                                            (
-                                                                member: any,
-                                                                i: number
-                                                            ) =>
-                                                                i === index
-                                                                    ? {
-                                                                          ...member,
-                                                                          team_ID:
-                                                                              value?.value ||
-                                                                              "", // Using value as team_ID for now
-                                                                      }
-                                                                    : member
-                                                        )
-                                                    );
-                                                }}
+                                                ) => {}}
                                                 disabled={false}
                                             />
                                             <Dropdown
@@ -469,45 +361,19 @@ const TransferEmployeeModalSingleEmployee = ({
                                                 size="small"
                                                 options={[
                                                     {
-                                                        label: "Junior Web Dev 2",
-                                                        value: "Junior Web Dev 2",
+                                                        label: "Active",
+                                                        value: "0",
                                                     },
                                                     {
-                                                        label: "Junior Web Dev 3",
-                                                        value: "Junior Web Dev 3",
-                                                    },
-                                                    {
-                                                        label: "Senior Dev 1",
-                                                        value: "Senior Dev 1",
+                                                        label: "Archived",
+                                                        value: "1",
                                                     },
                                                 ]}
                                                 placeholder="Select position available from team"
-                                                value={selectedPosition}
+                                                // value={}
                                                 onSelectionChange={(
                                                     value: any
-                                                ) => {
-                                                    setSelectedPosition(value);
-                                                    // Update employeeTeamMember with selected position
-                                                    setEmployeeTeamMember(
-                                                        employeeTeamMember.map(
-                                                            (
-                                                                member: any,
-                                                                i: number
-                                                            ) =>
-                                                                i === index
-                                                                    ? {
-                                                                          ...member,
-                                                                          position_ID:
-                                                                              value?.value ||
-                                                                              "", // Using value as position_ID for now
-                                                                          position_name:
-                                                                              value?.value ||
-                                                                              "",
-                                                                      }
-                                                                    : member
-                                                        )
-                                                    );
-                                                }}
+                                                ) => {}}
                                                 disabled={false}
                                             />
                                         </div>
@@ -523,10 +389,6 @@ const TransferEmployeeModalSingleEmployee = ({
                                                             ) => i !== index
                                                         )
                                                     );
-
-                                                    setSelectedEmployee(null);
-                                                    setSelectedTeam(null);
-                                                    setSelectedPosition(null);
                                                 }}
                                                 variant="ghost"
                                             />
@@ -547,16 +409,7 @@ const TransferEmployeeModalSingleEmployee = ({
                                                                     : member
                                                         )
                                                     );
-
-                                                    setSelectedEmployee(null);
-                                                    setSelectedTeam(null);
-                                                    setSelectedPosition(null);
                                                 }}
-                                                disabled={
-                                                    !selectedEmployee ||
-                                                    !selectedTeam ||
-                                                    !selectedPosition
-                                                }
                                                 variant="primary"
                                             />
                                         </div>
@@ -616,138 +469,78 @@ const TransferEmployeeModalSingleEmployee = ({
                 onClick={() => {
                     setConfirmationModalOpen(false);
                     setShowSuccessSnackbar(true);
-                    setSelectedEmployee(null);
-                    setSelectedTeam(null);
-                    setSelectedPosition(null);
-                    setEmployeeTeamMember([
-                        {
-                            employee_ID: "",
-                            employee_first_name: "",
-                            employee_last_name: "",
-                            team_ID: "",
-                            position_ID: "",
-                            position_name: "",
-                            saved: false,
-                        },
-                    ]);
                     onClose();
                 }}
-                description={"You are about to transfer these employees."}
+                description={""}
                 content={
-                    <div className="flex flex-col mt-2 gap-4">
-                        <div className="relative bg-success50 border border-gray-300 rounded-[8px] px-[16px] py-[20px] ">
-                            <div className="absolute -top-3 left-4 bg-success700 rounded-[4px] px-[8px] py-[2px]">
-                                <p className="body-small-strong text-white">
-                                    Rigor, Maria Alma Angela
-                                </p>
-                            </div>
-                            <div>
-                                <div className="flex gap-5 items-center">
-                                    <div className="flex flex-col gap-1 flex-1">
-                                        <TextContent
-                                            header={"previous team"}
-                                            text={"Accounting & Finance Team"}
-                                        />
-                                        <TextContent
-                                            header={"position"}
-                                            text={"Liaison 1"}
-                                        />
-                                    </div>
-                                    <div>
-                                        <ArrowRight className="text-szPrimary900" />
-                                    </div>
-                                    <div className="flex flex-col gap-1 flex-1">
-                                        <TextContent
-                                            header={"Team"}
-                                            text={
-                                                "Business Solutions & Innovations"
-                                            }
-                                        />{" "}
-                                        <TextContent
-                                            header={"position"}
-                                            text={"Junior Web Dev 1"}
-                                        />
-                                    </div>
+                    <div className="flex flex-col gap-2">
+                        <span className="text-body-base-strong text-szBlack800 text-center">
+                            You are about to add these employees to{" "}
+                            <span className="text-szPrimary700">Team Name</span>
+                            .
+                        </span>
+
+                        <div className="flex flex-col gap-2">
+                            <div className="flex justify-between items-center gap-5">
+                                <div className="flex-1">
+                                    <TextContent
+                                        header="Employee Name"
+                                        text="John Doe"
+                                    />
+                                </div>
+
+                                <span>
+                                    <ArrowRight />
+                                </span>
+                                <div className="flex-1">
+                                    <TextContent
+                                        header="Position"
+                                        text="Junior Web Developer"
+                                    />
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="relative bg-success50 border border-gray-300 rounded-[8px] px-[16px] py-[20px] ">
-                            <div className="absolute -top-3 left-4 bg-success700 rounded-[4px] px-[8px] py-[2px]">
-                                <p className="body-small-strong text-white">
-                                    Rigor, Maria Alma Angela
-                                </p>
-                            </div>
-                            <div>
-                                <div className="flex gap-5 items-center">
-                                    <div className="flex flex-col gap-1 flex-1">
-                                        <TextContent
-                                            header={"previous team"}
-                                            text={"Accounting & Finance Team"}
-                                        />
-                                        <TextContent
-                                            header={"position"}
-                                            text={"Liaison 1"}
-                                        />
-                                    </div>
-                                    <div>
-                                        <ArrowRight className="text-szPrimary900" />
-                                    </div>
-                                    <div className="flex flex-col gap-1 flex-1">
-                                        <TextContent
-                                            header={"Team"}
-                                            text={
-                                                "Business Solutions & Innovations"
-                                            }
-                                        />{" "}
-                                        <TextContent
-                                            header={"position"}
-                                            text={"Junior Web Dev 1"}
-                                        />
-                                    </div>
+                            <div className="flex justify-between items-center gap-5">
+                                <div className="flex-1">
+                                    <TextContent
+                                        header="Employee Name"
+                                        text="John Doe"
+                                    />
+                                </div>
+
+                                <span>
+                                    <ArrowRight />
+                                </span>
+                                <div className="flex-1">
+                                    <TextContent
+                                        header="Position"
+                                        text="Junior Web Developer"
+                                    />
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="relative bg-success50 border border-gray-300 rounded-[8px] px-[16px] py-[20px] ">
-                            <div className="absolute -top-3 left-4 bg-success700 rounded-[4px] px-[8px] py-[2px]">
-                                <p className="body-small-strong text-white">
-                                    Rigor, Maria Alma Angela
-                                </p>
-                            </div>
-                            <div>
-                                <div className="flex gap-5 items-center">
-                                    <div className="flex flex-col gap-1 flex-1">
-                                        <TextContent
-                                            header={"previous team"}
-                                            text={"Accounting & Finance Team"}
-                                        />
-                                        <TextContent
-                                            header={"position"}
-                                            text={"Liaison 1"}
-                                        />
-                                    </div>
-                                    <div>
-                                        <ArrowRight className="text-szPrimary900" />
-                                    </div>
-                                    <div className="flex flex-col gap-1 flex-1">
-                                        <TextContent
-                                            header={"Team"}
-                                            text={
-                                                "Business Solutions & Innovations"
-                                            }
-                                        />{" "}
-                                        <TextContent
-                                            header={"position"}
-                                            text={"Junior Web Dev 1"}
-                                        />
-                                    </div>
+                            <div className="flex justify-between items-center gap-5">
+                                <div className="flex-1">
+                                    <TextContent
+                                        header="Employee Name"
+                                        text="John Doe"
+                                    />
+                                </div>
+
+                                <span>
+                                    <ArrowRight />
+                                </span>
+                                <div className="flex-1">
+                                    <TextContent
+                                        header="Position"
+                                        text="Junior Web Developer"
+                                    />
                                 </div>
                             </div>
                         </div>
                     </div>
                 }
-                buttonLabel={"Transfer Employee"}
+                buttonLabel={"Add Employee(s)"}
             />
 
             <SnackbarAlert
@@ -757,7 +550,7 @@ const TransferEmployeeModalSingleEmployee = ({
                 }}
                 showCloseButton={true}
                 type="success"
-                title={"Successfully transferred team members"}
+                title={"Successfully added team members"}
                 animation="slide-up"
             />
         </>
