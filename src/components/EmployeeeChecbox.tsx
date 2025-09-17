@@ -4,7 +4,7 @@ import { Avatar, Checkbox } from "enterprisze-global-components";
 export interface EmployeeeChecboxProps {
   id?: string;
   name: string;
-  team: string;
+  team?: string;
   position: string;
   disabled?: boolean;
   className?: string;
