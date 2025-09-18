@@ -1,43 +1,58 @@
 import React, { useCallback, useState } from "react";
 import { Avatar, Checkbox } from "enterprisze-global-components";
 
-interface EmployeeeChecboxProps {
+export interface EmployeeeChecboxProps {
+  id?: string;
   name: string;
-  team: string;
-  role: string;
+  team?: string;
+  position: string;
   disabled?: boolean;
   className?: string;
   avatar?: string;
-  onChange: (checked: boolean, teamName: string) => void;
+  showPosition?: boolean;
+  showTeam?: boolean;
+  checked?: boolean;
+  onChange?: (checked: boolean, teamName: string) => void;
   onToggle?: (teamName: string) => void;
 }
 
 const EmployeeeChecbox: React.FC<EmployeeeChecboxProps> = ({
+  id,
   name,
   team,
-  role,
+  position,
   disabled = false,
   className = "",
   avatar,
+  showPosition = true,
+  showTeam = true,
+  checked,
   onChange,
   onToggle,
 }) => {
-  const [isChecked, setIsChecked] = useState(false);
+  const [internalChecked, setInternalChecked] = useState(false);
+
+  // Use external checked prop if provided, otherwise use internal state
+  const isChecked = checked !== undefined ? checked : internalChecked;
 
   // Handle checkbox change with dynamic selection
   const handleCheckboxChange = useCallback(
-    (isChecked: boolean) => {
+    (newChecked: boolean) => {
       if (disabled) return;
 
-      setIsChecked(isChecked);
-      onChange(isChecked, name);
+      // Only update internal state if not controlled externally
+      if (checked === undefined) {
+        setInternalChecked(newChecked);
+      }
+
+      onChange?.(newChecked, name);
 
       // Call onToggle if provided for additional functionality
       if (onToggle) {
         onToggle(name);
       }
     },
-    [disabled, onChange, onToggle, name]
+    [disabled, onChange, onToggle, name, checked]
   );
 
   // Toggle function for external control
@@ -49,7 +64,7 @@ const EmployeeeChecbox: React.FC<EmployeeeChecboxProps> = ({
 
   return (
     <div
-      className={`flex items-center gap-[4px] p-3 ${
+      className={`flex items-center gap-[4px] ${
         disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
       } ${className}`}
     >
@@ -65,9 +80,12 @@ const EmployeeeChecbox: React.FC<EmployeeeChecboxProps> = ({
         <Avatar src={avatar} size="small" />
         <div>
           <p className="text-body-small-strong text-gray-900">{name}</p>
-          <p className="text-caption-all-caps uppercase text-szPrimary900">
-            {team} - <span className="text-szGrey500"> {role} </span>
-          </p>
+          {showPosition && (
+            <p className="text-caption-all-caps uppercase text-szPrimary900">
+              {showTeam && team && `${team} - `}
+              <span className="text-szGrey500"> {position} </span>
+            </p>
+          )}
         </div>
       </div>
     </div>
