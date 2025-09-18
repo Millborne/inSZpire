@@ -5,6 +5,7 @@ import PapaZ from "../../../../../assets/excited-zebra.png";
 import { Button } from "enterprisze-global-components";
 
 import TransferEmployeeModalSingleEmployee from "./TransferEmployeeModalSingleEmployee";
+import TransferEmployeeModalBatchEmployee from "./TransferEmployeeModalBatchEmployee";
 
 interface TransferEmployeeModalProps {
     isOpen: boolean;
@@ -19,6 +20,12 @@ const TransferEmployeeModal: React.FC<TransferEmployeeModalProps> = ({
         isTransferEmployeeModalSingleEmployeeOpen,
         setIsTransferEmployeeModalSingleEmployeeOpen,
     ] = useState(false);
+
+    const [
+        isTransferEmployeeModalBatchEmployeeOpen,
+        setIsTransferEmployeeModalBatchEmployeeOpen,
+    ] = useState(false);
+
     return (
         <>
             <Modal
@@ -57,7 +64,11 @@ const TransferEmployeeModal: React.FC<TransferEmployeeModalProps> = ({
                             label="Batch Transfer in Position"
                             variant="ghost"
                             size="medium"
-                            onClick={() => {}}
+                            onClick={() => {
+                                setIsTransferEmployeeModalBatchEmployeeOpen(
+                                    true
+                                );
+                            }}
                         />
                     </div>
                 }
@@ -67,6 +78,14 @@ const TransferEmployeeModal: React.FC<TransferEmployeeModalProps> = ({
                 isOpen={isTransferEmployeeModalSingleEmployeeOpen}
                 onClose={() => {
                     setIsTransferEmployeeModalSingleEmployeeOpen(false);
+                    onClose();
+                }}
+            />
+
+            <TransferEmployeeModalBatchEmployee
+                isOpen={isTransferEmployeeModalBatchEmployeeOpen}
+                onClose={() => {
+                    setIsTransferEmployeeModalBatchEmployeeOpen(false);
                     onClose();
                 }}
             />

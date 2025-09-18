@@ -16,13 +16,7 @@ import { ArrowRight, SearchNormal, Warning2 } from "iconsax-reactjs";
 import profilePic from "../../../../../assets/noAvatar.png";
 import BatchMessage from "../../../../../components/BatchMessage";
 
-const TransferEmployeeModalBatchEmployee = ({
-    isOpen,
-    onClose,
-}: {
-    isOpen: boolean;
-    onClose: () => void;
-}) => {
+const TransferEmployeeModalBatchEmployee = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
     // Employee data array with unique identifiers
     const [employees, setEmployees] = useState([
         {
@@ -186,22 +180,14 @@ const TransferEmployeeModalBatchEmployee = ({
 
     // Handle individual employee checkbox change
     const handleEmployeeCheckboxChange = (employeeId: number) => {
-        setEmployees((prev) =>
-            prev.map((emp) =>
-                emp.id === employeeId
-                    ? { ...emp, selected: !emp.selected }
-                    : emp
-            )
-        );
+        setEmployees((prev) => prev.map((emp) => (emp.id === employeeId ? { ...emp, selected: !emp.selected } : emp)));
     };
 
     // Handle team checkbox change (select all/none)
     const handleTeamCheckboxChange = () => {
         const newSelectionState = !isTeamSelected;
         setIsTeamSelected(newSelectionState);
-        setEmployees((prev) =>
-            prev.map((emp) => ({ ...emp, selected: newSelectionState }))
-        );
+        setEmployees((prev) => prev.map((emp) => ({ ...emp, selected: newSelectionState })));
     };
 
     // Handle access mode changes
@@ -210,14 +196,10 @@ const TransferEmployeeModalBatchEmployee = ({
         setSpecificMembersOnly(false);
         if (!allTeamMembers) {
             setIsTeamSelected(true);
-            setEmployees((prev) =>
-                prev.map((emp) => ({ ...emp, selected: true }))
-            );
+            setEmployees((prev) => prev.map((emp) => ({ ...emp, selected: true })));
         } else {
             setIsTeamSelected(false);
-            setEmployees((prev) =>
-                prev.map((emp) => ({ ...emp, selected: false }))
-            );
+            setEmployees((prev) => prev.map((emp) => ({ ...emp, selected: false })));
         }
     };
 
@@ -225,9 +207,7 @@ const TransferEmployeeModalBatchEmployee = ({
         setSpecificMembersOnly(!specificMembersOnly);
         setAllTeamMembers(false);
         // setIsTeamSelected(false);
-        setEmployees((prev) =>
-            prev.map((emp) => ({ ...emp, selected: false }))
-        );
+        setEmployees((prev) => prev.map((emp) => ({ ...emp, selected: false })));
     };
 
     const OnCloseModal = () => {
@@ -235,9 +215,7 @@ const TransferEmployeeModalBatchEmployee = ({
         setIsTeamSelected(false);
         setAllTeamMembers(false);
         setSpecificMembersOnly(false);
-        setEmployees((prev) =>
-            prev.map((emp) => ({ ...emp, selected: false }))
-        );
+        setEmployees((prev) => prev.map((emp) => ({ ...emp, selected: false })));
         setSelectedTeam("");
         setSelectedJobTitle("");
         onClose();
@@ -274,21 +252,13 @@ const TransferEmployeeModalBatchEmployee = ({
                         variant: "primary",
                         disabled: (() => {
                             const isDisabled =
-                                currentStep === 1
-                                    ? selectedCount === 0
-                                    : selectedCount === 0 ||
-                                      !selectedTeam ||
-                                      !selectedJobTitle;
-                            console.log(
-                                "Continue button disabled:",
-                                isDisabled,
-                                {
-                                    currentStep,
-                                    selectedCount,
-                                    selectedTeam,
-                                    selectedJobTitle,
-                                }
-                            );
+                                currentStep === 1 ? selectedCount === 0 : selectedCount === 0 || !selectedTeam || !selectedJobTitle;
+                            console.log("Continue button disabled:", isDisabled, {
+                                currentStep,
+                                selectedCount,
+                                selectedTeam,
+                                selectedJobTitle,
+                            });
                             return isDisabled;
                         })(),
                         onClick: () => {
@@ -307,10 +277,7 @@ const TransferEmployeeModalBatchEmployee = ({
                                 steps={[
                                     {
                                         id: "1",
-                                        stepType:
-                                            currentStep > 1
-                                                ? "checked"
-                                                : "number",
+                                        stepType: currentStep > 1 ? "checked" : "number",
                                         stepNumber: 1,
                                         isActive: currentStep === 1,
                                         labelText: "employees",
@@ -343,28 +310,17 @@ const TransferEmployeeModalBatchEmployee = ({
                                 <div className="border border-szGrey300 rounded-[6px] py-4 px-2 flex flex-col gap-2">
                                     <div className="flex items-center justify-between">
                                         <div className="flex gap-[10px] ">
-                                            <Checkbox
-                                                checked={isTeamSelected}
-                                                onChange={
-                                                    handleTeamCheckboxChange
-                                                }
-                                            />
+                                            <Checkbox checked={isTeamSelected} onChange={handleTeamCheckboxChange} />
                                             <div className="flex flex-col">
-                                                <span className="text-body-small-strong">
-                                                    Business Solutions &
-                                                    Innovation
-                                                </span>
+                                                <span className="text-body-small-strong">Business Solutions & Innovation</span>
                                                 <span className="text-caption-all-caps uppercase text-szGrey500">
-                                                    Managed by Dino Flores •{" "}
-                                                    {employees.length} members
+                                                    Managed by Dino Flores • {employees.length} members
                                                 </span>
                                             </div>
                                         </div>
 
                                         <div>
-                                            <Chip
-                                                label={`${selectedCount}/${employees.length} selected`}
-                                            />
+                                            <Chip label={`${selectedCount}/${employees.length} selected`} />
                                         </div>
                                     </div>
 
@@ -372,26 +328,18 @@ const TransferEmployeeModalBatchEmployee = ({
 
                                     <div className="flex flex-col gap-4">
                                         <div className="flex flex-col gap-2">
-                                            <span className="text-caption-all-caps uppercase text-szDarkGrey600">
-                                                Access Mode
-                                            </span>
+                                            <span className="text-caption-all-caps uppercase text-szDarkGrey600">Access Mode</span>
 
                                             <div className="flex gap-2">
                                                 <Checkbox
                                                     label="All team members"
                                                     checked={allTeamMembers}
-                                                    onChange={
-                                                        handleAllTeamMembersChange
-                                                    }
+                                                    onChange={handleAllTeamMembersChange}
                                                 />
                                                 <Checkbox
                                                     label="Specific members only"
-                                                    checked={
-                                                        specificMembersOnly
-                                                    }
-                                                    onChange={
-                                                        handleSpecificMembersOnlyChange
-                                                    }
+                                                    checked={specificMembersOnly}
+                                                    onChange={handleSpecificMembersOnlyChange}
                                                 />
                                             </div>
                                         </div>
@@ -406,32 +354,18 @@ const TransferEmployeeModalBatchEmployee = ({
                                                 placeholder="Search Employees..."
                                                 value={searchTerm}
                                                 icon={SearchNormal}
-                                                onChange={(e) =>
-                                                    setSearchTerm(
-                                                        e.target.value
-                                                    )
-                                                }
+                                                onChange={(e) => setSearchTerm(e.target.value)}
                                                 iconClick={() => {}}
                                             />
 
                                             <div className="h-[200px] flex flex-col gap-2 overflow-y-auto">
-                                                {filteredEmployees.map(
-                                                    (employee) => (
-                                                        <div
-                                                            key={employee.id}
-                                                            className="flex items-center gap-2"
-                                                        >
-                                                            <Checkbox
-                                                                checked={
-                                                                    employee.selected
-                                                                }
-                                                                onChange={() =>
-                                                                    handleEmployeeCheckboxChange(
-                                                                        employee.id
-                                                                    )
-                                                                }
-                                                            />
-                                                            {/* <TextContent
+                                                {filteredEmployees.map((employee) => (
+                                                    <div key={employee.id} className="flex items-center gap-2">
+                                                        <Checkbox
+                                                            checked={employee.selected}
+                                                            onChange={() => handleEmployeeCheckboxChange(employee.id)}
+                                                        />
+                                                        {/* <TextContent
                                                                     icon={
                                                                         <Avatar
                                                                             size="small"
@@ -448,38 +382,20 @@ const TransferEmployeeModalBatchEmployee = ({
                                                                     }
                                                                 /> */}
 
-                                                            <div
-                                                                className={`flex flex-1 items-center gap-[8px]`}
-                                                            >
-                                                                <Avatar
-                                                                    src={
-                                                                        profilePic
-                                                                    }
-                                                                    size="small"
-                                                                />
-                                                                <div>
-                                                                    <p className="text-body-small-strong text-gray-900">
-                                                                        {
-                                                                            employee.name
-                                                                        }
-                                                                    </p>
-                                                                    <p className="text-caption-all-caps uppercase text-szPrimary900">
-                                                                        <span className="text-szGrey500">
-                                                                            {
-                                                                                employee.position
-                                                                            }
-                                                                        </span>
-                                                                    </p>
-                                                                </div>
+                                                        <div className={`flex flex-1 items-center gap-[8px]`}>
+                                                            <Avatar src={profilePic} size="small" />
+                                                            <div>
+                                                                <p className="text-body-small-strong text-gray-900">{employee.name}</p>
+                                                                <p className="text-caption-all-caps uppercase text-szPrimary900">
+                                                                    <span className="text-szGrey500">{employee.position}</span>
+                                                                </p>
                                                             </div>
                                                         </div>
-                                                    )
-                                                )}
-                                                {filteredEmployees.length ===
-                                                    0 && (
+                                                    </div>
+                                                ))}
+                                                {filteredEmployees.length === 0 && (
                                                     <div className="flex items-center justify-center h-full text-szGrey500">
-                                                        No employees found
-                                                        matching your search.
+                                                        No employees found matching your search.
                                                     </div>
                                                 )}
                                             </div>
@@ -493,58 +409,29 @@ const TransferEmployeeModalBatchEmployee = ({
                             <div className="flex flex-col gap-2 mt-1 h-full">
                                 <div className="w-full ">
                                     <span className="text-body-small-strong text-szDarkGrey600">
-                                        You can only add new members to the team
-                                        if there are available positions and
-                                        that the position is enabled for batch
-                                        transfers.
+                                        You can only add new members to the team if there are available positions and that the position is
+                                        enabled for batch transfers.
                                     </span>
                                 </div>
 
                                 <div className="flex gap-2 h-full">
                                     <div className="flex-1 bg-success50 p-2">
-                                        <span className="text-body-small-reg">
-                                            Selected Employees
-                                        </span>
+                                        <span className="text-body-small-reg">Selected Employees</span>
                                         <div className="flex flex-col gap-2 mt-2 max-h-[90%] overflow-y-auto">
                                             {employees
-                                                .filter(
-                                                    (employee) =>
-                                                        employee.selected
-                                                )
+                                                .filter((employee) => employee.selected)
                                                 .map((employee) => (
-                                                    <div
-                                                        key={employee.id}
-                                                        className="flex items-center gap-2"
-                                                    >
+                                                    <div key={employee.id} className="flex items-center gap-2">
                                                         <Checkbox
-                                                            checked={
-                                                                employee.selected
-                                                            }
-                                                            onChange={() =>
-                                                                handleEmployeeCheckboxChange(
-                                                                    employee.id
-                                                                )
-                                                            }
+                                                            checked={employee.selected}
+                                                            onChange={() => handleEmployeeCheckboxChange(employee.id)}
                                                         />
-                                                        <div
-                                                            className={`flex flex-1 items-center gap-[8px]`}
-                                                        >
-                                                            <Avatar
-                                                                src={profilePic}
-                                                                size="small"
-                                                            />
+                                                        <div className={`flex flex-1 items-center gap-[8px]`}>
+                                                            <Avatar src={profilePic} size="small" />
                                                             <div>
-                                                                <p className="text-body-small-strong text-gray-900">
-                                                                    {
-                                                                        employee.name
-                                                                    }
-                                                                </p>
+                                                                <p className="text-body-small-strong text-gray-900">{employee.name}</p>
                                                                 <p className="text-caption-all-caps uppercase text-szPrimary900">
-                                                                    <span className="text-szGrey500">
-                                                                        {
-                                                                            employee.position
-                                                                        }
-                                                                    </span>
+                                                                    <span className="text-szGrey500">{employee.position}</span>
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -564,9 +451,7 @@ const TransferEmployeeModalBatchEmployee = ({
                                                         /> */}
                                                     </div>
                                                 ))}
-                                            {employees.filter(
-                                                (emp) => emp.selected
-                                            ).length === 0 && (
+                                            {employees.filter((emp) => emp.selected).length === 0 && (
                                                 <div className="flex items-center justify-center py-4 text-szGrey500">
                                                     No employees selected
                                                 </div>
@@ -585,8 +470,7 @@ const TransferEmployeeModalBatchEmployee = ({
                                                     label: "Junior Web Dev",
                                                     value: "Junior Web Dev",
                                                     showChip: true,
-                                                    chipLabel:
-                                                        "For batch transfer (1-5)",
+                                                    chipLabel: "For batch transfer (1-5)",
                                                     chipColor: "default",
                                                     textType: "allCapsSmall",
                                                 },
@@ -594,8 +478,7 @@ const TransferEmployeeModalBatchEmployee = ({
                                                     label: "CCA2",
                                                     value: "CCA2",
                                                     showChip: true,
-                                                    chipLabel:
-                                                        "For batch transfer (1-45)",
+                                                    chipLabel: "For batch transfer (1-45)",
                                                     chipColor: "default",
                                                     textType: "allCapsSmall",
                                                 },
@@ -603,8 +486,7 @@ const TransferEmployeeModalBatchEmployee = ({
                                                     label: "Operations Manager",
                                                     value: "Operations Manager",
                                                     showChip: true,
-                                                    chipLabel:
-                                                        "For batch transfer (1-45)",
+                                                    chipLabel: "For batch transfer (1-45)",
                                                     chipColor: "default",
                                                     textType: "allCapsSmall",
                                                 },
@@ -612,22 +494,14 @@ const TransferEmployeeModalBatchEmployee = ({
                                                     label: "Director",
                                                     value: "Director",
                                                     showChip: true,
-                                                    chipLabel:
-                                                        "For batch transfer (1-45)",
+                                                    chipLabel: "For batch transfer (1-45)",
                                                     chipColor: "default",
                                                     textType: "allCapsSmall",
                                                 },
                                             ]}
                                             onSelectionChange={(option) => {
-                                                console.log(
-                                                    "Team dropdown selection:",
-                                                    option
-                                                );
-                                                const value = Array.isArray(
-                                                    option
-                                                )
-                                                    ? option[0]?.value || ""
-                                                    : option?.value || "";
+                                                console.log("Team dropdown selection:", option);
+                                                const value = Array.isArray(option) ? option[0]?.value || "" : option?.value || "";
                                                 setSelectedTeam(value);
                                             }}
                                             size="small"
@@ -642,22 +516,14 @@ const TransferEmployeeModalBatchEmployee = ({
                                                     label: "Junior Web Dev",
                                                     value: "Junior Web Dev",
                                                     showChip: true,
-                                                    chipLabel:
-                                                        "For batch transfer (1-15)",
+                                                    chipLabel: "For batch transfer (1-15)",
                                                     chipColor: "default",
                                                     textType: "allCapsSmall",
                                                 },
                                             ]}
                                             onSelectionChange={(option) => {
-                                                console.log(
-                                                    "Job title dropdown selection:",
-                                                    option
-                                                );
-                                                const value = Array.isArray(
-                                                    option
-                                                )
-                                                    ? option[0]?.value || ""
-                                                    : option?.value || "";
+                                                console.log("Job title dropdown selection:", option);
+                                                const value = Array.isArray(option) ? option[0]?.value || "" : option?.value || "";
                                                 setSelectedJobTitle(value);
                                             }}
                                             size="small"
@@ -696,36 +562,20 @@ const TransferEmployeeModalBatchEmployee = ({
                     <div className="flex flex-col mt-2 gap-4">
                         <div className="relative bg-success50 border border-gray-300 rounded-[8px] px-[16px] py-[20px] ">
                             <div className="absolute -top-3 left-4 bg-success700 rounded-[4px] px-[8px] py-[2px]">
-                                <p className="body-small-strong text-white">
-                                    Rigor, Maria Alma Angela
-                                </p>
+                                <p className="body-small-strong text-white">Rigor, Maria Alma Angela</p>
                             </div>
                             <div>
                                 <div className="flex gap-5 items-center">
                                     <div className="flex flex-col gap-1 flex-1">
-                                        <TextContent
-                                            header={"previous team"}
-                                            text={"Accounting & Finance Team"}
-                                        />
-                                        <TextContent
-                                            header={"position"}
-                                            text={"Liaison 1"}
-                                        />
+                                        <TextContent header={"previous team"} text={"Accounting & Finance Team"} />
+                                        <TextContent header={"position"} text={"Liaison 1"} />
                                     </div>
                                     <div>
                                         <ArrowRight className="text-szPrimary900" />
                                     </div>
                                     <div className="flex flex-col gap-1 flex-1">
-                                        <TextContent
-                                            header={"Team"}
-                                            text={
-                                                "Business Solutions & Innovations"
-                                            }
-                                        />{" "}
-                                        <TextContent
-                                            header={"position"}
-                                            text={"Junior Web Dev 1"}
-                                        />
+                                        <TextContent header={"Team"} text={"Business Solutions & Innovations"} />{" "}
+                                        <TextContent header={"position"} text={"Junior Web Dev 1"} />
                                     </div>
                                 </div>
                             </div>
@@ -733,36 +583,20 @@ const TransferEmployeeModalBatchEmployee = ({
 
                         <div className="relative bg-success50 border border-gray-300 rounded-[8px] px-[16px] py-[20px] ">
                             <div className="absolute -top-3 left-4 bg-success700 rounded-[4px] px-[8px] py-[2px]">
-                                <p className="body-small-strong text-white">
-                                    Rigor, Maria Alma Angela
-                                </p>
+                                <p className="body-small-strong text-white">Rigor, Maria Alma Angela</p>
                             </div>
                             <div>
                                 <div className="flex gap-5 items-center">
                                     <div className="flex flex-col gap-1 flex-1">
-                                        <TextContent
-                                            header={"previous team"}
-                                            text={"Accounting & Finance Team"}
-                                        />
-                                        <TextContent
-                                            header={"position"}
-                                            text={"Liaison 1"}
-                                        />
+                                        <TextContent header={"previous team"} text={"Accounting & Finance Team"} />
+                                        <TextContent header={"position"} text={"Liaison 1"} />
                                     </div>
                                     <div>
                                         <ArrowRight className="text-szPrimary900" />
                                     </div>
                                     <div className="flex flex-col gap-1 flex-1">
-                                        <TextContent
-                                            header={"Team"}
-                                            text={
-                                                "Business Solutions & Innovations"
-                                            }
-                                        />{" "}
-                                        <TextContent
-                                            header={"position"}
-                                            text={"Junior Web Dev 1"}
-                                        />
+                                        <TextContent header={"Team"} text={"Business Solutions & Innovations"} />{" "}
+                                        <TextContent header={"position"} text={"Junior Web Dev 1"} />
                                     </div>
                                 </div>
                             </div>
@@ -770,36 +604,20 @@ const TransferEmployeeModalBatchEmployee = ({
 
                         <div className="relative bg-success50 border border-gray-300 rounded-[8px] px-[16px] py-[20px] ">
                             <div className="absolute -top-3 left-4 bg-success700 rounded-[4px] px-[8px] py-[2px]">
-                                <p className="body-small-strong text-white">
-                                    Rigor, Maria Alma Angela
-                                </p>
+                                <p className="body-small-strong text-white">Rigor, Maria Alma Angela</p>
                             </div>
                             <div>
                                 <div className="flex gap-5 items-center">
                                     <div className="flex flex-col gap-1 flex-1">
-                                        <TextContent
-                                            header={"previous team"}
-                                            text={"Accounting & Finance Team"}
-                                        />
-                                        <TextContent
-                                            header={"position"}
-                                            text={"Liaison 1"}
-                                        />
+                                        <TextContent header={"previous team"} text={"Accounting & Finance Team"} />
+                                        <TextContent header={"position"} text={"Liaison 1"} />
                                     </div>
                                     <div>
                                         <ArrowRight className="text-szPrimary900" />
                                     </div>
                                     <div className="flex flex-col gap-1 flex-1">
-                                        <TextContent
-                                            header={"Team"}
-                                            text={
-                                                "Business Solutions & Innovations"
-                                            }
-                                        />{" "}
-                                        <TextContent
-                                            header={"position"}
-                                            text={"Junior Web Dev 1"}
-                                        />
+                                        <TextContent header={"Team"} text={"Business Solutions & Innovations"} />{" "}
+                                        <TextContent header={"position"} text={"Junior Web Dev 1"} />
                                     </div>
                                 </div>
                             </div>
