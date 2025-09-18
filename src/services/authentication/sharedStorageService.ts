@@ -177,9 +177,9 @@ class SharedStorageService {
       return false;
     }
 
-    // Check if data is too old (5 minutes)
-    const fiveMinutes = 5 * 60 * 1000;
-    if (Date.now() - authData.timestamp > fiveMinutes) {
+    // Check if data is too old (30 minutes for development)
+    const thirtyMinutes = 30 * 60 * 1000;
+    if (Date.now() - authData.timestamp > thirtyMinutes) {
       return false;
     }
 
