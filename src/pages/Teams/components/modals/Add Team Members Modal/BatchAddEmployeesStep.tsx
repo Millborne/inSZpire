@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import PapaZ from "../../../../../assets/papa-z-csr.png";
 
 //icons
@@ -9,24 +9,36 @@ import { Inputs, ButtonsIcon } from "enterprisze-global-components";
 import SelectedFilter from "../../../../../components/SelectedFilter";
 import SearchTeamGroup from "../../../../../components/SearchTeamGroup";
 import EmployeeeChecbox from "../../../../../components/EmployeeeChecbox";
-import BatchSelectedView from "../../../../../components/BatchSelectedView";
+import BatchSelectedView from "./BatchSelectedView";
 
 //types
 import { Employee, Team } from "../../../../../types/team";
 
 interface AddEmployeesStepProps {
   data: Team[];
+  onSelectionChange: (
+    employees: Employee[],
+    employeeIds: Set<string>,
+    teamIds: Set<string>
+  ) => void;
+  selectedEmployeeIds?: Set<string>;
+  selectedTeamIds?: Set<string>;
 }
 
-const AddEmployeesStep: React.FC<AddEmployeesStepProps> = ({ data }) => {
+const BatchAddEmployeesStep: React.FC<AddEmployeesStepProps> = ({
+  data,
+  onSelectionChange,
+  selectedEmployeeIds = new Set(),
+  selectedTeamIds = new Set(),
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFilterSelected, setIsFilterSelected] = useState(false);
 
-  // State for selected items
-  const [selectedTeams, setSelectedTeams] = useState<Set<string>>(new Set());
-  const [selectedEmployees, setSelectedEmployees] = useState<Set<string>>(
-    new Set()
-  );
+  // State for selected items - initialize with passed props
+  const [selectedTeams, setSelectedTeams] =
+    useState<Set<string>>(selectedTeamIds);
+  const [selectedEmployees, setSelectedEmployees] =
+    useState<Set<string>>(selectedEmployeeIds);
 
   // Filter teams and employees based on search term
   const { filteredTeams, individualEmployees } = useMemo(() => {
@@ -113,19 +125,21 @@ const AddEmployeesStep: React.FC<AddEmployeesStepProps> = ({ data }) => {
     );
   }, [data, selectedEmployees]);
 
-  // Utility functions for managing selections
-  const clearAllSelections = () => {
-    setSelectedTeams(new Set());
-    setSelectedEmployees(new Set());
-  };
+  // Update local state when props change (when going back from step 2)
+  useEffect(() => {
+    setSelectedEmployees(selectedEmployeeIds);
+    setSelectedTeams(selectedTeamIds);
+  }, [selectedEmployeeIds, selectedTeamIds]);
 
-  const getTotalSelectedCount = () => {
-    return selectedTeams.size + selectedEmployees.size;
-  };
-
-  const isAnySelected = () => {
-    return selectedTeams.size > 0 || selectedEmployees.size > 0;
-  };
+  // Notify parent component when selections change
+  useEffect(() => {
+    onSelectionChange(selectedEmployeesData, selectedEmployees, selectedTeams);
+  }, [
+    selectedEmployeesData,
+    selectedEmployees,
+    selectedTeams,
+    onSelectionChange,
+  ]);
 
   return (
     <div className="w-full">
@@ -250,4 +264,4 @@ const AddEmployeesStep: React.FC<AddEmployeesStepProps> = ({ data }) => {
   );
 };
 
-export default AddEmployeesStep;
+export default BatchAddEmployeesStep;

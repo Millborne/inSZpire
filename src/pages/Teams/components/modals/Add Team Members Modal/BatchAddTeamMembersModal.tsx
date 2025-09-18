@@ -1,11 +1,14 @@
-import { Modal, Stepper } from "enterprisze-global-components";
+import { Modal, Stepper, SnackbarAlert } from "enterprisze-global-components";
 import React, { useState } from "react";
 
 //components
-import AddEmployeesStep from "./AddEmployeesStep";
+import BatchAddEmployeesStep from "./BatchAddEmployeesStep";
+import BatchAddConfirmationModal from "./BatchAddConfirmationModal";
 
 //types
-import { Team } from "../../../../../types/team";
+import { Team, Employee } from "../../../../../types/team";
+import BatchAddEmployeesStep2 from "./BatchAddEmployeesStep2";
+import { Add } from "iconsax-reactjs";
 
 interface BatchAddTeamMembersModalProps {
   isOpen: boolean;
@@ -249,64 +252,151 @@ const BatchAddTeamMembersModal: React.FC<BatchAddTeamMembersModalProps> = ({
   onClose,
 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([]);
+  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<string>>(
+    new Set()
+  );
+  const [selectedTeamIds, setSelectedTeamIds] = useState<Set<string>>(
+    new Set()
+  );
+  const [selectedPosition, setSelectedPosition] = useState<string>("");
+  const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
+  const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
+
+  // Reset state when modal is closed
+  const handleClose = () => {
+    setCurrentStepIndex(0);
+    setSelectedEmployees([]);
+    setSelectedEmployeeIds(new Set());
+    setSelectedTeamIds(new Set());
+    setSelectedPosition("");
+    setConfirmationModalOpen(false);
+    setShowSuccessSnackbar(false);
+    onClose();
+  };
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      showCloseIcon={false}
-      showButton={false}
-      footerOptions="stacked-left"
-      footerButtons={[
-        { label: "Cancel", variant: "ghost", size: "medium", onClick: onClose },
-        {
-          label: "Continue",
-          variant: "primary",
-          size: "medium",
-          onClick: () => {
-            if (currentStepIndex < 1) {
-              setCurrentStepIndex(currentStepIndex + 1);
-            }
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        showCloseIcon={false}
+        showButton={false}
+        footerOptions="stacked-left"
+        footerButtons={[
+          {
+            label: currentStepIndex === 1 ? "Back" : "Cancel",
+            variant: "ghost",
+            size: "medium",
+            onClick:
+              currentStepIndex === 1
+                ? () => setCurrentStepIndex(0)
+                : handleClose,
           },
-        },
-      ]}
-      title="Add Team Member(s)"
-      modalWidth="w-[910px]"
-      contentHeight="h-[400px] min-h-[120px] max-h-[56vh]"
-      content={
-        <div className="flex flex-col gap-[8px] justify-center items-center">
-          <Stepper
-            steps={[
-              {
-                id: "1",
-                stepType: "number",
-                stepNumber: 1,
-                isActive: currentStepIndex === 0,
-                labelText: "EMPLOYEES",
-              },
-              {
-                id: "2",
-                stepType: "number",
-                stepNumber: 2,
-                isActive: currentStepIndex === 1,
-                labelText: "POSITION",
-              },
-            ]}
-            connectorType="solid"
-            showConnectors={true}
-            connected={false}
-            currentStepIndex={currentStepIndex}
-            orientation="horizontal"
-          />
-          <p className="text-body-small-strong text-szDarkGrey600">
-            You can only add new members to the team if there are available
-            positions and that position is enabled for batch transfers.
-          </p>
-          <div className="flex flex-col w-full gap-[8px]">
-            <AddEmployeesStep data={teamsData} />
+          {
+            label: currentStepIndex === 1 ? "Team member" : "Continue",
+            variant: "primary",
+            size: "medium",
+            leftIcon: currentStepIndex === 1 ? <Add /> : undefined,
+            onClick: () => {
+              if (currentStepIndex < 1) {
+                setCurrentStepIndex(currentStepIndex + 1);
+              } else {
+                // Open confirmation modal
+                setConfirmationModalOpen(true);
+              }
+            },
+            disabled:
+              (currentStepIndex === 0 && selectedEmployees.length === 0) ||
+              (currentStepIndex === 1 &&
+                (!selectedPosition || selectedEmployees.length === 0)),
+          },
+        ]}
+        title="Add Team Member(s)"
+        modalWidth="w-[910px]"
+        contentHeight="h-[320px]"
+        content={
+          <div className="flex flex-col gap-[8px] items-center h-full">
+            <Stepper
+              steps={[
+                {
+                  id: "1",
+                  stepType: currentStepIndex === 0 ? "number" : "checked",
+                  stepNumber: 1,
+                  isActive: currentStepIndex === 0,
+                  labelText: "EMPLOYEES",
+                },
+                {
+                  id: "2",
+                  stepType: "number",
+                  stepNumber: 2,
+                  isActive: currentStepIndex === 1,
+                  labelText: "POSITION",
+                },
+              ]}
+              connectorType="solid"
+              showConnectors={true}
+              connected={false}
+              currentStepIndex={currentStepIndex}
+              orientation="horizontal"
+            />
+            <p className="text-body-small-strong text-szDarkGrey600">
+              You can only add new members to the team if there are available
+              positions and that position is enabled for batch transfers.
+            </p>
+            <div className="flex flex-col w-full gap-[8px] h-full">
+              {currentStepIndex === 0 ? (
+                <BatchAddEmployeesStep
+                  data={teamsData}
+                  onSelectionChange={(employees, employeeIds, teamIds) => {
+                    setSelectedEmployees(employees);
+                    setSelectedEmployeeIds(employeeIds);
+                    setSelectedTeamIds(teamIds);
+                  }}
+                  selectedEmployeeIds={selectedEmployeeIds}
+                  selectedTeamIds={selectedTeamIds}
+                />
+              ) : (
+                <BatchAddEmployeesStep2
+                  selectedEmployees={selectedEmployees}
+                  onPositionChange={setSelectedPosition}
+                />
+              )}
+            </div>
           </div>
-        </div>
-      }
-    />
+        }
+      />
+
+      <BatchAddConfirmationModal
+        isOpen={confirmationModalOpen}
+        onClose={() => setConfirmationModalOpen(false)}
+        onClick={() => {
+          setConfirmationModalOpen(false);
+          setShowSuccessSnackbar(true);
+          // Reset form state
+          setCurrentStepIndex(0);
+          setSelectedEmployees([]);
+          setSelectedEmployeeIds(new Set());
+          setSelectedTeamIds(new Set());
+          setSelectedPosition("");
+          // Close modal after a short delay to allow snackbar to show
+          setTimeout(() => {
+            onClose();
+          }, 100);
+        }}
+        selectedEmployees={selectedEmployees}
+        selectedPosition={selectedPosition}
+        teamName="Business Solutions & Innovation"
+      />
+
+      <SnackbarAlert
+        isOpen={showSuccessSnackbar}
+        onClose={() => setShowSuccessSnackbar(false)}
+        showCloseButton={true}
+        type="success"
+        title="Successfully added team members"
+        animation="slide-up"
+      />
+    </>
   );
 };
 

@@ -6,82 +6,79 @@ import PapaZ from "../../../../../assets/excited-zebra.png";
 import AddTeamMemberModalSingleEmployee from "./AddTeamMemberModalSingleEmployee";
 
 interface AddTeamMemberModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onSave?: (data: any) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  onSave?: (data: any) => void;
 }
 
 const AddTeamMemberModal: React.FC<AddTeamMemberModalProps> = ({
-    isOpen,
-    onClose,
-    onSave,
+  isOpen,
+  onClose,
+  onSave,
 }) => {
-    const [isBatchAddTeamMembersModalOpen, setIsBatchAddTeamMembersModalOpen] =
-        useState(false);
-    const [
-        isAddTeamMemberModalSingleEmployeeOpen,
-        setIsAddTeamMemberModalSingleEmployeeOpen,
-    ] = useState(false);
+  const [isBatchAddTeamMembersModalOpen, setIsBatchAddTeamMembersModalOpen] =
+    useState(false);
+  const [
+    isAddTeamMemberModalSingleEmployeeOpen,
+    setIsAddTeamMemberModalSingleEmployeeOpen,
+  ] = useState(false);
 
-    return (
-        <>
-            <Modal
-                isOpen={isOpen}
-                onClose={onClose}
-                showCloseIcon={false}
-                title="Add Team Member(s)"
-                showButton={false}
-                modalWidth="w-[900px]"
-                contentHeight="h-[400px] min-h-[120px] max-h-[60vh]"
-                showFooter={false}
-                content={
-                    <div className="flex flex-col gap-[8px] items-center justify-center h-full pb-[32px]">
-                        <div className="flex flex-col items-center gap-[16px]">
-                            <img
-                                src={PapaZ}
-                                className="w-[142x] h-[120px]"
-                                alt="PapaZ"
-                            />
-                            <p className="text-body-base-strong text-szDarkGrey600 max-w-[320px] text-center">
-                                You can only add new members to the team if
-                                there are available positions.
-                            </p>
-                        </div>
-                        <Button
-                            label="Add Employee"
-                            variant="primary"
-                            size="medium"
-                            onClick={() => {
-                                setIsAddTeamMemberModalSingleEmployeeOpen(true);
-                            }}
-                        />
-                        <Button
-                            label="Batch Add in Position"
-                            variant="ghost"
-                            size="medium"
-                            onClick={() => {
-                                setIsBatchAddTeamMembersModalOpen(true);
-                            }}
-                        />
-                    </div>
-                }
+  return (
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        showCloseIcon={false}
+        title="Add Team Member(s)"
+        showButton={false}
+        modalWidth="w-[900px]"
+        contentHeight="h-[400px] min-h-[120px] max-h-[60vh]"
+        showFooter={false}
+        content={
+          <div className="flex flex-col gap-[8px] items-center justify-center h-full pb-[32px]">
+            <div className="flex flex-col items-center gap-[16px]">
+              <img src={PapaZ} className="w-[142x] h-[120px]" alt="PapaZ" />
+              <p className="text-body-base-strong text-szDarkGrey600 max-w-[320px] text-center">
+                You can only add new members to the team if there are available
+                positions.
+              </p>
+            </div>
+            <Button
+              label="Add Employee"
+              variant="primary"
+              size="medium"
+              onClick={() => {
+                setIsAddTeamMemberModalSingleEmployeeOpen(true);
+              }}
             />
-            <BatchAddTeamMembersModal
-                isOpen={isBatchAddTeamMembersModalOpen}
-                onClose={() => {
-                    setIsBatchAddTeamMembersModalOpen(false);
-                }}
+            <Button
+              label="Batch Add in Position"
+              variant="ghost"
+              size="medium"
+              onClick={() => {
+                setIsBatchAddTeamMembersModalOpen(true);
+              }}
             />
+          </div>
+        }
+      />
+      <BatchAddTeamMembersModal
+        isOpen={isBatchAddTeamMembersModalOpen}
+        onClose={() => {
+          setIsBatchAddTeamMembersModalOpen(false);
+          onClose();
+        }}
+      />
 
-            <AddTeamMemberModalSingleEmployee
-                isOpen={isAddTeamMemberModalSingleEmployeeOpen}
-                onClose={() => {
-                    setIsAddTeamMemberModalSingleEmployeeOpen(false);
-                    onClose();
-                }}
-            />
-        </>
-    );
+      <AddTeamMemberModalSingleEmployee
+        isOpen={isAddTeamMemberModalSingleEmployeeOpen}
+        onClose={() => {
+          setIsAddTeamMemberModalSingleEmployeeOpen(false);
+          onClose();
+        }}
+      />
+    </>
+  );
 };
 
 export default AddTeamMemberModal;

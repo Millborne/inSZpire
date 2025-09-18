@@ -2,11 +2,11 @@ import React, { useState } from "react";
 
 //component
 import { Tabs } from "enterprisze-global-components";
-import SearchTeamGroup from "./SearchTeamGroup";
+import SearchTeamGroup from "../../../../../components/SearchTeamGroup";
 
 //types
-import { Employee, Team } from "../types/team";
-import EmployeeeChecbox from "./EmployeeeChecbox";
+import { Employee, Team } from "../../../../../types/team";
+import EmployeeeChecbox from "../../../../../components/EmployeeeChecbox";
 
 interface BatchSelectedViewProps {
   selectedItems: {
@@ -72,7 +72,7 @@ const BatchSelectedView: React.FC<BatchSelectedViewProps> = ({
                 />
               ))
             ) : (
-              <div className="flex flex-col items-center gap-[16px] py-[40px]">
+              <div className="flex flex-col items-center gap-[16px] py-[40px] h-[155px]">
                 <p className="text-body-base text-szDarkGrey600">
                   No teams selected
                 </p>
