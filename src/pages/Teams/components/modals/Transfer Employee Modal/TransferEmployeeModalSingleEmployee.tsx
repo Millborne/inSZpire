@@ -6,6 +6,7 @@ import {
     Dropdown,
     Inputs,
     Modal,
+    PurpleTaggedCard,
     SnackbarAlert,
     Tab,
     TextContent,
@@ -264,25 +265,47 @@ const TransferEmployeeModalSingleEmployee = ({
                                         <div className="w-full border border-szGrey300 rounded-lg p-2 flex flex-col gap-2">
                                             <div className="flex items-center justify-between gap-2">
                                                 <div className="flex gap-5 items-center">
-                                                    <TextContent
-                                                        icon={
-                                                            <Avatar
-                                                                src="/src/assets/noAvatar.png"
-                                                                size="small"
-                                                            />
-                                                        }
-                                                        header={"Employee name"}
-                                                        text={
-                                                            "Stephanie Germanotta"
-                                                        }
-                                                    />
+                                                    <div className="flex flex-col gap-1">
+                                                        <TextContent
+                                                            icon={
+                                                                <Avatar
+                                                                    src="/src/assets/noAvatar.png"
+                                                                    size="small"
+                                                                />
+                                                            }
+                                                            header={
+                                                                "Employee name"
+                                                            }
+                                                            text={
+                                                                "Stephanie Germanotta"
+                                                            }
+                                                        />
+                                                        <TextContent
+                                                            header={
+                                                                "previous team"
+                                                            }
+                                                            text={
+                                                                "No Previous Team"
+                                                            }
+                                                        />
+                                                    </div>
                                                     <div>
                                                         <ArrowRight className="text-szPrimary900" />
                                                     </div>
-                                                    <TextContent
-                                                        header={"position"}
-                                                        text={"Junior Web Dev"}
-                                                    />
+                                                    <div className="flex flex-col gap-1">
+                                                        <TextContent
+                                                            header={"position"}
+                                                            text={
+                                                                "Junior Web Dev"
+                                                            }
+                                                        />{" "}
+                                                        <TextContent
+                                                            header={"position"}
+                                                            text={
+                                                                "Senior Web Developer"
+                                                            }
+                                                        />
+                                                    </div>
                                                 </div>
 
                                                 <div>
@@ -301,9 +324,8 @@ const TransferEmployeeModalSingleEmployee = ({
                                 ) : (
                                     <div className="w-full border border-szGrey300 rounded-lg p-2 flex flex-col gap-2">
                                         <span className="text-caption-strong text-[#1D973C]">
-                                            Assigning Employee to available
-                                            Position from Business Solution &
-                                            Innovation
+                                            Transferring employee to available
+                                            position
                                         </span>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                             <Dropdown
@@ -337,7 +359,7 @@ const TransferEmployeeModalSingleEmployee = ({
                                         </span>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                             <Dropdown
-                                                label="Business Solution & Innovation (Default)"
+                                                label="Select Team"
                                                 size="small"
                                                 options={[
                                                     {
@@ -349,7 +371,7 @@ const TransferEmployeeModalSingleEmployee = ({
                                                         value: "1",
                                                     },
                                                 ]}
-                                                placeholder="Business Solution & Innovation (Default)"
+                                                placeholder="Select Team"
                                                 // value={}
                                                 onSelectionChange={(
                                                     value: any
@@ -471,76 +493,122 @@ const TransferEmployeeModalSingleEmployee = ({
                     setShowSuccessSnackbar(true);
                     onClose();
                 }}
-                description={""}
+                description={"You are about to transfer these employees."}
                 content={
-                    <div className="flex flex-col gap-2">
-                        <span className="text-body-base-strong text-szBlack800 text-center">
-                            You are about to add these employees to{" "}
-                            <span className="text-szPrimary700">Team Name</span>
-                            .
-                        </span>
-
-                        <div className="flex flex-col gap-2">
-                            <div className="flex justify-between items-center gap-5">
-                                <div className="flex-1">
-                                    <TextContent
-                                        header="Employee Name"
-                                        text="John Doe"
-                                    />
-                                </div>
-
-                                <span>
-                                    <ArrowRight />
-                                </span>
-                                <div className="flex-1">
-                                    <TextContent
-                                        header="Position"
-                                        text="Junior Web Developer"
-                                    />
+                    <div className="flex flex-col mt-2 gap-4">
+                        <div className="relative bg-success50 border border-gray-300 rounded-[8px] px-[16px] py-[20px] ">
+                            <div className="absolute -top-3 left-4 bg-success700 rounded-[4px] px-[8px] py-[2px]">
+                                <p className="body-small-strong text-white">
+                                    Rigor, Maria Alma Angela
+                                </p>
+                            </div>
+                            <div>
+                                <div className="flex gap-5 items-center">
+                                    <div className="flex flex-col gap-1 flex-1">
+                                        <TextContent
+                                            header={"previous team"}
+                                            text={"Accounting & Finance Team"}
+                                        />
+                                        <TextContent
+                                            header={"position"}
+                                            text={"Liaison 1"}
+                                        />
+                                    </div>
+                                    <div>
+                                        <ArrowRight className="text-szPrimary900" />
+                                    </div>
+                                    <div className="flex flex-col gap-1 flex-1">
+                                        <TextContent
+                                            header={"Team"}
+                                            text={
+                                                "Business Solutions & Innovations"
+                                            }
+                                        />{" "}
+                                        <TextContent
+                                            header={"position"}
+                                            text={"Junior Web Dev 1"}
+                                        />
+                                    </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div className="flex justify-between items-center gap-5">
-                                <div className="flex-1">
-                                    <TextContent
-                                        header="Employee Name"
-                                        text="John Doe"
-                                    />
-                                </div>
-
-                                <span>
-                                    <ArrowRight />
-                                </span>
-                                <div className="flex-1">
-                                    <TextContent
-                                        header="Position"
-                                        text="Junior Web Developer"
-                                    />
+                        <div className="relative bg-success50 border border-gray-300 rounded-[8px] px-[16px] py-[20px] ">
+                            <div className="absolute -top-3 left-4 bg-success700 rounded-[4px] px-[8px] py-[2px]">
+                                <p className="body-small-strong text-white">
+                                    Rigor, Maria Alma Angela
+                                </p>
+                            </div>
+                            <div>
+                                <div className="flex gap-5 items-center">
+                                    <div className="flex flex-col gap-1 flex-1">
+                                        <TextContent
+                                            header={"previous team"}
+                                            text={"Accounting & Finance Team"}
+                                        />
+                                        <TextContent
+                                            header={"position"}
+                                            text={"Liaison 1"}
+                                        />
+                                    </div>
+                                    <div>
+                                        <ArrowRight className="text-szPrimary900" />
+                                    </div>
+                                    <div className="flex flex-col gap-1 flex-1">
+                                        <TextContent
+                                            header={"Team"}
+                                            text={
+                                                "Business Solutions & Innovations"
+                                            }
+                                        />{" "}
+                                        <TextContent
+                                            header={"position"}
+                                            text={"Junior Web Dev 1"}
+                                        />
+                                    </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div className="flex justify-between items-center gap-5">
-                                <div className="flex-1">
-                                    <TextContent
-                                        header="Employee Name"
-                                        text="John Doe"
-                                    />
-                                </div>
-
-                                <span>
-                                    <ArrowRight />
-                                </span>
-                                <div className="flex-1">
-                                    <TextContent
-                                        header="Position"
-                                        text="Junior Web Developer"
-                                    />
+                        <div className="relative bg-success50 border border-gray-300 rounded-[8px] px-[16px] py-[20px] ">
+                            <div className="absolute -top-3 left-4 bg-success700 rounded-[4px] px-[8px] py-[2px]">
+                                <p className="body-small-strong text-white">
+                                    Rigor, Maria Alma Angela
+                                </p>
+                            </div>
+                            <div>
+                                <div className="flex gap-5 items-center">
+                                    <div className="flex flex-col gap-1 flex-1">
+                                        <TextContent
+                                            header={"previous team"}
+                                            text={"Accounting & Finance Team"}
+                                        />
+                                        <TextContent
+                                            header={"position"}
+                                            text={"Liaison 1"}
+                                        />
+                                    </div>
+                                    <div>
+                                        <ArrowRight className="text-szPrimary900" />
+                                    </div>
+                                    <div className="flex flex-col gap-1 flex-1">
+                                        <TextContent
+                                            header={"Team"}
+                                            text={
+                                                "Business Solutions & Innovations"
+                                            }
+                                        />{" "}
+                                        <TextContent
+                                            header={"position"}
+                                            text={"Junior Web Dev 1"}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 }
-                buttonLabel={"Add Employee(s)"}
+                buttonLabel={"Transfer Employee"}
             />
 
             <SnackbarAlert
@@ -550,7 +618,7 @@ const TransferEmployeeModalSingleEmployee = ({
                 }}
                 showCloseButton={true}
                 type="success"
-                title={"Successfully added team members"}
+                title={"Successfully transferred team members"}
                 animation="slide-up"
             />
         </>
