@@ -11,13 +11,14 @@ import { jobTitleAPI } from "../services/settings/job-title/list/jobTitleAPI";
 import { employeeAPI } from "../services/employee/list/employeeAPI";
 import { employeeCreateAPI } from "../services/employee/create/employeeCreateAPI";
 import { employeeUpdateAPI } from "../services/employee/update/employeeUpdateAPI";
+import { employeeDetailsAPI as employeeDetailsMainAPI } from "../services/employee/details/employeeDetailsAPI";
 import { summaryAPI } from "../services/employee-profile/summary/summaryAPI";
 import { basicInfoAPI } from "../services/employee-profile/personal/basic-info/basicInfoAPI";
 import { educationAPI } from "../services/employee-profile/personal/education/educationAPI";
 import { familyAPI } from "../services/employee-profile/personal/family/familyAPI";
 import { contactAPI } from "../services/employee-profile/personal/contact/contactAPI";
 import { idsAPI } from "../services/employee-profile/personal/ids/idsAPI";
-import { employeeDetailsAPI } from "../services/employee-profile/work/employee-details/employeeDetailsAPI";
+import { employeeDetailsAPI as employeeDetailsProfileAPI } from "../services/employee-profile/work/employee-details/employeeDetailsAPI";
 import { teamMemberAPI } from "../services/employee-profile/work/team-member/teamMemberAPI";
 import { employeeHistoryAPI } from "../services/employee-profile/work/employee-history/employeeHistoryAPI";
 import { externalPositionsAPI } from "../services/employee-profile/work/employee-history/positionsAPI";
@@ -51,7 +52,8 @@ const rootReducer = combineReducers({
     [familyAPI.reducerPath]: familyAPI.reducer,
     [contactAPI.reducerPath]: contactAPI.reducer,
     [idsAPI.reducerPath]: idsAPI.reducer,
-    [employeeDetailsAPI.reducerPath]: employeeDetailsAPI.reducer,
+    [employeeDetailsProfileAPI.reducerPath]: employeeDetailsProfileAPI.reducer,
+    [employeeDetailsMainAPI.reducerPath]: employeeDetailsMainAPI.reducer,
     [teamMemberAPI.reducerPath]: teamMemberAPI.reducer,
     [employeeHistoryAPI.reducerPath]: employeeHistoryAPI.reducer,
     [externalPositionsAPI.reducerPath]: externalPositionsAPI.reducer,
@@ -76,13 +78,14 @@ const configStore = configureStore({
             employeeAPI.middleware,
             employeeCreateAPI.middleware,
             employeeUpdateAPI.middleware,
+            employeeDetailsMainAPI.middleware,
             summaryAPI.middleware,
             basicInfoAPI.middleware,
             educationAPI.middleware,
             familyAPI.middleware,
             contactAPI.middleware,
             idsAPI.middleware,
-            employeeDetailsAPI.middleware,
+            employeeDetailsProfileAPI.middleware,
             teamMemberAPI.middleware,
             employeeHistoryAPI.middleware,
             externalPositionsAPI.middleware,

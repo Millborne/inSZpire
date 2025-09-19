@@ -60,6 +60,8 @@ export interface EmployeeData {
     setup_name?: string;
     job_code: string;
     job_title: string;
+    supervisor_first_name?: string;
+    supervisor_last_name?: string;
 
     filters?: {
         is_archived: number;

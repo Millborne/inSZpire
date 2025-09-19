@@ -7,15 +7,33 @@ import {
 } from "enterprisze-global-components";
 import { Edit2 } from "iconsax-reactjs";
 import { useNavigate, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import qrcode from "../../../assets/qrcode.png";
+import { RootState } from "../../../reducers/store";
 
 const EmployeeDetails = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { employee_ID } = useParams();
+  
+  // Employee RTK State
+  const selectedEmployee = useSelector(
+    (state: RootState) => state.employeeState.selectedEmployee
+  );
+
+  console.log(selectedEmployee);
 
   const handleChangePassword = () => {
-    navigate(`/change-password?employeeId=${id}`);
+    navigate(`/change-password?employeeId=${employee_ID}`);
   };
+
+  // No data state
+  if (!selectedEmployee) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-szGrey500">No employee data found</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -34,8 +52,8 @@ const EmployeeDetails = () => {
               <div className="flex justify-center">
                 <div className="md:w-[150px] w-full max-w-[300px] p-3">
                   <img
-                    src={qrcode}
-                    alt="employee"
+                    src={selectedEmployee.qr_code_url || qrcode}
+                    alt="employee qr code"
                     style={{
                       width: "100%",
                     }}
@@ -46,7 +64,10 @@ const EmployeeDetails = () => {
                 {/* 1st row */}
                 <div className="w-full grid sm:grid-cols-2 gap-4">
                   <div>
-                    <TextContent header="username" text={"js_fernandez"} />
+                    <TextContent 
+                      header="username" 
+                      text={selectedEmployee.work_email?.split('@')[0] || selectedEmployee.preferred_name || "N/A"} 
+                    />
                   </div>
 
                   <div>
@@ -71,7 +92,10 @@ const EmployeeDetails = () => {
                 {/* 2nd row */}
                 <div className="w-full grid sm:grid-cols-2 gap-4">
                   <div>
-                    <TextContent header="id number" text={"2022100107"} />
+                    <TextContent 
+                      header="id number" 
+                      text={selectedEmployee.employee_number || selectedEmployee.old_employee_number || "N/A"} 
+                    />
                   </div>
 
                   <div>
@@ -82,7 +106,13 @@ const EmployeeDetails = () => {
                         </p>
                         <div>
                           <Document
-                            onFileChange={(file) => {
+                            value={selectedEmployee.e_sig_url ? {
+                              name: "e-signature",
+                              url: selectedEmployee.e_sig_url,
+                              mimeType: "application/pdf",
+                              isLocal: false
+                            } : null}
+                            onChange={(file: any) => {
                               if (file) {
                                 console.log("Selected file:", file);
                               } else {
@@ -99,13 +129,16 @@ const EmployeeDetails = () => {
                 {/* 3rd row */}
                 <div className="w-full grid sm:grid-cols-2 gap-4">
                   <div>
-                    <TextContent header="Team" text={"BSI"} />
+                    <TextContent 
+                      header="Team" 
+                      text={selectedEmployee.team_name || "N/A"} 
+                    />
                   </div>
 
                   <div>
                     <TextContent
-                      header="ACCOunt"
-                      text={"No billable account"}
+                      header="Account"
+                      text={selectedEmployee.work_email || "No billable account"}
                     />
                   </div>
                 </div>
@@ -115,19 +148,25 @@ const EmployeeDetails = () => {
                   <div>
                     <TextContent
                       header="position"
-                      text={"Junior Web Developer"}
+                      text={selectedEmployee.position_name || selectedEmployee.job_title || "N/A"}
                     />
                   </div>
 
                   <div>
-                    <TextContent header="earned leave" text={"Yes"} />
+                    <TextContent 
+                      header="earned leave" 
+                      text={selectedEmployee.is_leave_earned ? "Yes" : "No"} 
+                    />
                   </div>
                 </div>
 
                 {/* 5th row */}
                 <div className="w-full grid sm:grid-cols-2 gap-4">
                   <div>
-                    <TextContent header="employment status" text={"Regular"} />
+                    <TextContent 
+                      header="employment status" 
+                      text={selectedEmployee.employment_status || "N/A"} 
+                    />
                   </div>
                 </div>
               </div>
@@ -150,14 +189,23 @@ const EmployeeDetails = () => {
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <TextContent
-                  icon={<Avatar firstName="eyyy" lastName="yoy" size="small" />}
+                  icon={
+                    <Avatar 
+                      firstName={selectedEmployee.supervisor_first_name || "N/A"} 
+                      lastName={selectedEmployee.supervisor_last_name || "N/A"} 
+                      size="small" 
+                    />
+                  }
                   header="name"
-                  text={"22010123"}
+                  text={`${selectedEmployee.supervisor_first_name || ""} ${selectedEmployee.supervisor_last_name || ""}`.trim() || "N/A"}
                 />
               </div>
 
               <div>
-                <TextContent header="Work email" text={"@supportzebra.com"} />
+                <TextContent 
+                  header="Work email" 
+                  text={selectedEmployee.work_email || "N/A"} 
+                />
               </div>
             </div>
           </div>
