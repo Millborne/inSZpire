@@ -48,6 +48,11 @@ const TransferEmployeeModalSingleEmployee = ({
 
     const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
 
+    // Check if all employees are saved
+    const allEmployeesSaved = employeeTeamMember.every(
+        (member: any) => member.saved === true
+    );
+
     return (
         <>
             <Modal
@@ -65,12 +70,12 @@ const TransferEmployeeModalSingleEmployee = ({
                         onClick: onClose,
                     },
                     {
-                        label: "Team Member",
+                        label: "Transfer Employee",
                         variant: "primary",
+                        disabled: !allEmployeesSaved,
                         onClick: () => {
                             setConfirmationModalOpen(true);
                         },
-                        leftIcon: <Add />,
                     },
                 ]}
                 content={
@@ -245,12 +250,22 @@ const TransferEmployeeModalSingleEmployee = ({
                                                 size="small"
                                                 options={[
                                                     {
-                                                        label: "Active",
-                                                        value: "0",
+                                                        label: "Edwards, Perry",
+                                                        value: "Edwards, Perry",
+                                                        showChip: true,
+                                                        chipLabel:
+                                                            "with subordinates",
+                                                        chipColor: "red",
+                                                        textType:
+                                                            "allCapsSmall",
                                                     },
                                                     {
-                                                        label: "Archived",
-                                                        value: "1",
+                                                        label: "Kehlani, Kate",
+                                                        value: "Kehlani, Kate",
+                                                    },
+                                                    {
+                                                        label: "Kehlani, Folded",
+                                                        value: "Kehlani, Folded",
                                                     },
                                                 ]}
                                                 placeholder="Select Employee"
@@ -259,6 +274,8 @@ const TransferEmployeeModalSingleEmployee = ({
                                                     value: any
                                                 ) => {}}
                                                 disabled={false}
+                                                multiSelect
+                                                // usePortal={false}
                                             />
                                             {/* {errors.status && (
                               <p className="text-caption-reg text-red-500 mt-1">
@@ -275,14 +292,15 @@ const TransferEmployeeModalSingleEmployee = ({
                                                 size="small"
                                                 options={[
                                                     {
-                                                        label: "Active",
-                                                        value: "0",
+                                                        label: "Business Solutions & Innovation (Default)",
+                                                        value: "Business Solutions & Innovation (Default)",
                                                     },
                                                     {
-                                                        label: "Archived",
-                                                        value: "1",
+                                                        label: "AFT",
+                                                        value: "AFT",
                                                     },
                                                 ]}
+                                                multiSelect
                                                 placeholder="Select Team"
                                                 // value={}
                                                 onSelectionChange={(
@@ -295,12 +313,16 @@ const TransferEmployeeModalSingleEmployee = ({
                                                 size="small"
                                                 options={[
                                                     {
-                                                        label: "Active",
-                                                        value: "0",
+                                                        label: "Junior Web Dev 2",
+                                                        value: "Junior Web Dev 2",
                                                     },
                                                     {
-                                                        label: "Archived",
-                                                        value: "1",
+                                                        label: "Junior Web Dev 3",
+                                                        value: "Junior Web Dev 3",
+                                                    },
+                                                    {
+                                                        label: "Senior Dev 1",
+                                                        value: "Senior Dev 1",
                                                     },
                                                 ]}
                                                 placeholder="Select position available from team"
