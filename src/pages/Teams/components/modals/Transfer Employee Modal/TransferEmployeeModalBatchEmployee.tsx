@@ -12,8 +12,9 @@ import {
 } from "enterprisze-global-components";
 import ConfirmationModal from "../ConfirmationModal";
 import { useState } from "react";
-import { Add, ArrowRight, SearchNormal } from "iconsax-reactjs";
+import { ArrowRight, SearchNormal, Warning2 } from "iconsax-reactjs";
 import profilePic from "../../../../../assets/noAvatar.png";
+import BatchMessage from "../../../../../components/BatchMessage";
 
 const TransferEmployeeModalBatchEmployee = ({
     isOpen,
@@ -169,6 +170,10 @@ const TransferEmployeeModalBatchEmployee = ({
     // Current step state
     const [currentStep, setCurrentStep] = useState(1);
 
+    // Dropdown states
+    const [selectedTeam, setSelectedTeam] = useState<string>("");
+    const [selectedJobTitle, setSelectedJobTitle] = useState<string>("");
+
     // Filtered employees based on search
     const filteredEmployees = employees.filter(
         (employee) =>
@@ -233,6 +238,8 @@ const TransferEmployeeModalBatchEmployee = ({
         setEmployees((prev) =>
             prev.map((emp) => ({ ...emp, selected: false }))
         );
+        setSelectedTeam("");
+        setSelectedJobTitle("");
         onClose();
     };
 
@@ -252,6 +259,8 @@ const TransferEmployeeModalBatchEmployee = ({
                         variant: "ghost",
                         onClick: () => {
                             if (currentStep === 2) {
+                                setSelectedTeam("");
+                                setSelectedJobTitle("");
                                 setCurrentStep(1);
                             } else {
                                 OnCloseModal();
@@ -261,6 +270,25 @@ const TransferEmployeeModalBatchEmployee = ({
                     {
                         label: "Continue",
                         variant: "primary",
+                        disabled: (() => {
+                            const isDisabled =
+                                currentStep === 1
+                                    ? selectedCount === 0
+                                    : selectedCount === 0 ||
+                                      !selectedTeam ||
+                                      !selectedJobTitle;
+                            console.log(
+                                "Continue button disabled:",
+                                isDisabled,
+                                {
+                                    currentStep,
+                                    selectedCount,
+                                    selectedTeam,
+                                    selectedJobTitle,
+                                }
+                            );
+                            return isDisabled;
+                        })(),
                         onClick: () => {
                             if (currentStep === 1) {
                                 setCurrentStep(2);
@@ -401,22 +429,47 @@ const TransferEmployeeModalBatchEmployee = ({
                                                                     )
                                                                 }
                                                             />
-                                                            <TextContent
-                                                                icon={
-                                                                    <Avatar
-                                                                        size="small"
-                                                                        src={
-                                                                            employee.avatar
+                                                            {/* <TextContent
+                                                                    icon={
+                                                                        <Avatar
+                                                                            size="small"
+                                                                            src={
+                                                                                employee.avatar
+                                                                            }
+                                                                        />
+                                                                    }
+                                                                    text={
+                                                                        employee.name
+                                                                    }
+                                                                    header={
+                                                                        employee.position
+                                                                    }
+                                                                /> */}
+
+                                                            <div
+                                                                className={`flex flex-1 items-center gap-[8px]`}
+                                                            >
+                                                                <Avatar
+                                                                    src={
+                                                                        profilePic
+                                                                    }
+                                                                    size="small"
+                                                                />
+                                                                <div>
+                                                                    <p className="text-body-small-strong text-gray-900">
+                                                                        {
+                                                                            employee.name
                                                                         }
-                                                                    />
-                                                                }
-                                                                text={
-                                                                    employee.name
-                                                                }
-                                                                header={
-                                                                    employee.position
-                                                                }
-                                                            />
+                                                                    </p>
+                                                                    <p className="text-caption-all-caps uppercase text-szPrimary900">
+                                                                        <span className="text-szGrey500">
+                                                                            {
+                                                                                employee.position
+                                                                            }
+                                                                        </span>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     )
                                                 )}
@@ -471,7 +524,29 @@ const TransferEmployeeModalBatchEmployee = ({
                                                                 )
                                                             }
                                                         />
-                                                        <TextContent
+                                                        <div
+                                                            className={`flex flex-1 items-center gap-[8px]`}
+                                                        >
+                                                            <Avatar
+                                                                src={profilePic}
+                                                                size="small"
+                                                            />
+                                                            <div>
+                                                                <p className="text-body-small-strong text-gray-900">
+                                                                    {
+                                                                        employee.name
+                                                                    }
+                                                                </p>
+                                                                <p className="text-caption-all-caps uppercase text-szPrimary900">
+                                                                    <span className="text-szGrey500">
+                                                                        {
+                                                                            employee.position
+                                                                        }
+                                                                    </span>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        {/* <TextContent
                                                             icon={
                                                                 <Avatar
                                                                     size="small"
@@ -484,7 +559,7 @@ const TransferEmployeeModalBatchEmployee = ({
                                                             header={
                                                                 employee.position
                                                             }
-                                                        />
+                                                        /> */}
                                                     </div>
                                                 ))}
                                             {employees.filter(
@@ -541,7 +616,18 @@ const TransferEmployeeModalBatchEmployee = ({
                                                     textType: "allCapsSmall",
                                                 },
                                             ]}
-                                            onSelectionChange={() => {}}
+                                            onSelectionChange={(option) => {
+                                                console.log(
+                                                    "Team dropdown selection:",
+                                                    option
+                                                );
+                                                const value = Array.isArray(
+                                                    option
+                                                )
+                                                    ? option[0]?.value || ""
+                                                    : option?.value || "";
+                                                setSelectedTeam(value);
+                                            }}
                                             size="small"
                                             usePortal={true}
                                         />
@@ -560,10 +646,31 @@ const TransferEmployeeModalBatchEmployee = ({
                                                     textType: "allCapsSmall",
                                                 },
                                             ]}
-                                            onSelectionChange={() => {}}
+                                            onSelectionChange={(option) => {
+                                                console.log(
+                                                    "Job title dropdown selection:",
+                                                    option
+                                                );
+                                                const value = Array.isArray(
+                                                    option
+                                                )
+                                                    ? option[0]?.value || ""
+                                                    : option?.value || "";
+                                                setSelectedJobTitle(value);
+                                            }}
                                             size="small"
                                             usePortal={true}
                                         />
+
+                                        {selectedTeam && selectedJobTitle && (
+                                            <BatchMessage
+                                                icon={<Warning2 />}
+                                                message={
+                                                    "You are about to transfer 3 employees for Junior Web Developer which has 15 slots. There are already 2 employees in this batch position. We will now generate Junior Web Developer with suffix from 3 - 5."
+                                                }
+                                                count={2}
+                                            />
+                                        )}
                                     </div>
                                 </div>
                             </div>
