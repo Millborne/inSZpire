@@ -2,17 +2,13 @@ import {
     Avatar,
     Button,
     ButtonsIcon,
-    Divider,
     Dropdown,
-    Inputs,
     Modal,
-    PurpleTaggedCard,
     SnackbarAlert,
-    Tab,
     TextContent,
 } from "enterprisze-global-components";
 import ConfirmationModal from "../ConfirmationModal";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
     Add,
     ArrowRight,
@@ -48,6 +44,11 @@ const TransferEmployeeModalSingleEmployee = ({
 
     const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
 
+    // State for dropdown selections
+    const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+    const [selectedTeam, setSelectedTeam] = useState<any>(null);
+    const [selectedPosition, setSelectedPosition] = useState<any>(null);
+
     // Check if all employees are saved
     const allEmployeesSaved = employeeTeamMember.every(
         (member: any) => member.saved === true
@@ -58,7 +59,23 @@ const TransferEmployeeModalSingleEmployee = ({
             <Modal
                 isOpen={isOpen}
                 showButton={false}
-                onClose={onClose}
+                onClose={() => {
+                    setSelectedEmployee(null);
+                    setSelectedTeam(null);
+                    setSelectedPosition(null);
+                    setEmployeeTeamMember([
+                        {
+                            employee_ID: "",
+                            employee_first_name: "",
+                            employee_last_name: "",
+                            team_ID: "",
+                            position_ID: "",
+                            position_name: "",
+                            saved: false,
+                        },
+                    ]);
+                    onClose();
+                }}
                 title={"Transfer Employee(s)"}
                 modalWidth="w-[900px]"
                 contentHeight="h-[400px] min-h-[120px] max-h-[55vh]"
@@ -112,8 +129,12 @@ const TransferEmployeeModalSingleEmployee = ({
                                                 </span>
                                                 <span className="text-body-small-strong">
                                                     Are you sure you want to
-                                                    cancel adding Rigor, John
-                                                    Daryll?
+                                                    cancel adding{" "}
+                                                    {employee.employee_last_name &&
+                                                    employee.employee_first_name
+                                                        ? `${employee.employee_last_name}, ${employee.employee_first_name}`
+                                                        : "this employee"}
+                                                    ?
                                                 </span>
                                             </div>
 
@@ -194,7 +215,8 @@ const TransferEmployeeModalSingleEmployee = ({
                                                                 "Employee name"
                                                             }
                                                             text={
-                                                                "Stephanie Germanotta"
+                                                                `${employee.employee_last_name}, ${employee.employee_first_name}` ||
+                                                                "No Employee Selected"
                                                             }
                                                         />
                                                         <TextContent
@@ -211,15 +233,17 @@ const TransferEmployeeModalSingleEmployee = ({
                                                     </div>
                                                     <div className="flex flex-col gap-1">
                                                         <TextContent
-                                                            header={"position"}
+                                                            header={"Team"}
                                                             text={
-                                                                "Junior Web Dev"
+                                                                employee.team_ID ||
+                                                                "No Team Selected"
                                                             }
-                                                        />{" "}
+                                                        />
                                                         <TextContent
                                                             header={"position"}
                                                             text={
-                                                                "Senior Web Developer"
+                                                                employee.position_name ||
+                                                                "No Position Selected"
                                                             }
                                                         />
                                                     </div>
@@ -269,12 +293,41 @@ const TransferEmployeeModalSingleEmployee = ({
                                                     },
                                                 ]}
                                                 placeholder="Select Employee"
-                                                // value={}
+                                                value={selectedEmployee}
                                                 onSelectionChange={(
                                                     value: any
-                                                ) => {}}
+                                                ) => {
+                                                    setSelectedEmployee(value);
+                                                    // Update employeeTeamMember with selected employee
+                                                    setEmployeeTeamMember(
+                                                        employeeTeamMember.map(
+                                                            (
+                                                                member: any,
+                                                                i: number
+                                                            ) =>
+                                                                i === index
+                                                                    ? {
+                                                                          ...member,
+                                                                          employee_first_name:
+                                                                              value?.value?.split(
+                                                                                  ", "
+                                                                              )[1] ||
+                                                                              "",
+                                                                          employee_last_name:
+                                                                              value?.value?.split(
+                                                                                  ", "
+                                                                              )[0] ||
+                                                                              "",
+                                                                          employee_ID:
+                                                                              value?.value ||
+                                                                              "", // Using value as ID for now
+                                                                      }
+                                                                    : member
+                                                        )
+                                                    );
+                                                }}
                                                 disabled={false}
-                                                multiSelect
+                                                // multiSelect
                                                 // usePortal={false}
                                             />
                                             {/* {errors.status && (
@@ -300,12 +353,31 @@ const TransferEmployeeModalSingleEmployee = ({
                                                         value: "AFT",
                                                     },
                                                 ]}
-                                                multiSelect
+                                                // multiSelect
                                                 placeholder="Select Team"
-                                                // value={}
+                                                value={selectedTeam}
                                                 onSelectionChange={(
                                                     value: any
-                                                ) => {}}
+                                                ) => {
+                                                    setSelectedTeam(value);
+                                                    // Update employeeTeamMember with selected team
+                                                    setEmployeeTeamMember(
+                                                        employeeTeamMember.map(
+                                                            (
+                                                                member: any,
+                                                                i: number
+                                                            ) =>
+                                                                i === index
+                                                                    ? {
+                                                                          ...member,
+                                                                          team_ID:
+                                                                              value?.value ||
+                                                                              "", // Using value as team_ID for now
+                                                                      }
+                                                                    : member
+                                                        )
+                                                    );
+                                                }}
                                                 disabled={false}
                                             />
                                             <Dropdown
@@ -326,10 +398,32 @@ const TransferEmployeeModalSingleEmployee = ({
                                                     },
                                                 ]}
                                                 placeholder="Select position available from team"
-                                                // value={}
+                                                value={selectedPosition}
                                                 onSelectionChange={(
                                                     value: any
-                                                ) => {}}
+                                                ) => {
+                                                    setSelectedPosition(value);
+                                                    // Update employeeTeamMember with selected position
+                                                    setEmployeeTeamMember(
+                                                        employeeTeamMember.map(
+                                                            (
+                                                                member: any,
+                                                                i: number
+                                                            ) =>
+                                                                i === index
+                                                                    ? {
+                                                                          ...member,
+                                                                          position_ID:
+                                                                              value?.value ||
+                                                                              "", // Using value as position_ID for now
+                                                                          position_name:
+                                                                              value?.value ||
+                                                                              "",
+                                                                      }
+                                                                    : member
+                                                        )
+                                                    );
+                                                }}
                                                 disabled={false}
                                             />
                                         </div>
@@ -345,6 +439,10 @@ const TransferEmployeeModalSingleEmployee = ({
                                                             ) => i !== index
                                                         )
                                                     );
+
+                                                    setSelectedEmployee(null);
+                                                    setSelectedTeam(null);
+                                                    setSelectedPosition(null);
                                                 }}
                                                 variant="ghost"
                                             />
@@ -365,7 +463,16 @@ const TransferEmployeeModalSingleEmployee = ({
                                                                     : member
                                                         )
                                                     );
+
+                                                    setSelectedEmployee(null);
+                                                    setSelectedTeam(null);
+                                                    setSelectedPosition(null);
                                                 }}
+                                                disabled={
+                                                    !selectedEmployee ||
+                                                    !selectedTeam ||
+                                                    !selectedPosition
+                                                }
                                                 variant="primary"
                                             />
                                         </div>
@@ -425,6 +532,20 @@ const TransferEmployeeModalSingleEmployee = ({
                 onClick={() => {
                     setConfirmationModalOpen(false);
                     setShowSuccessSnackbar(true);
+                    setSelectedEmployee(null);
+                    setSelectedTeam(null);
+                    setSelectedPosition(null);
+                    setEmployeeTeamMember([
+                        {
+                            employee_ID: "",
+                            employee_first_name: "",
+                            employee_last_name: "",
+                            team_ID: "",
+                            position_ID: "",
+                            position_name: "",
+                            saved: false,
+                        },
+                    ]);
                     onClose();
                 }}
                 description={"You are about to transfer these employees."}
