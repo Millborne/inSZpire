@@ -26,11 +26,11 @@ const EmailVerification = () => {
         console.log("Selected Options:", selected);
     };
 
-    const setSearchTerm: (arg0: string) => void = (string) => {
+    const setSearchTerm: (arg0: string) => void = () => {
         throw new Error("Function not implemented.");
     };
 
-    const setCurrentPage: (arg0: number) => void = (number) => {
+    const setCurrentPage: (arg0: number) => void = () => {
         throw new Error("Function not implemented.");
     };
 

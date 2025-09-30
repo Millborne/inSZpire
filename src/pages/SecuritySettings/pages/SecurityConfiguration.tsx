@@ -2,7 +2,6 @@ import { useContext, useState } from "react";
 import { CardContainer, Inputs } from "enterprisze-global-components";
 import { Civic, HamburgerMenu } from "iconsax-reactjs";
 import { SidebarContext } from "..";
-
 //icons
 
 const SecurityConfiguration = () => {

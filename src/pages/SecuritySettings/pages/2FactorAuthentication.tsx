@@ -18,16 +18,19 @@ const TwoFactorAuthentication = () => {
         { label: "Authenticator", value: "authenticator" },
         { label: "Email", value: "email" },
     ];
-
     const handleSelectionChange = (selected: Option | Option[]) => {
+        if (Array.isArray(selected)) {
+            // Handle array case if needed
+            return;
+        }
         setSelectedMethod(selected.value);
     };
 
-    const setSearchTerm: (arg0: string) => void = (string) => {
+    const setSearchTerm: (arg0: string) => void = () => {
         throw new Error("Function not implemented.");
     };
 
-    const setCurrentPage: (arg0: number) => void = (number) => {
+    const setCurrentPage: (arg0: number) => void = () => {
         throw new Error("Function not implemented.");
     };
 

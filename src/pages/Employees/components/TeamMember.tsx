@@ -1,14 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { CardContainer, Chip, PopoverMenu, SnackbarAlert, Tab, TextContent, Avatar } from "enterprisze-global-components";
-import { ArchiveBox, Data2, Edit2, Hierarchy2, People, Tag, Information } from "iconsax-reactjs";
+import { CardContainer, Chip, PopoverMenu, SnackbarAlert, Avatar, ButtonsIcon } from "enterprisze-global-components";
+import { ArchiveBox, Data2, Edit2, Hierarchy2, Tag, ArrowSwapHorizontal } from "iconsax-reactjs";
 
 import SpecificTeamModal, { ModalMode, SpecificTeamDataType } from "../../Teams/components/modals/SpecificTeamModal";
 import ConfirmSpecificTeamArchive from "../../Teams/components/modals/ConfirmSpecificTeamArchive";
 
 // Import the team member service
 import { useTeamMemberService, type TeamData, type PositionData } from "../../../services/employee-profile/work/team-member";
-
 
 const TeamMember = () => {
     const { id: employeeId } = useParams(); // Get employee ID from URL
@@ -21,7 +20,7 @@ const TeamMember = () => {
     const [snackbarMessage, setSnackbarMessage] = useState("");
 
     // State for employee and team data
-   
+
     const [teamData, setTeamData] = useState<TeamData | null>(null);
     const [teamMembers, setTeamMembers] = useState<PositionData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -29,17 +28,16 @@ const TeamMember = () => {
 
     // Get services
     const teamMemberService = useTeamMemberService();
-  
+
     const hasLoadedRef = useRef(false);
 
     // Function to get team details and members
-    
 
     // Load team data using the real API endpoint
     useEffect(() => {
         // Reset the ref when employeeId changes
         hasLoadedRef.current = false;
-        
+
         // Prevent multiple calls
         if (hasLoadedRef.current) return;
         hasLoadedRef.current = true;
@@ -48,9 +46,9 @@ const TeamMember = () => {
             try {
                 setIsLoading(true);
                 setError(null);
-                
+
                 console.log("Loading team data for employee ID:", employeeId);
-                
+
                 if (!employeeId) {
                     setError("No employee ID provided");
                     setIsLoading(false);
@@ -60,17 +58,17 @@ const TeamMember = () => {
                 // Try dynamic lookup first
                 try {
                     console.log("🔄 Attempting dynamic employee lookup...");
-                    
+
                     // Step 1: Get employee's position and team_ID using /position/getPositions
                     console.log("Step 1: Getting employee position and team_ID for employee ID:", employeeId);
-                    
+
                     // Clean employee ID - remove 0x prefix if present
                     let cleanEmployeeId = employeeId;
-                    if (employeeId && employeeId.startsWith('0x')) {
-                        cleanEmployeeId = employeeId.replace(/^0x/, '');
+                    if (employeeId && employeeId.startsWith("0x")) {
+                        cleanEmployeeId = employeeId.replace(/^0x/, "");
                     }
                     console.log("Clean employee ID for API call:", cleanEmployeeId);
-                    
+
                     // Call the API with the correct parameter structure
                     const employeePositionResponse = await teamMemberService.getEmployeePosition(cleanEmployeeId);
                     console.log("Employee position response:", employeePositionResponse);
@@ -90,30 +88,33 @@ const TeamMember = () => {
 
                     const positions = employeePositionResponse.data.positions;
                     console.log("All positions returned:", positions);
-                    
+
                     // Look for position that matches the employee ID
                     const employeePosition = positions.find((pos: any) => {
                         const posEmployeeId = pos.employee_ID;
-                        const cleanPosEmployeeId = posEmployeeId?.replace(/^0x/, '');
-                        const cleanSearchEmployeeId = cleanEmployeeId?.replace(/^0x/, '');
+                        const cleanPosEmployeeId = posEmployeeId?.replace(/^0x/, "");
+                        const cleanSearchEmployeeId = cleanEmployeeId?.replace(/^0x/, "");
                         return cleanPosEmployeeId === cleanSearchEmployeeId;
                     });
-                    
+
                     if (!employeePosition) {
                         console.log("ERROR: No position found for employee ID:", cleanEmployeeId);
-                        console.log("Available positions:", positions.map((p: any) => ({ 
-                            employee_ID: p.employee_ID, 
-                            employee_name: p.employee_name,
-                            position_ID: p.position_ID,
-                            team_ID: p.team_ID,
-                            position_name: p.position_name
-                        })));
+                        console.log(
+                            "Available positions:",
+                            positions.map((p: any) => ({
+                                employee_ID: p.employee_ID,
+                                employee_name: p.employee_name,
+                                position_ID: p.position_ID,
+                                team_ID: p.team_ID,
+                                position_name: p.position_name,
+                            }))
+                        );
                         throw new Error("Employee position not found");
                     }
 
                     console.log("Found employee position:", employeePosition);
                     console.log("Employee position keys:", Object.keys(employeePosition));
-                    
+
                     const team_ID = employeePosition.team_ID;
                     console.log("Team_ID from employee position:", team_ID);
 
@@ -124,8 +125,8 @@ const TeamMember = () => {
 
                     // Clean team_ID - remove 0x prefix if present
                     let cleanTeam_ID = team_ID;
-                    if (typeof team_ID === 'string' && team_ID.startsWith('0x')) {
-                        cleanTeam_ID = team_ID.replace(/^0x/, '');
+                    if (typeof team_ID === "string" && team_ID.startsWith("0x")) {
+                        cleanTeam_ID = team_ID.replace(/^0x/, "");
                     }
                     console.log("Clean team_ID (no 0x prefix):", cleanTeam_ID);
 
@@ -135,7 +136,7 @@ const TeamMember = () => {
                         team_ID: cleanTeam_ID,
                         is_archived: 0,
                         offset: 0,
-                        limit: 10
+                        limit: 10,
                     });
 
                     console.log("Team response from /teams/view:", teamResponse);
@@ -143,9 +144,9 @@ const TeamMember = () => {
                     if (teamResponse.data?.data && Array.isArray(teamResponse.data.data) && teamResponse.data.data.length > 0) {
                         const team = teamResponse.data.data[0];
                         setTeamData(team);
-                        
+
                         console.log("Team found:", team.team_name);
-                        
+
                         // Get team members from the response
                         if (teamResponse.data?.members && Array.isArray(teamResponse.data.members)) {
                             setTeamMembers(teamResponse.data.members);
@@ -158,13 +159,13 @@ const TeamMember = () => {
                                     team_ID: cleanTeam_ID,
                                     is_archived: 0,
                                     offset: 0,
-                                    limit: 50
+                                    limit: 50,
                                 });
                                 console.log("Team members response:", membersResponse);
-                                
+
                                 if (membersResponse.data?.success && membersResponse.data?.data) {
-                                    const members = Array.isArray(membersResponse.data.data) 
-                                        ? membersResponse.data.data 
+                                    const members = Array.isArray(membersResponse.data.data)
+                                        ? membersResponse.data.data
                                         : [membersResponse.data.data];
                                     setTeamMembers(members);
                                     console.log("Team members loaded from separate call:", members.length);
@@ -177,29 +178,27 @@ const TeamMember = () => {
                                 setTeamMembers([]);
                             }
                         }
-                        
+
                         console.log("✅ Dynamic lookup successful!");
                         return; // Success, exit early
-                        
                     } else {
                         console.log("ERROR: Team response structure issue");
                         console.log("Team response keys:", Object.keys(teamResponse.data || {}));
                         throw new Error("No team data found");
                     }
-                    
                 } catch (dynamicError) {
                     console.log("❌ Dynamic lookup failed:", (dynamicError as Error).message);
                     console.log("🔄 Falling back to hardcoded approach...");
-                    
+
                     // Fallback to hardcoded approach
                     const hardcodedTeamId = "14fbd3bf20744699bce2df89633e1e70";
                     console.log("🔧 Using hardcoded team ID:", hardcodedTeamId);
-                    
+
                     const teamResponse = await teamMemberService.getTeamDetails({
                         team_ID: hardcodedTeamId,
                         is_archived: 0,
                         offset: 0,
-                        limit: 10
+                        limit: 10,
                     });
 
                     console.log("Team response from /teams/view:", teamResponse);
@@ -207,9 +206,9 @@ const TeamMember = () => {
                     if (teamResponse.data?.data && Array.isArray(teamResponse.data.data) && teamResponse.data.data.length > 0) {
                         const team = teamResponse.data.data[0];
                         setTeamData(team);
-                        
+
                         console.log("Team found:", team.team_name);
-                        
+
                         // Get team members from the response
                         if (teamResponse.data?.members && Array.isArray(teamResponse.data.members)) {
                             setTeamMembers(teamResponse.data.members);
@@ -218,7 +217,7 @@ const TeamMember = () => {
                             console.log("No members found in response");
                             setTeamMembers([]);
                         }
-                        
+
                         console.log("✅ Hardcoded fallback successful!");
                     } else {
                         console.log("ERROR: Both dynamic and hardcoded approaches failed");
@@ -309,34 +308,34 @@ const TeamMember = () => {
     const teamMemberCount = teamMembers.length;
     const underlingsCount = 9; // TODO: Calculate from hierarchy
 
-
     return (
         <>
             <CardContainer
                 content={
                     <div className="flex flex-col gap-[20px]">
                         {/* Team Header */}
-                        <div className="flex items-center gap-[8px]">
-                            <h5 className="text-h5 text-szPrimary700">{teamData.team_name}</h5>
-                            <div className="flex-1">
-                                <PopoverMenu
-                                    size="small"
-                                    items={[
-                                        {
-                                            label: "Edit Team Info",
-                                            icon: <Edit2 />,
-                                            onClick: () => handleOpenModal({} as SpecificTeamDataType, "edit"),
-                                        },
-                                        {
-                                            label: "Archive Team",
-                                            icon: <ArchiveBox />,
-                                            onClick: () => handleOpenArchiveModal(),
-                                        },
-                                    ]}
-                                />
-                            </div>
-                            {/* Debug buttons - uncomment for testing */}
-                            {/* 
+                        <div className="flex flex-row justify-between">
+                            <div className="flex items-center gap-[8px]">
+                                <h5 className="text-h5 text-szPrimary700">{teamData.team_name}</h5>
+                                <div className="flex-1">
+                                    <PopoverMenu
+                                        size="small"
+                                        items={[
+                                            {
+                                                label: "Edit Team Info",
+                                                icon: <Edit2 />,
+                                                onClick: () => handleOpenModal({} as SpecificTeamDataType, "edit"),
+                                            },
+                                            {
+                                                label: "Archive Team",
+                                                icon: <ArchiveBox />,
+                                                onClick: () => handleOpenArchiveModal(),
+                                            },
+                                        ]}
+                                    />
+                                </div>
+                                {/* Debug buttons - uncomment for testing */}
+                                {/* 
                             <button 
                                 onClick={testAPI}
                                 className="px-2 py-1 text-xs bg-blue-500 text-white rounded"
@@ -356,12 +355,23 @@ const TeamMember = () => {
                                 Test Hardcoded
                             </button>
                             */}
+                            </div>
+                            <div className="flex flex-row gap-[8px]">
+                                <div className="flex flex-row gap-[8px] items-center px-[16px] py-[8px]">
+                                    <ArrowSwapHorizontal size={16} className="text-szPrimary700" />
+                                    <p className="text-body-small-strong text-szPrimary700">Transfer John</p>
+                                </div>
+                                <ButtonsIcon icon={<Data2 variant="Bold" />} variant="primary" size="small" />
+                            </div>
                         </div>
 
                         {/* Team Description */}
                         <div className="flex flex-col gap-[20px]">
                             <p className="text-body-small-strong text-szDarkGrey600">
-                                {teamData.team_description || "The Business Solutions and Innovations team is dedicated to developing cutting-edge system applications and enhancing operational efficiency. Our talented developers work collaboratively to create user-friendly software solutions that drive continuous improvement and empower teams across the organization."}
+                                {/* {teamData.team_description ||  */}
+                                The Business Solutions and Innovations team is dedicated to developing cutting-edge system applications and
+                                enhancing operational efficiency. Our talented developers work collaboratively to create user-friendly
+                                software solutions that drive continuous improvement and empower teams across the organization.
                             </p>
 
                             {/* Team Reference and Tags Section */}
@@ -369,12 +379,10 @@ const TeamMember = () => {
                                 <div className="flex flex-row justify-between">
                                     {/* Team Reference */}
                                     <div className="flex flex-row gap-[8px]">
-                                        <Hierarchy2 className="text-szPrimary700" />
+                                        <Hierarchy2 />
                                         <div className="flex flex-col lg:flex-row lg:gap-[75px]">
                                             <p className="text-caption-all-caps text-szGrey500">TEAM REFERENCE</p>
-                                            <p className="text-body-small-strong">
-                                                {getTeamReference()}
-                                            </p>
+                                            <p className="text-body-small-strong"> {getTeamReference()} </p>
                                         </div>
                                     </div>
 
@@ -382,12 +390,12 @@ const TeamMember = () => {
                                     <div className="flex flex-col gap-[8px]">
                                         <div className="flex flex-row justify-end gap-[8px]">
                                             <p className="text-caption-all-caps text-szGrey500">TAGS</p>
-                                            <Information className="text-szPrimary700" />
+                                            <Tag className="text-szPrimary700" />
                                         </div>
 
                                         <div className="flex flex-col lg:flex-row gap-[8px]">
                                             {teamData.tags ? (
-                                                teamData.tags.split(',').map((tag: string, index: number) => (
+                                                teamData.tags.split(",").map((tag: string, index: number) => (
                                                     <div key={index} className="relative group">
                                                         <Chip label={tag.trim()} />
                                                     </div>
@@ -404,7 +412,7 @@ const TeamMember = () => {
                                 </div>
 
                                 {/* Team Member Counts */}
-                                <div className="flex gap-4 mt-4">
+                                {/* <div className="flex gap-4 mt-4">
                                     <div className="flex items-center gap-2">
                                         <People className="text-szPrimary700" />
                                         <span className="text-body-small-strong">{teamMemberCount}</span>
@@ -413,18 +421,18 @@ const TeamMember = () => {
                                         <Data2 className="text-szPrimary700" />
                                         <span className="text-body-small-strong">{underlingsCount}</span>
                                     </div>
-                                </div>
+                                </div> */}
 
                                 {/* Tab Navigation */}
-                                <div className="relative flex w-full justify-center items-center mt-6">
-                                    {/* center line */}
+                                {/* <div className="relative flex w-full justify-center items-center mt-6">
+                                    // center line
                                     <div className="absolute top-1/2 left-0 w-full h-[1px] bg-szGrey300 z-0" />
 
-                                    {/* Tab group overlapping the line */}
+                                    // Tab group overlapping the line
                                     <div className="flex w-fit z-10">
                                         <Tab
                                             type="left"
-                                            active={viewType === "team"}
+                                            // active={viewType === "team"}
                                             icon={
                                                 <div className="flex flex-row items-center gap-2">
                                                     <People />
@@ -438,11 +446,11 @@ const TeamMember = () => {
                                                     </p>
                                                 </div>
                                             }
-                                            onClick={() => setViewType("team")}
+                                            // onClick={() => setViewType("team")}
                                         />
                                         <Tab
                                             type="right"
-                                            active={viewType === "underlings"}
+                                            // active={viewType === "underlings"}
                                             icon={
                                                 <div className="flex flex-row gap-2">
                                                     <Data2 />
@@ -456,36 +464,40 @@ const TeamMember = () => {
                                                     </p>
                                                 </div>
                                             }
-                                            onClick={() => setViewType("underlings")}
+                                            // onClick={() => setViewType("underlings")}
                                         />
                                     </div>
+                                </div> */}
+
+                                {/* center line */}
+                                <div className="relative flex w-full justify-center items-center mt-6">
+                                    <div className="absolute top-1/2 left-0 w-full h-[1px] bg-szGrey300 z-0" />
                                 </div>
-                                
+
                                 {/* Team Members List */}
                                 <div className="mt-6">
-                                    <h6 className="text-h6 text-szPrimary700 mb-4">These are user's teammates</h6>
+                                    <h6 className="text-body-small-reg text-szDarkGrey600 mb-4">All Team Members</h6>
                                     {viewType === "team" && teamMembers.length > 0 ? (
                                         <div className="space-y-0">
                                             {teamMembers.map((member, index) => {
                                                 // Format the name properly
-                                                const displayName = member.employee_name || 
-                                                    (member.first_name && member.last_name ? 
-                                                        `${member.last_name}, ${member.first_name}${member.middle_name ? ` ${member.middle_name}` : ''}` : 
-                                                        member.position_name || "Unknown");
-                                                
+                                                const displayName =
+                                                    member.employee_name ||
+                                                    (member.first_name && member.last_name
+                                                        ? `${member.last_name}, ${member.first_name}${
+                                                              member.middle_name ? ` ${member.middle_name}` : ""
+                                                          }`
+                                                        : member.position_name || "Unknown");
+
                                                 const jobTitle = member.job_title || member.position_name || "No title";
-                                                
+
                                                 return (
                                                     <div key={member.position_ID}>
                                                         <div className="flex items-center gap-3 p-3">
                                                             <Avatar size="small" src="/src/assets/noAvatar.png" />
                                                             <div className="flex flex-col">
-                                                                <p className="text-body-small-strong text-szBlack800">
-                                                                    {displayName}
-                                                                </p>
-                                                                <p className="text-caption-reg text-szDarkGrey600">
-                                                                    {jobTitle}
-                                                                </p>
+                                                                <p className="text-body-small-strong text-szBlack800">{displayName}</p>
+                                                                <p className="text-caption-reg text-szDarkGrey600">{jobTitle}</p>
                                                                 {member.employee_number && (
                                                                     <p className="text-caption-reg text-szGrey500">
                                                                         #{member.employee_number}
@@ -493,7 +505,7 @@ const TeamMember = () => {
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        {/* Add separator line after each member except the last one */}
+                                                        Add separator line after each member except the last one
                                                         {index < teamMembers.length - 1 && (
                                                             <div className="border-b border-szGrey200"></div>
                                                         )}
@@ -506,9 +518,7 @@ const TeamMember = () => {
                                             Underlings view - TODO: Implement hierarchy view
                                         </div>
                                     ) : (
-                                        <div className="text-center py-8 text-szGrey500">
-                                            No team members found
-                                        </div>
+                                        <div className="text-center py-8 text-szGrey500">No team members found</div>
                                     )}
                                 </div>
                             </div>
