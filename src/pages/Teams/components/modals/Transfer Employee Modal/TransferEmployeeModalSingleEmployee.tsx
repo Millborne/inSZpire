@@ -122,34 +122,35 @@ const TransferEmployeeModalSingleEmployee = ({
                             (employee: any, index: number) =>
                                 employee.saved ? (
                                     onRemoveEmployeeIndex === index ? (
-                                        <div className="w-full border border-error700 rounded-lg p-2 flex items-center justify-between gap-2">
-                                            <div className="flex items-center gap-1">
-                                                <span className="text-error700">
-                                                    <Warning2 />
-                                                </span>
-                                                <span className="text-body-small-strong">
-                                                    Are you sure you want to
-                                                    cancel adding{" "}
-                                                    {employee.employee_last_name &&
-                                                    employee.employee_first_name
-                                                        ? `${employee.employee_last_name}, ${employee.employee_first_name}`
-                                                        : "this employee"}
-                                                    ?
-                                                </span>
-                                            </div>
+                                        <>
+                                            <div className="md:flex hidden w-full border border-error700 rounded-lg p-2 items-center justify-between gap-2">
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-error700">
+                                                        <Warning2 />
+                                                    </span>
+                                                    <span className="text-body-small-strong">
+                                                        Are you sure you want to
+                                                        cancel adding{" "}
+                                                        {employee.employee_last_name &&
+                                                        employee.employee_first_name
+                                                            ? `${employee.employee_last_name}, ${employee.employee_first_name}`
+                                                            : "this employee"}
+                                                        ?
+                                                    </span>
+                                                </div>
 
-                                            <div className="flex items-center justify-end gap-1">
-                                                <Button
-                                                    label="Cancel"
-                                                    variant="ghost"
-                                                    size="medium"
-                                                    onClick={() =>
-                                                        setOnRemoveEmployeeIndex(
-                                                            null
-                                                        )
-                                                    }
-                                                />
-                                                {/* <Button
+                                                <div className="flex items-center justify-end gap-1">
+                                                    <Button
+                                                        label="Cancel"
+                                                        variant="ghost"
+                                                        size="medium"
+                                                        onClick={() =>
+                                                            setOnRemoveEmployeeIndex(
+                                                                null
+                                                            )
+                                                        }
+                                                    />
+                                                    {/* <Button
                                                   label="Confirm"
                                                   variant="ghost"
                                                   size="medium"
@@ -169,36 +170,119 @@ const TransferEmployeeModalSingleEmployee = ({
                                                   }}
                                                   className="text-error700"
                                               /> */}
-                                                <button
-                                                    type="button"
-                                                    aria-label="Confirm"
-                                                    className="h-fit flex items-center justify-center rounded-custom-md font-semibold transition-all min-h-[44px] px-6 py-3 false bg-transparent active:outline-none  focus:outline focus:outline-1 focus:outline-szSecondary500 focus:bg-szWhite100 cursor-pointer text-error700 hover:text-error900 active:text-szBlack900 focus:text-error700 false"
-                                                    onClick={() => {
-                                                        setEmployeeTeamMember(
-                                                            employeeTeamMember.filter(
-                                                                (
-                                                                    member: any,
-                                                                    i: number
-                                                                ) => i !== index
-                                                            )
-                                                        );
-                                                        setOnRemoveEmployeeIndex(
-                                                            null
-                                                        );
-                                                        setConfirmationModalOpen(
-                                                            false
-                                                        );
-                                                    }}
-                                                >
-                                                    <div className="flex items-center justify-center gap-2">
-                                                        <MinusCirlce className="" />
-                                                        <span className="font-dmSans text-body-base-strong leading-none m-0">
-                                                            Confirm
-                                                        </span>
-                                                    </div>
-                                                </button>
+                                                    <button
+                                                        type="button"
+                                                        aria-label="Confirm"
+                                                        className="h-fit flex items-center justify-center rounded-custom-md font-semibold transition-all min-h-[44px] px-6 py-3 false bg-transparent active:outline-none  focus:outline focus:outline-1 focus:outline-szSecondary500 focus:bg-szWhite100 cursor-pointer text-error700 hover:text-error900 active:text-szBlack900 focus:text-error700 false"
+                                                        onClick={() => {
+                                                            setEmployeeTeamMember(
+                                                                employeeTeamMember.filter(
+                                                                    (
+                                                                        member: any,
+                                                                        i: number
+                                                                    ) =>
+                                                                        i !==
+                                                                        index
+                                                                )
+                                                            );
+                                                            setOnRemoveEmployeeIndex(
+                                                                null
+                                                            );
+                                                            setConfirmationModalOpen(
+                                                                false
+                                                            );
+                                                        }}
+                                                    >
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            <MinusCirlce className="" />
+                                                            <span className="font-dmSans text-body-base-strong leading-none m-0">
+                                                                Confirm
+                                                            </span>
+                                                        </div>
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </div>
+
+                                            <div className="flex flex-col md:hidden w-full border border-error700 rounded-lg p-2 justify-between gap-2">
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-error700">
+                                                        <Warning2 />
+                                                    </span>
+                                                    <span className="text-body-small-strong">
+                                                        Are you sure you want to
+                                                        cancel adding{" "}
+                                                        {employee.employee_last_name &&
+                                                        employee.employee_first_name
+                                                            ? `${employee.employee_last_name}, ${employee.employee_first_name}`
+                                                            : "this employee"}
+                                                        ?
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center justify-start gap-1">
+                                                    <Button
+                                                        label="Cancel"
+                                                        variant="ghost"
+                                                        size="medium"
+                                                        onClick={() =>
+                                                            setOnRemoveEmployeeIndex(
+                                                                null
+                                                            )
+                                                        }
+                                                    />
+                                                    {/* <Button
+                                                  label="Confirm"
+                                                  variant="ghost"
+                                                  size="medium"
+                                                  leftIcon={<MinusCirlce />}
+                                                  onClick={() => {
+                                                      setEmployeeTeamMember(
+                                                          employeeTeamMember.filter(
+                                                              (
+                                                                  member: any,
+                                                                  i: number
+                                                              ) => i !== index
+                                                          )
+                                                      );
+                                                      setOnRemoveEmployeeIndex(
+                                                          null
+                                                      );
+                                                  }}
+                                                  className="text-error700"
+                                              /> */}
+                                                    <button
+                                                        type="button"
+                                                        aria-label="Confirm"
+                                                        className="h-fit flex items-center justify-center rounded-custom-md font-semibold transition-all min-h-[44px] px-6 py-3 false bg-transparent active:outline-none  focus:outline focus:outline-1 focus:outline-szSecondary500 focus:bg-szWhite100 cursor-pointer text-error700 hover:text-error900 active:text-szBlack900 focus:text-error700 false"
+                                                        onClick={() => {
+                                                            setEmployeeTeamMember(
+                                                                employeeTeamMember.filter(
+                                                                    (
+                                                                        member: any,
+                                                                        i: number
+                                                                    ) =>
+                                                                        i !==
+                                                                        index
+                                                                )
+                                                            );
+                                                            setOnRemoveEmployeeIndex(
+                                                                null
+                                                            );
+                                                            setConfirmationModalOpen(
+                                                                false
+                                                            );
+                                                        }}
+                                                    >
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            <MinusCirlce className="" />
+                                                            <span className="font-dmSans text-body-base-strong leading-none m-0">
+                                                                Confirm
+                                                            </span>
+                                                        </div>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </>
                                     ) : (
                                         <div className="w-full border border-szGrey300 rounded-lg p-2 flex flex-col gap-2">
                                             <div className="flex items-center justify-between gap-2">
