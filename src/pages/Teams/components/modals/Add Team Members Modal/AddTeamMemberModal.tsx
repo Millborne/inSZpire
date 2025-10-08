@@ -63,9 +63,11 @@ const AddTeamMemberModal: React.FC<AddTeamMemberModalProps> = ({
         }
       />
       <BatchAddTeamMembersModal
+        key={isBatchAddTeamMembersModalOpen ? "open" : "closed"}
         isOpen={isBatchAddTeamMembersModalOpen}
         onClose={() => {
           setIsBatchAddTeamMembersModalOpen(false);
+          // Close the parent modal when batch process is completed
           onClose();
         }}
       />

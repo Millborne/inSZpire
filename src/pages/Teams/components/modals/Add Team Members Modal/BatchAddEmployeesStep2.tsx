@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 
 //components
 import { Dropdown, Option } from "enterprisze-global-components";
@@ -52,6 +52,18 @@ const BatchAddEmployeesStep2: React.FC<BatchAddEmployeesStep2Props> = ({
   onPositionChange,
 }) => {
   const [selectedPosition, setSelectedPosition] = useState<string>("");
+  const [isLargeScreen, setIsLargeScreen] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsLargeScreen(window.innerWidth >= 768);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
 
   // Get the selected position data
   const selectedPositionData = useMemo(() => {
@@ -77,7 +89,11 @@ const BatchAddEmployeesStep2: React.FC<BatchAddEmployeesStep2Props> = ({
   // Show BatchMessage only when position is selected and employees are available
   const shouldShowMessage = selectedPosition && selectedEmployees.length > 0;
   return (
-    <div className="flex flex-row gap-[8px] h-full">
+    <div
+      className={`flex gap-[8px] h-full ${
+        isLargeScreen ? "flex-row" : "flex-col"
+      }`}
+    >
       <div className="flex flex-1 flex-col gap-[8px] p-[8px] bg-success50 rounded-[6px] ">
         <p className="text-body-base">
           Selected Employees ({selectedEmployees.length})
@@ -94,7 +110,13 @@ const BatchAddEmployeesStep2: React.FC<BatchAddEmployeesStep2Props> = ({
           ))}
         </div>
       </div>
-      <div className="border-l border-szGrey200 ml-[8px] pl-[8px] py-[16px]"></div>
+      <div
+        className={`${
+          isLargeScreen
+            ? "border-l border-szGrey200 ml-[8px] pl-[8px]"
+            : "border-t border-szGrey200 mt-[8px] pt-[8px]"
+        } py-[16px]`}
+      ></div>
       <div className="flex flex-1 flex-col gap-[8px]">
         <Dropdown
           options={availablePositions.map((pos) => ({
@@ -122,6 +144,7 @@ const BatchAddEmployeesStep2: React.FC<BatchAddEmployeesStep2Props> = ({
           placeholder="Select Position"
           label="Select Position"
           size="small"
+          usePortal
         />
         {shouldShowMessage && (
           <BatchMessage
