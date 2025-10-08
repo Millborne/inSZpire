@@ -224,7 +224,7 @@ const TransferEmployeeModalBatchEmployee = ({
     const handleSpecificMembersOnlyChange = () => {
         setSpecificMembersOnly(!specificMembersOnly);
         setAllTeamMembers(false);
-        setIsTeamSelected(false);
+        // setIsTeamSelected(false);
         setEmployees((prev) =>
             prev.map((emp) => ({ ...emp, selected: false }))
         );
@@ -249,6 +249,8 @@ const TransferEmployeeModalBatchEmployee = ({
                 isOpen={isOpen}
                 showButton={false}
                 onClose={OnCloseModal}
+                showCloseIcon={false}
+                footerOptions="stacked-left"
                 title={"Batch Transfer Employee of this team"}
                 modalWidth="w-[900px]"
                 contentHeight="h-[400px] min-h-[120px] max-h-[55vh]"
@@ -352,7 +354,7 @@ const TransferEmployeeModalBatchEmployee = ({
                                                     Business Solutions &
                                                     Innovation
                                                 </span>
-                                                <span className="text-caption-all-caps text-szGrey500">
+                                                <span className="text-caption-all-caps uppercase text-szGrey500">
                                                     Managed by Dino Flores •{" "}
                                                     {employees.length} members
                                                 </span>
@@ -370,7 +372,7 @@ const TransferEmployeeModalBatchEmployee = ({
 
                                     <div className="flex flex-col gap-4">
                                         <div className="flex flex-col gap-2">
-                                            <span className="text-caption-all-caps text-szDarkGrey600">
+                                            <span className="text-caption-all-caps uppercase text-szDarkGrey600">
                                                 Access Mode
                                             </span>
 
@@ -395,7 +397,7 @@ const TransferEmployeeModalBatchEmployee = ({
                                         </div>
 
                                         <div className="flex flex-col gap-2">
-                                            <span className="text-caption-all-caps text-szDarkGrey600">
+                                            <span className="text-caption-all-caps uppercase text-szDarkGrey600">
                                                 Select specific employees
                                             </span>
 
@@ -689,7 +691,7 @@ const TransferEmployeeModalBatchEmployee = ({
                     setShowSuccessSnackbar(true);
                     OnCloseModal();
                 }}
-                description={"You are about to transfer these employees."}
+                description={"You are about to batch transfer these employees."}
                 content={
                     <div className="flex flex-col mt-2 gap-4">
                         <div className="relative bg-success50 border border-gray-300 rounded-[8px] px-[16px] py-[20px] ">
@@ -804,7 +806,7 @@ const TransferEmployeeModalBatchEmployee = ({
                         </div>
                     </div>
                 }
-                buttonLabel={"Transfer Employee"}
+                buttonLabel={"Batch Transfer Employee"}
             />
 
             <SnackbarAlert

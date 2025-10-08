@@ -59,6 +59,7 @@ const TransferEmployeeModalSingleEmployee = ({
             <Modal
                 isOpen={isOpen}
                 showButton={false}
+                showCloseIcon={false}
                 onClose={() => {
                     setSelectedEmployee(null);
                     setSelectedTeam(null);
@@ -80,6 +81,7 @@ const TransferEmployeeModalSingleEmployee = ({
                 modalWidth="w-[900px]"
                 contentHeight="h-[400px] min-h-[120px] max-h-[55vh]"
                 headerOptions="left"
+                footerOptions="stacked-left"
                 footerButtons={[
                     {
                         label: "Cancel",
@@ -354,7 +356,7 @@ const TransferEmployeeModalSingleEmployee = ({
                                         </span>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                             <Dropdown
-                                                label="Select employee"
+                                                label=""
                                                 size="small"
                                                 options={[
                                                     {
@@ -425,7 +427,7 @@ const TransferEmployeeModalSingleEmployee = ({
                                         </span>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                             <Dropdown
-                                                label="Select Team"
+                                                label=""
                                                 size="small"
                                                 options={[
                                                     {
@@ -465,7 +467,7 @@ const TransferEmployeeModalSingleEmployee = ({
                                                 disabled={false}
                                             />
                                             <Dropdown
-                                                label="Select position available from team"
+                                                label=""
                                                 size="small"
                                                 options={[
                                                     {

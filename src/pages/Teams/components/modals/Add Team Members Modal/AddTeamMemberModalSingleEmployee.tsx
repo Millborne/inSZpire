@@ -57,6 +57,8 @@ const AddTeamMemberModalSingleEmployee = ({
                 modalWidth="w-[900px]"
                 contentHeight="h-[400px] min-h-[120px] max-h-[55vh]"
                 headerOptions="left"
+                showCloseIcon={false}
+                footerOptions="stacked-left"
                 footerButtons={[
                     {
                         label: "Cancel",
@@ -285,16 +287,12 @@ const AddTeamMemberModalSingleEmployee = ({
                                         </span>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                             <Dropdown
-                                                label="Select employee"
+                                                label=""
                                                 size="small"
                                                 options={[
                                                     {
-                                                        label: "Active",
-                                                        value: "0",
-                                                    },
-                                                    {
-                                                        label: "Archived",
-                                                        value: "1",
+                                                        label: "Rigor, John Daryll",
+                                                        value: "Rigor, John Daryll",
                                                     },
                                                 ]}
                                                 placeholder="Select Employee"
@@ -315,16 +313,12 @@ const AddTeamMemberModalSingleEmployee = ({
                                         </span>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                             <Dropdown
-                                                label="Business Solution & Innovation (Default)"
+                                                label=""
                                                 size="small"
                                                 options={[
                                                     {
-                                                        label: "Active",
-                                                        value: "0",
-                                                    },
-                                                    {
-                                                        label: "Archived",
-                                                        value: "1",
+                                                        label: "Business Solution & Innovation (Default)",
+                                                        value: "Business Solution & Innovation (Default)",
                                                     },
                                                 ]}
                                                 placeholder="Business Solution & Innovation (Default)"
@@ -335,16 +329,16 @@ const AddTeamMemberModalSingleEmployee = ({
                                                 disabled={false}
                                             />
                                             <Dropdown
-                                                label="Select position available from team"
+                                                label=""
                                                 size="small"
                                                 options={[
                                                     {
-                                                        label: "Active",
-                                                        value: "0",
+                                                        label: "Junior Web Dev",
+                                                        value: "Junior Web Dev",
                                                     },
                                                     {
-                                                        label: "Archived",
-                                                        value: "1",
+                                                        label: "Operations Manager",
+                                                        value: "Operations Manager",
                                                     },
                                                 ]}
                                                 placeholder="Select position available from team"
