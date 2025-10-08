@@ -31,6 +31,7 @@ const TransferEmployeeModal: React.FC<TransferEmployeeModalProps> = ({
             <Modal
                 isOpen={isOpen}
                 onClose={onClose}
+                showCloseIcon={false}
                 title="Transfer Employee"
                 showButton={false}
                 modalWidth="w-[900px]"
