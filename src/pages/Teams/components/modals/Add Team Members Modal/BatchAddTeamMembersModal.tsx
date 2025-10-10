@@ -312,7 +312,7 @@ const BatchAddTeamMembersModal: React.FC<BatchAddTeamMembersModalProps> = ({
           },
         ]}
         title="Add Team Member(s)"
-        modalWidth="w-[910px]"
+        modalWidth="w-full max-w-[910px]"
         contentHeight="h-[320px]"
         content={
           <div className="flex flex-col gap-[8px] items-center h-full">

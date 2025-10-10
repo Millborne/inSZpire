@@ -1,4 +1,10 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
 import PapaZ from "../../../../../assets/papa-z-csr.png";
 
 //icons
@@ -39,6 +45,45 @@ const BatchAddEmployeesStep: React.FC<AddEmployeesStepProps> = ({
     useState<Set<string>>(selectedTeamIds);
   const [selectedEmployees, setSelectedEmployees] =
     useState<Set<string>>(selectedEmployeeIds);
+
+  // Refs to track previous prop values to prevent unnecessary updates
+  const prevSelectedEmployeeIds = useRef<Set<string>>(selectedEmployeeIds);
+  const prevSelectedTeamIds = useRef<Set<string>>(selectedTeamIds);
+  const hasInitialized = useRef<boolean>(false);
+
+  // Reset component state when modal is opened fresh (both props are empty)
+  useEffect(() => {
+    const isModalOpenedFresh =
+      selectedEmployeeIds.size === 0 && selectedTeamIds.size === 0;
+
+    if (isModalOpenedFresh && !hasInitialized.current) {
+      // Reset all local state when modal is opened fresh
+      setSearchTerm("");
+      setIsFilterSelected(false);
+      setSelectedTeams(new Set());
+      setSelectedEmployees(new Set());
+
+      // Update refs to match the reset state
+      prevSelectedEmployeeIds.current = new Set();
+      prevSelectedTeamIds.current = new Set();
+      hasInitialized.current = true;
+    } else if (!isModalOpenedFresh) {
+      // Reset the initialization flag when modal has data (coming back from step 2)
+      hasInitialized.current = false;
+    }
+  }, [selectedEmployeeIds.size, selectedTeamIds.size]);
+
+  // Additional reset effect when component mounts with empty props
+  useEffect(() => {
+    if (selectedEmployeeIds.size === 0 && selectedTeamIds.size === 0) {
+      // Force reset on mount if props are empty
+      setSearchTerm("");
+      setIsFilterSelected(false);
+      setSelectedTeams(new Set());
+      setSelectedEmployees(new Set());
+      hasInitialized.current = true;
+    }
+  }, []); // Empty dependency array - runs only on mount
 
   // Filter teams and employees based on search term
   const { filteredTeams, individualEmployees } = useMemo(() => {
@@ -127,18 +172,48 @@ const BatchAddEmployeesStep: React.FC<AddEmployeesStepProps> = ({
 
   // Update local state when props change (when going back from step 2)
   useEffect(() => {
-    setSelectedEmployees(selectedEmployeeIds);
-    setSelectedTeams(selectedTeamIds);
+    // Only update if the props have actually changed
+    const employeeIdsChanged =
+      selectedEmployeeIds.size !== prevSelectedEmployeeIds.current.size ||
+      [...selectedEmployeeIds].some(
+        (id) => !prevSelectedEmployeeIds.current.has(id)
+      );
+
+    const teamIdsChanged =
+      selectedTeamIds.size !== prevSelectedTeamIds.current.size ||
+      [...selectedTeamIds].some((id) => !prevSelectedTeamIds.current.has(id));
+
+    if (employeeIdsChanged) {
+      setSelectedEmployees(selectedEmployeeIds);
+      prevSelectedEmployeeIds.current = selectedEmployeeIds;
+    }
+
+    if (teamIdsChanged) {
+      setSelectedTeams(selectedTeamIds);
+      prevSelectedTeamIds.current = selectedTeamIds;
+    }
   }, [selectedEmployeeIds, selectedTeamIds]);
+
+  // Memoize the onSelectionChange callback to prevent unnecessary re-renders
+  const memoizedOnSelectionChange = useCallback(
+    (employees: Employee[], employeeIds: Set<string>, teamIds: Set<string>) => {
+      onSelectionChange(employees, employeeIds, teamIds);
+    },
+    [onSelectionChange]
+  );
 
   // Notify parent component when selections change
   useEffect(() => {
-    onSelectionChange(selectedEmployeesData, selectedEmployees, selectedTeams);
+    memoizedOnSelectionChange(
+      selectedEmployeesData,
+      selectedEmployees,
+      selectedTeams
+    );
   }, [
     selectedEmployeesData,
     selectedEmployees,
     selectedTeams,
-    onSelectionChange,
+    memoizedOnSelectionChange,
   ]);
 
   return (

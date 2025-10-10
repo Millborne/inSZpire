@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 //components
 import TeamCheckbox, { TeamCheckboxProps } from "./TeamCheckbox";
@@ -39,13 +39,16 @@ const SearchTeamGroup: React.FC<SearchTeamGroupProps> = ({
   const [internalTeamChecked, setInternalTeamChecked] = useState(false);
   const isTeamChecked = checked !== undefined ? checked : internalTeamChecked;
 
+  // Memoize employees to prevent unnecessary re-renders
+  const memoizedEmployees = useMemo(() => employees, [employees]);
+
   // Auto-update access mode based on employee selection
   useEffect(() => {
-    if (isTeamChecked && employees.length > 0) {
-      const selectedCount = employees.filter((emp) =>
+    if (isTeamChecked && memoizedEmployees.length > 0) {
+      const selectedCount = memoizedEmployees.filter((emp) =>
         selectedEmployees.has(emp.id || "")
       ).length;
-      const totalCount = employees.length;
+      const totalCount = memoizedEmployees.length;
 
       // If all employees are selected, set to "all"
       if (selectedCount === totalCount) {
@@ -57,14 +60,14 @@ const SearchTeamGroup: React.FC<SearchTeamGroupProps> = ({
       }
       // If no employees are selected, keep current mode
     }
-  }, [selectedEmployees, employees, isTeamChecked]);
+  }, [selectedEmployees, memoizedEmployees, isTeamChecked]);
 
   const handleAccessModeChange = (value: "all" | "specific") => {
     setAccessMode(value);
 
     // If switching to "all" mode and team is checked, select all employees
     if (value === "all" && isTeamChecked && onEmployeeSelection) {
-      employees.forEach((employee) => {
+      memoizedEmployees.forEach((employee) => {
         if (employee.id) {
           onEmployeeSelection(employee.id, true);
         }
@@ -73,7 +76,7 @@ const SearchTeamGroup: React.FC<SearchTeamGroupProps> = ({
 
     // If switching to "specific" mode and team is checked, deselect all employees
     if (value === "specific" && isTeamChecked && onEmployeeSelection) {
-      employees.forEach((employee) => {
+      memoizedEmployees.forEach((employee) => {
         if (employee.id) {
           onEmployeeSelection(employee.id, false);
         }
@@ -93,7 +96,7 @@ const SearchTeamGroup: React.FC<SearchTeamGroupProps> = ({
 
       // If access mode is "all", select/deselect all employees in the team
       if (accessMode === "all" && onEmployeeSelection) {
-        employees.forEach((employee) => {
+        memoizedEmployees.forEach((employee) => {
           if (employee.id) {
             onEmployeeSelection(employee.id, checked);
           }
@@ -108,7 +111,7 @@ const SearchTeamGroup: React.FC<SearchTeamGroupProps> = ({
   };
 
   // Calculate actual selected count based on selectedEmployees
-  const actualSelectedCount = employees.filter((emp) =>
+  const actualSelectedCount = memoizedEmployees.filter((emp) =>
     selectedEmployees.has(emp.id || "")
   ).length;
 
@@ -163,7 +166,7 @@ const SearchTeamGroup: React.FC<SearchTeamGroupProps> = ({
               // Optional: Add any additional search handling logic here
               console.log("Searching employees:", searchTerm);
             }}
-            employees={employees.map((employee) => ({
+            employees={memoizedEmployees.map((employee) => ({
               ...employee,
               checked: selectedEmployees.has(employee.id || ""),
               onChange: (checked: boolean) => {
@@ -177,10 +180,11 @@ const SearchTeamGroup: React.FC<SearchTeamGroupProps> = ({
 
                   // If access mode is "specific" and all employees are now checked, change to "all"
                   if (accessMode === "specific" && checked) {
-                    const allEmployeesSelected = employees.every((emp) =>
-                      emp.id === employee.id
-                        ? checked
-                        : selectedEmployees.has(emp.id || "")
+                    const allEmployeesSelected = memoizedEmployees.every(
+                      (emp) =>
+                        emp.id === employee.id
+                          ? checked
+                          : selectedEmployees.has(emp.id || "")
                     );
                     if (allEmployeesSelected) {
                       setAccessMode("all");
