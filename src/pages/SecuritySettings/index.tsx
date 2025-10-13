@@ -124,6 +124,7 @@ const SecuritySettings = () => {
                                 selected={selected}
                                 setSelected={handleMenuSelect}
                                 onToggleSidebar={toggleSidebar}
+                                title="Setting Configuration"
                             />
                         </div>
                     )}
@@ -141,6 +142,7 @@ const SecuritySettings = () => {
                                     selected={selected}
                                     setSelected={handleMenuSelect}
                                     onToggleSidebar={toggleSidebar}
+                                    title="Setting Configuration"
                                 />
                             </div>
                         </>

@@ -1,6 +1,15 @@
 import { useContext, useState } from "react";
 import { Sms, HamburgerMenu, SearchNormal, TickCircle, Personalcard, Send } from "iconsax-reactjs";
-import { CardContainer, Inputs, Pagination, Dropdown, Option, Button, SnackbarAlert } from "enterprisze-global-components";
+import {
+    CardContainer,
+    Inputs,
+    Pagination,
+    Dropdown,
+    Option,
+    Button,
+    SnackbarAlert,
+    ItemLimitDropdown,
+} from "enterprisze-global-components";
 import { SidebarContext } from "..";
 import UpdateEmailModal, { UpdateEmailDataType } from "../modals/UpdateEmailModal";
 
@@ -11,10 +20,10 @@ const EmailVerification = () => {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [snackbarType, setSnackbarType] = useState<"error" | "success">("error");
-    const [totalCount, setTotalCount] = useState(0);
     const [emailList, setEmailList] = useState<typeof emailEntries>([]);
     const [selectedEmail, setSelectedEmail] = useState<UpdateEmailDataType | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [limit, setLimit] = useState({ label: "10", value: "10" });
 
     // const navigate = useNavigate();
     const options = [
@@ -180,12 +189,21 @@ const EmailVerification = () => {
                             );
                         })}
 
-                        <section className="flex justify-end">
-                            <Pagination
-                                currentPage={1}
-                                totalPages={Math.ceil(totalCount / 10)}
-                                visiblePages={3}
-                                onChange={handlePageChange}
+                        <section className="flex justify-between">
+                            <Pagination currentPage={1} totalPages={3} onChange={handlePageChange} />
+                            <ItemLimitDropdown
+                                value={limit}
+                                options={[
+                                    { label: "5", value: "5" },
+                                    { label: "10", value: "10" },
+                                    { label: "25", value: "25" },
+                                    { label: "50", value: "50" },
+                                    { label: "100", value: "100" },
+                                ]}
+                                onChange={(value) => {
+                                    setLimit(value);
+                                }}
+                                page={1}
                             />
                         </section>
 
