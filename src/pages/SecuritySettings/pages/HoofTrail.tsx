@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { HamburgerMenu, SearchNormal, Edit2, ArchiveBox } from "iconsax-reactjs";
-import { CardContainer, Inputs, Pagination, Table, HeaderType } from "enterprisze-global-components";
+import { CardContainer, Inputs, Pagination, Table, HeaderType, ItemLimitDropdown } from "enterprisze-global-components";
 import { SidebarContext } from "..";
 import hoofTrails from "../../../assets/Hoofprints.svg";
 
@@ -13,7 +13,7 @@ const newValue = "10";
 
 const HoofTrail = () => {
     const { toggleSidebar } = useContext(SidebarContext);
-    const [totalCount, setTotalCount] = useState(0);
+    const [limit, setLimit] = useState({ label: "10", value: "10" });
 
     // const navigate = useNavigate();
 
@@ -141,12 +141,21 @@ const HoofTrail = () => {
                             onRowClick={handleRowClick}
                         />
 
-                        <section className="flex justify-end">
-                            <Pagination
-                                currentPage={1}
-                                totalPages={Math.ceil(totalCount / 10)}
-                                visiblePages={3}
-                                onChange={handlePageChange}
+                        <section className="flex justify-between">
+                            <Pagination currentPage={1} totalPages={3} onChange={handlePageChange} />
+                            <ItemLimitDropdown
+                                value={limit}
+                                options={[
+                                    { label: "5", value: "5" },
+                                    { label: "10", value: "10" },
+                                    { label: "25", value: "25" },
+                                    { label: "50", value: "50" },
+                                    { label: "100", value: "100" },
+                                ]}
+                                onChange={(value) => {
+                                    setLimit(value);
+                                }}
+                                page={1}
                             />
                         </section>
                     </div>
