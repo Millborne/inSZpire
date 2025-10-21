@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowDown2, ArrowUp2, Key } from "iconsax-react";
 import { Checkbox } from "enterprisze-global-components";
 
@@ -16,6 +16,7 @@ export interface ChecklistOption {
 interface CollapsableDropdownChecklistProps {
   title: string;
   icon?: React.ReactNode;
+  iconColor?: string;
   items: ChecklistItem[];
   backgroundColor?: string;
   checklistOptions: ChecklistOption[];
@@ -26,6 +27,7 @@ interface CollapsableDropdownChecklistProps {
   ) => void;
   onAllChecklistChange?: (itemId: string, checked: boolean) => void;
   className?: string;
+  searchTerm?: string;
 }
 
 const CollapsableDropdownChecklist: React.FC<
@@ -33,14 +35,58 @@ const CollapsableDropdownChecklist: React.FC<
 > = ({
   title,
   icon = <Key variant="Bold" />,
+  iconColor = "szDarkGrey600",
   backgroundColor = "bg-szWhite100",
   items,
   checklistOptions,
   onChecklistChange,
   onAllChecklistChange,
   className = "",
+  searchTerm = "",
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [highlightedItems, setHighlightedItems] = useState<Set<string>>(
+    new Set()
+  );
+  const [isTitleHighlighted, setIsTitleHighlighted] = useState(false);
+
+  // Search highlighting effect
+  useEffect(() => {
+    if (searchTerm.trim()) {
+      const newHighlightedItems = new Set<string>();
+      const searchTermLower = searchTerm.toLowerCase().trim();
+
+      // Check if title matches (exact match or whole word match)
+      const titleLower = title.toLowerCase();
+      if (
+        titleLower === searchTermLower ||
+        titleLower.includes(` ${searchTermLower} `) ||
+        titleLower.startsWith(`${searchTermLower} `) ||
+        titleLower.endsWith(` ${searchTermLower}`)
+      ) {
+        setIsTitleHighlighted(true);
+        setTimeout(() => setIsTitleHighlighted(false), 3000);
+      }
+
+      // Check if any item labels match (exact match or whole word match)
+      items.forEach((item) => {
+        const labelLower = item.label.toLowerCase();
+        if (
+          labelLower === searchTermLower ||
+          labelLower.includes(` ${searchTermLower} `) ||
+          labelLower.startsWith(`${searchTermLower} `) ||
+          labelLower.endsWith(` ${searchTermLower}`)
+        ) {
+          newHighlightedItems.add(item.id);
+        }
+      });
+
+      if (newHighlightedItems.size > 0) {
+        setHighlightedItems(newHighlightedItems);
+        setTimeout(() => setHighlightedItems(new Set()), 3000);
+      }
+    }
+  }, [searchTerm, title, items]);
 
   const handleChecklistChange = (
     itemId: string,
@@ -83,13 +129,17 @@ const CollapsableDropdownChecklist: React.FC<
         <div className="flex items-center gap-[8px]">
           <div className="border-b border-szGrey300 p-[2px]">
             {React.cloneElement(icon as React.ReactElement, {
-              className: "w-[12px] h-[12px] text-szDarkGrey600",
+              className: `w-[12px] h-[12px] text-${iconColor}`,
             })}
           </div>
 
           <p
-            className={`font-body-small-strong text-szBlack800 truncate cursor-help ${
-              isExpanded ? "text-szSecondary700 text-medium" : ""
+            className={`font-body-small-strong font-medium truncate cursor-help ${
+              isTitleHighlighted
+                ? "text-success700"
+                : isExpanded
+                ? "text-szSecondary700 text-medium"
+                : "text-szBlack800"
             }`}
           >
             {title}
@@ -97,7 +147,7 @@ const CollapsableDropdownChecklist: React.FC<
         </div>
         {!isExpanded ? (
           <div className="p-2">
-            <ArrowDown2 className="w-[16px] h-[16px] text-gray-500" />
+            <ArrowDown2 className="w-[16px] h-[16px] text-szPrimary900" />
           </div>
         ) : (
           <div className="flex">
@@ -132,7 +182,11 @@ const CollapsableDropdownChecklist: React.FC<
                   })}
                 </div>
                 <p
-                  className="text-body-caption-reg text-szBlack800 truncate cursor-help"
+                  className={`text-body-caption-reg font-medium truncate cursor-help ${
+                    highlightedItems.has(item.id)
+                      ? "text-success700"
+                      : "text-szBlack800"
+                  }`}
                   title={item.label}
                 >
                   {item.label}
@@ -179,7 +233,7 @@ const CollapsableDropdownChecklist: React.FC<
           {/* Bottom arrow (collapse control) */}
           <div className="flex justify-end p-2 cursor-pointer">
             <ArrowUp2
-              className="w-[16px] h-[16px] text-gray-500"
+              className="w-[16px] h-[16px] text-szPrimary900"
               onClick={toggleExpanded}
             />
           </div>
