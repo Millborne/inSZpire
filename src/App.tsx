@@ -32,6 +32,7 @@ import TwoFactorAuthentication from "./pages/SecuritySettings/pages/2FactorAuthe
 import ActiveSessionManagement from "./pages/SecuritySettings/pages/ActiveSessionManagement";
 import EmailVerification from "./pages/SecuritySettings/pages/EmailVerification";
 import HoofTrail from "./pages/SecuritySettings/pages/HoofTrail";
+import MillComponents from "./components/examples/millcomponents";
 
 function App() {
     // const {
@@ -146,6 +147,8 @@ function App() {
                 <Route path="change-password" element={<ChangePassword />} />
                 <Route path="/" element={<Navigate to="/home/dashboard" replace />} />
                 <Route path="*" element={<Navigate to="/home/dashboard" replace />} />
+
+                <Route path="mill" element={<MillComponents />} />
             </Routes>
         </Router>
     );
