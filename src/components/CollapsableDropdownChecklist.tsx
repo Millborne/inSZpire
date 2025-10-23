@@ -15,6 +15,7 @@ export interface ChecklistOption {
 
 interface CollapsableDropdownChecklistProps {
   title: string;
+  expanded?: boolean;
   icon?: React.ReactNode;
   iconColor?: string;
   items: ChecklistItem[];
@@ -34,6 +35,7 @@ const CollapsableDropdownChecklist: React.FC<
   CollapsableDropdownChecklistProps
 > = ({
   title,
+  expanded = false,
   icon = <Key variant="Bold" />,
   iconColor = "szDarkGrey600",
   backgroundColor = "bg-szWhite100",
@@ -44,7 +46,7 @@ const CollapsableDropdownChecklist: React.FC<
   className = "",
   searchTerm = "",
 }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(expanded);
   const [highlightedItems, setHighlightedItems] = useState<Set<string>>(
     new Set()
   );
@@ -231,11 +233,11 @@ const CollapsableDropdownChecklist: React.FC<
             </div>
           ))}
           {/* Bottom arrow (collapse control) */}
-          <div className="flex justify-end p-2 cursor-pointer">
-            <ArrowUp2
-              className="w-[16px] h-[16px] text-szPrimary900"
-              onClick={toggleExpanded}
-            />
+          <div
+            className="flex justify-end p-2 cursor-pointer mt-2"
+            onClick={toggleExpanded}
+          >
+            <ArrowUp2 className="w-[16px] h-[16px] text-szPrimary900" />
           </div>
         </div>
       )}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Key } from "iconsax-react";
 import CollapsableDropdownChecklist, {
   ChecklistItem,
   ChecklistOption,
@@ -6,6 +7,7 @@ import CollapsableDropdownChecklist, {
 import CollapsableDropdownContent, {
   ChecklistOptionContent,
   ChecklistItemContent,
+  SubContentItem,
 } from "./CollapsableDropdownContent";
 
 const KassyComponents = () => {
@@ -53,8 +55,29 @@ const KassyComponents = () => {
 
   // Helper function to create initial checklist state for content
   const createInitialChecklistContent = (
-    items: { id: string; label: string; content?: string }[]
+    items: {
+      id: string;
+      label: string;
+      content?: string;
+      subContent?: SubContentItem[];
+    }[]
   ): ChecklistItemContent[] => {
+    return items.map((item) => ({
+      id: item.id,
+      label: item.label,
+      content: item.content,
+      subContent: item.subContent,
+      checklist: checklistOptionsContent.reduce((acc, option) => {
+        acc[option.key] = false;
+        return acc;
+      }, {} as Record<string, boolean>),
+    }));
+  };
+
+  // Helper function to create initial checklist state for subcontent
+  const createInitialSubContentChecklist = (
+    items: { id: string; label: string; content?: string }[]
+  ): SubContentItem[] => {
     return items.map((item) => ({
       id: item.id,
       label: item.label,
@@ -258,6 +281,228 @@ const KassyComponents = () => {
     );
   };
 
+  //! ============================================================================
+  //! COLLAPSABLE DROPDOWN CONTENT - NESTED SUBCONTENT EXAMPLE
+  //! ============================================================================
+
+  // Define nested subcontent items (similar to the image)
+  const nestedSubContentItems = [
+    {
+      id: "employment-id",
+      label: "Employment ID",
+    },
+    {
+      id: "employment-id",
+      label: "Employment ID",
+    },
+    {
+      id: "employment-id",
+      label: "Employment ID",
+    },
+    {
+      id: "employment-id",
+      label: "Employment ID",
+    },
+    {
+      id: "employment-id-1",
+      label: "Employment ID",
+      subContent: createInitialSubContentChecklist([
+        {
+          id: "employee-status",
+          label: "Employee Status",
+          content:
+            "Last Name, First Name, Middle Name, Nickname, Extension, Date of Birth, Age, Place of Birth, Religion, Sex, Civil Status, Gender Identity, Pronouns, Blood Type, Present Address, Permanent Address",
+        },
+        {
+          id: "birth-info",
+          label: "Date of Birth, Age, Place of Birth",
+          content:
+            "Birth-related information including date, calculated age, and birthplace details",
+        },
+        {
+          id: "personal-details",
+          label:
+            "Religion, Sex, Civil Status, Gender Identity, Pronouns, Blood Type",
+          content:
+            "Personal characteristics and identity information including religious affiliation, gender details, and medical information",
+        },
+        {
+          id: "address-info",
+          label: "Present Address, Permanent Address",
+          content:
+            "Current and permanent residential address information for contact and legal purposes",
+        },
+      ]),
+    },
+    {
+      id: "employment-id-1",
+      label: "Employment ID",
+      subContent: createInitialSubContentChecklist([
+        {
+          id: "employee-status",
+          label: "Employee Status",
+          content:
+            "Last Name, First Name, Middle Name, Nickname, Extension, Date of Birth, Age, Place of Birth, Religion, Sex, Civil Status, Gender Identity, Pronouns, Blood Type, Present Address, Permanent Address",
+        },
+        {
+          id: "birth-info",
+          label: "Date of Birth, Age, Place of Birth",
+          content:
+            "Birth-related information including date, calculated age, and birthplace details",
+        },
+        {
+          id: "personal-details",
+          label:
+            "Religion, Sex, Civil Status, Gender Identity, Pronouns, Blood Type",
+          content:
+            "Personal characteristics and identity information including religious affiliation, gender details, and medical information",
+        },
+        {
+          id: "address-info",
+          label: "Present Address, Permanent Address",
+          content:
+            "Current and permanent residential address information for contact and legal purposes",
+        },
+      ]),
+    },
+    {
+      id: "employment-id-1",
+      label: "Employment ID",
+      subContent: createInitialSubContentChecklist([
+        {
+          id: "employee-status",
+          label: "Employee Status",
+          content:
+            "Last Name, First Name, Middle Name, Nickname, Extension, Date of Birth, Age, Place of Birth, Religion, Sex, Civil Status, Gender Identity, Pronouns, Blood Type, Present Address, Permanent Address",
+        },
+        {
+          id: "birth-info",
+          label: "Date of Birth, Age, Place of Birth",
+          content:
+            "Birth-related information including date, calculated age, and birthplace details",
+        },
+        {
+          id: "personal-details",
+          label:
+            "Religion, Sex, Civil Status, Gender Identity, Pronouns, Blood Type",
+          content:
+            "Personal characteristics and identity information including religious affiliation, gender details, and medical information",
+        },
+        {
+          id: "address-info",
+          label: "Present Address, Permanent Address",
+          content:
+            "Current and permanent residential address information for contact and legal purposes",
+        },
+      ]),
+    },
+  ];
+
+  // State for nested subcontent checklist
+  const [nestedSubContentChecklist, setNestedSubContentChecklist] = useState<
+    ChecklistItemContent[]
+  >(createInitialChecklistContent(nestedSubContentItems));
+
+  // Handlers for nested subcontent checklist
+  const handleNestedSubContentChecklistChange = (
+    itemId: string,
+    checklistKey: string,
+    checked: boolean
+  ) => {
+    setNestedSubContentChecklist((prev) =>
+      prev.map((item) =>
+        item.id === itemId
+          ? {
+              ...item,
+              checklist: { ...item.checklist, [checklistKey]: checked },
+            }
+          : item
+      )
+    );
+  };
+
+  const handleNestedSubContentAllChecklistChange = (
+    itemId: string,
+    checked: boolean
+  ) => {
+    setNestedSubContentChecklist((prev) =>
+      prev.map((item) =>
+        item.id === itemId
+          ? {
+              ...item,
+              checklist: checklistOptionsContent.reduce((acc, option) => {
+                if (option.key.toLowerCase() !== "all") {
+                  acc[option.key] = checked;
+                }
+                return acc;
+              }, {} as Record<string, boolean>),
+            }
+          : item
+      )
+    );
+  };
+
+  // Handlers for subcontent checklist
+  const handleSubContentChecklistChange = (
+    itemId: string,
+    subContentId: string,
+    checklistKey: string,
+    checked: boolean
+  ) => {
+    setNestedSubContentChecklist((prev) =>
+      prev.map((item) =>
+        item.id === itemId
+          ? {
+              ...item,
+              subContent: item.subContent?.map((subContent) =>
+                subContent.id === subContentId
+                  ? {
+                      ...subContent,
+                      checklist: {
+                        ...subContent.checklist,
+                        [checklistKey]: checked,
+                      },
+                    }
+                  : subContent
+              ),
+            }
+          : item
+      )
+    );
+  };
+
+  const handleSubContentAllChecklistChange = (
+    itemId: string,
+    subContentId: string,
+    checked: boolean
+  ) => {
+    setNestedSubContentChecklist((prev) =>
+      prev.map((item) =>
+        item.id === itemId
+          ? {
+              ...item,
+              subContent: item.subContent?.map((subContent) =>
+                subContent.id === subContentId
+                  ? {
+                      ...subContent,
+                      checklist: checklistOptionsContent.reduce(
+                        (acc, option) => {
+                          if (option.key.toLowerCase() !== "all") {
+                            acc[option.key] = checked;
+                          }
+                          return acc;
+                        },
+                        {} as Record<string, boolean>
+                      ),
+                    }
+                  : subContent
+              ),
+            }
+          : item
+      )
+    );
+  };
+
   return (
     <div className="flex flex-col w-full h-screen bg-[#F0F1F4] overflow-auto overflow-x-hidden">
       <h2 className="text-h2 text-szBlack700">Kassy Components</h2>
@@ -299,6 +544,7 @@ const KassyComponents = () => {
           <div className="w-full max-w-4xl">
             <CollapsableDropdownChecklist
               title="Employee"
+              expanded={true}
               items={employeeChecklist}
               checklistOptions={checklistOptions}
               onChecklistChange={handleChecklistChange}
@@ -316,6 +562,7 @@ const KassyComponents = () => {
           <div className="w-full max-w-4xl space-y-2">
             <CollapsableDropdownContent
               title="Summary"
+              expanded={true}
               items={summaryChecklist}
               checklistOptions={checklistOptionsContent}
               onChecklistChange={handleChecklistChangeContent}
@@ -329,6 +576,33 @@ const KassyComponents = () => {
               checklistOptions={checklistOptionsContent}
               onChecklistChange={handleMainDocumentsChecklistChange}
               onAllChecklistChange={handleMainDocumentsAllChecklistChange}
+              backgroundColor="bg-szWhite100"
+              searchTerm={searchTerm}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <h4 className="text-h3 text-szBlack700">
+            Collapsable Dropdown Content with Nested SubContent
+          </h4>
+          <p>
+            This component demonstrates nested subcontent with their own
+            checkboxes and icons, similar to the image.
+          </p>
+          <div className="w-full max-w-4xl space-y-2">
+            <CollapsableDropdownContent
+              title="Personal Information"
+              items={nestedSubContentChecklist}
+              checklistOptions={checklistOptionsContent}
+              onChecklistChange={handleNestedSubContentChecklistChange}
+              onAllChecklistChange={handleNestedSubContentAllChecklistChange}
+              onSubContentChecklistChange={handleSubContentChecklistChange}
+              onSubContentAllChecklistChange={
+                handleSubContentAllChecklistChange
+              }
+              subContentIcon={<Key variant="Bold" />}
+              subContentIconColor="szDarkGrey600"
               backgroundColor="bg-szWhite100"
               searchTerm={searchTerm}
             />
