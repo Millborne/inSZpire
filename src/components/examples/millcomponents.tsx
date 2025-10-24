@@ -29,6 +29,7 @@ const millcomponents = () => {
                     onClose={() => { setIsOpenDataScopeModal(false) }}
                     onSave={() => { setIsOpenDataScopeModal(false) }}
                     roleName="Super Admin"
+                    children={<div>Hello</div>}
                 />
             </div>
         </>

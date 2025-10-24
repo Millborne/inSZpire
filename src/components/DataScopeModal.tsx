@@ -18,8 +18,8 @@ const DataScopeModal: React.FC<DataScopeModalProps> = ({
     onSave,
     roleName = "Super Admin",
     children,
-    contentHeight = "h-auto min-h-[400px]",
-    modalWidth = "w-[936px]",
+    contentHeight = "h-auto max-h-[576px]",
+    modalWidth = "w-[900px]",
 }) => {
     return (
         <Modal
