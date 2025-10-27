@@ -189,7 +189,7 @@ const millcomponents = () => {
                             : selected;
                         setSelectedEmployee(value);
                     }}
-                    showWarning={false}
+                    showWarning={true}
                     submitButtonLabel="Add Permission"
                     cancelButtonLabel="Cancel"
                 />
