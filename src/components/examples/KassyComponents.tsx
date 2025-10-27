@@ -1,20 +1,33 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Key } from "iconsax-react";
 import CollapsableDropdownChecklist, {
   ChecklistItem,
   ChecklistOption,
-} from "./CollapsableDropdownChecklist";
+} from "../CollapsableDropdownChecklist";
 import CollapsableDropdownContent, {
   ChecklistOptionContent,
   ChecklistItemContent,
   SubContentItem,
-} from "./CollapsableDropdownContent";
+} from "../CollapsableDropdownContent";
+import TeamCheckboxDropdownComponent from "../TeamCheckboxDrodpownComponent";
+import { Team, Employee } from "../../types/team";
+import PapaZ from "../assets/papa-z-csr.png";
 
 const KassyComponents = () => {
   //? ============================================================================
   //? SEARCH STATE
   //? ============================================================================
   const [searchTerm, setSearchTerm] = useState("");
+
+  //? ============================================================================
+  //? TEAM CHECKBOX DROPDOWN STATE
+  //? ============================================================================
+  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<string>>(
+    new Set()
+  );
+  const [selectedTeamIds, setSelectedTeamIds] = useState<Set<string>>(
+    new Set()
+  );
 
   //? ============================================================================
   //? SHARED CONFIGURATION & HELPER FUNCTIONS
@@ -88,6 +101,257 @@ const KassyComponents = () => {
       }, {} as Record<string, boolean>),
     }));
   };
+
+  //? ============================================================================
+  //? MOCK DATA FOR TEAM CHECKBOX DROPDOWN
+  //? ============================================================================
+
+  // Mock teams data similar to BatchAddEmployeesStep
+  const teams: Team[] = [
+    {
+      team_ID: "1",
+      team_name: "Accounting and Finance Team",
+      team_code: "AFT",
+      team_description: "Handles all financial operations and accounting tasks",
+      managedBy: "DINO FLORES",
+      employees: [
+        {
+          id: "emp1",
+          name: "John Doe",
+          position: "Senior Accountant",
+          jobTitle: "Senior Accountant",
+          team: "Accounting and Finance Team",
+          avatar: "https://i.pravatar.cc/150?img=1",
+          nodeReference: 1,
+        },
+        {
+          id: "emp2",
+          name: "Jane Smith",
+          position: "Financial Analyst",
+          jobTitle: "Financial Analyst",
+          team: "Accounting and Finance Team",
+          avatar: "https://i.pravatar.cc/150?img=2",
+          nodeReference: 2,
+        },
+        {
+          id: "emp3",
+          name: "Mike Johnson",
+          position: "Junior Accountant",
+          jobTitle: "Junior Accountant",
+          team: "Accounting and Finance Team",
+          avatar: "https://i.pravatar.cc/150?img=3",
+          nodeReference: 3,
+        },
+        {
+          id: "emp4",
+          name: "Sarah Wilson",
+          position: "Finance Manager",
+          jobTitle: "Finance Manager",
+          team: "Accounting and Finance Team",
+          avatar: "https://i.pravatar.cc/150?img=4",
+          nodeReference: 4,
+        },
+        {
+          id: "emp5",
+          name: "David Brown",
+          position: "Tax Specialist",
+          jobTitle: "Tax Specialist",
+          team: "Accounting and Finance Team",
+          avatar: "https://i.pravatar.cc/150?img=5",
+          nodeReference: 5,
+        },
+      ],
+    },
+    {
+      team_ID: "2",
+      team_name: "Business Solutions & Innovation",
+      team_code: "BSI",
+      team_description: "Drives innovation and business solutions",
+      managedBy: "SARAH JOHNSON",
+      employees: [
+        {
+          id: "emp6",
+          name: "Stephanie Germanotta",
+          position: "Senior Web Developer",
+          jobTitle: "Senior Web Developer",
+          team: "Business Solutions & Innovation",
+          avatar: "https://i.pravatar.cc/150?img=6",
+          nodeReference: 6,
+        },
+        {
+          id: "emp7",
+          name: "Alex Rodriguez",
+          position: "UX Designer",
+          jobTitle: "UX Designer",
+          team: "Business Solutions & Innovation",
+          avatar: "https://i.pravatar.cc/150?img=7",
+          nodeReference: 7,
+        },
+        {
+          id: "emp8",
+          name: "Emily Chen",
+          position: "Product Manager",
+          jobTitle: "Product Manager",
+          team: "Business Solutions & Innovation",
+          avatar: "https://i.pravatar.cc/150?img=8",
+          nodeReference: 8,
+        },
+        {
+          id: "emp9",
+          name: "Chris Taylor",
+          position: "DevOps Engineer",
+          jobTitle: "DevOps Engineer",
+          team: "Business Solutions & Innovation",
+          avatar: "https://i.pravatar.cc/150?img=9",
+          nodeReference: 9,
+        },
+      ],
+    },
+    {
+      team_ID: "3",
+      team_name: "Human Resources",
+      team_code: "HR",
+      team_description: "Manages human resources and employee relations",
+      managedBy: "LISA MARTINEZ",
+      employees: [
+        {
+          id: "emp10",
+          name: "Maria Garcia",
+          position: "HR Manager",
+          jobTitle: "HR Manager",
+          team: "Human Resources",
+          avatar: "https://i.pravatar.cc/150?img=10",
+          nodeReference: 10,
+        },
+        {
+          id: "emp11",
+          name: "Robert Lee",
+          position: "Recruitment Specialist",
+          jobTitle: "Recruitment Specialist",
+          team: "Human Resources",
+          avatar: "https://i.pravatar.cc/150?img=11",
+          nodeReference: 11,
+        },
+        {
+          id: "emp12",
+          name: "Jennifer Davis",
+          position: "Training Coordinator",
+          jobTitle: "Training Coordinator",
+          team: "Human Resources",
+          avatar: "https://i.pravatar.cc/150?img=12",
+          nodeReference: 12,
+        },
+      ],
+    },
+    {
+      team_ID: "4",
+      team_name: "Marketing & Communications",
+      team_code: "M&C",
+      team_description: "Handles marketing strategies and communications",
+      managedBy: "TOM ANDERSON",
+      employees: [
+        {
+          id: "emp13",
+          name: "Amanda White",
+          position: "Marketing Director",
+          jobTitle: "Marketing Director",
+          team: "Marketing & Communications",
+          avatar: "https://i.pravatar.cc/150?img=13",
+          nodeReference: 13,
+        },
+        {
+          id: "emp14",
+          name: "Kevin Park",
+          position: "Content Creator",
+          jobTitle: "Content Creator",
+          team: "Marketing & Communications",
+          avatar: "https://i.pravatar.cc/150?img=14",
+          nodeReference: 14,
+        },
+        {
+          id: "emp15",
+          name: "Rachel Green",
+          position: "Social Media Manager",
+          jobTitle: "Social Media Manager",
+          team: "Marketing & Communications",
+          avatar: "https://i.pravatar.cc/150?img=15",
+          nodeReference: 15,
+        },
+      ],
+    },
+    // Add employees with no team assignment (unaffiliated)
+    {
+      team_ID: "unaffiliated",
+      team_name: "Unaffiliated",
+      team_code: "UNA",
+      team_description: "Employees with no team assignment",
+      managedBy: "None",
+      employees: [
+        {
+          id: "unaffiliated1",
+          name: "James Wilson",
+          position: "Consultant",
+          jobTitle: "Consultant",
+          team: "", // Empty team - will be detected as unaffiliated
+          avatar: "https://i.pravatar.cc/150?img=18",
+          nodeReference: 18,
+        },
+        {
+          id: "unaffiliated2",
+          name: "Anna Kowalski",
+          position: "Freelancer",
+          jobTitle: "Freelancer",
+          team: undefined, // Undefined team - will be detected as unaffiliated
+          avatar: "https://i.pravatar.cc/150?img=19",
+          nodeReference: 19,
+        },
+        {
+          id: "unaffiliated3",
+          name: "Daniel Kim",
+          position: "Contractor",
+          jobTitle: "Contractor",
+          team: undefined, // Undefined team - will be detected as unaffiliated
+          avatar: "https://i.pravatar.cc/150?img=20",
+          nodeReference: 20,
+        },
+        {
+          id: "unaffiliated4",
+          name: "Sarah Martinez",
+          position: "Independent Contractor",
+          jobTitle: "Independent Contractor",
+          team: "   ", // Whitespace only - will be detected as unaffiliated
+          avatar: "https://i.pravatar.cc/150?img=21",
+          nodeReference: 21,
+        },
+      ],
+    },
+  ];
+
+  //? ============================================================================
+  //? TEAM CHECKBOX DROPDOWN HANDLERS
+  //? ============================================================================
+
+  // Handle selection change for team checkbox dropdown
+  const handleSelectionChange = useCallback(
+    (employees: Employee[], employeeIds: Set<string>, teamIds: Set<string>) => {
+      setSelectedEmployeeIds(employeeIds);
+      setSelectedTeamIds(teamIds);
+      console.log("Selected employees:", employees);
+      console.log("Selected employee IDs:", employeeIds);
+      console.log("Selected team IDs:", teamIds);
+    },
+    []
+  );
+
+  // Handle search change for team checkbox dropdown
+  const handleSearchChange = useCallback((searchTerm: string) => {
+    console.log("Search term changed:", searchTerm);
+  }, []);
+
+  // Handle filter toggle for team checkbox dropdown
+  const handleFilterToggle = useCallback((isFilterSelected: boolean) => {
+    console.log("Filter toggled:", isFilterSelected);
+  }, []);
 
   //! ============================================================================
   //! COLLAPSABLE DROPDOWN CHECKLIST - EMPLOYEE COMPONENT
@@ -605,6 +869,45 @@ const KassyComponents = () => {
               subContentIconColor="szDarkGrey600"
               backgroundColor="bg-szWhite100"
               searchTerm={searchTerm}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <h4 className="text-h3 text-szBlack700">Team Checkbox dropdown</h4>
+          <p>
+            This component is for displaying, searching team based on search
+            term and checkbox selection.
+          </p>
+          <div className="w-full max-w-4xl space-y-2 h-fit bg-white rounded-lg border border-szGrey300 p-[16px]">
+            <TeamCheckboxDropdownComponent
+              data={teams}
+              selectedEmployeeIds={selectedEmployeeIds}
+              selectedTeamIds={selectedTeamIds}
+              onSelectionChange={handleSelectionChange}
+              onSearchChange={handleSearchChange}
+              onFilterToggle={handleFilterToggle}
+              config={{
+                searchPlaceholder: "Search for employees and teams",
+                showSearch: true,
+                showFilter: true,
+                showEmptyState: true,
+                emptyStateImage: PapaZ,
+                emptyStateTitle: "Search for employees and teams",
+                emptyStateDescription:
+                  "I'll search for your employees and team. You could also search the word",
+                emptyStateHighlightText: "Unaffiliated",
+                allowTeamSelection: true,
+                allowEmployeeSelection: true,
+                allowIndividualEmployeeSelection: true,
+                defaultAccessMode: "all",
+                showAccessMode: true,
+                maxHeight: "400px",
+                showSelectionCounts: true,
+                enableSearchFiltering: true,
+                enableUnaffiliatedSearch: true,
+                unaffiliatedSearchTerm: "Unaffiliated",
+              }}
             />
           </div>
         </div>

@@ -38,7 +38,7 @@ import ActiveSessionManagement from "./pages/SecuritySettings/pages/ActiveSessio
 import EmailVerification from "./pages/SecuritySettings/pages/EmailVerification";
 import HoofTrail from "./pages/SecuritySettings/pages/HoofTrail";
 import MillComponents from "./components/examples/millcomponents";
-import KassyComponents from "./components/KassyComponents";
+import KassyComponents from "./components/examples/KassyComponents";
 
 function App() {
   // const {
