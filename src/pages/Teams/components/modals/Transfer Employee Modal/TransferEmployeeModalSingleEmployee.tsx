@@ -482,7 +482,7 @@ const TransferEmployeeModalSingleEmployee = ({ isOpen, onClose }: { isOpen: bool
                     ]);
                     onClose();
                 }}
-                description={"You are about to transfer these employees."}
+                description={employeeTeamMember.length > 1 ? "You are about to request to add these employees to Team Name." : "You are about to transfer these employees."}
                 content={
                     <div className="flex flex-col mt-2 gap-4">
                         <div className="relative bg-success50 border border-gray-300 rounded-[8px] px-[16px] py-[20px] ">

@@ -168,6 +168,8 @@ const TransferEmployeeModalBatchEmployee = ({ isOpen, onClose }: { isOpen: boole
     const [selectedTeam, setSelectedTeam] = useState<string>("");
     const [selectedJobTitle, setSelectedJobTitle] = useState<string>("");
 
+    const [confirmationHR, setConfirmationHR] = useState(true); // Temporary state to check if the confirmation is for HR or not
+
     // Filtered employees based on search
     const filteredEmployees = employees.filter(
         (employee) =>
@@ -551,13 +553,14 @@ const TransferEmployeeModalBatchEmployee = ({ isOpen, onClose }: { isOpen: boole
                 isOpen={confirmationModalOpen}
                 onClose={() => {
                     setConfirmationModalOpen(false);
+                    setConfirmationHR(!confirmationHR)
                 }}
                 onClick={() => {
                     setConfirmationModalOpen(false);
                     setShowSuccessSnackbar(true);
                     OnCloseModal();
                 }}
-                description={"You are about to batch transfer these employees."}
+                description={confirmationHR? "You are about to batch transfer these employees." : "You are about to request batch adding these employees"}
                 content={
                     <div className="flex flex-col mt-2 gap-4">
                         <div className="relative bg-success50 border border-gray-300 rounded-[8px] px-[16px] py-[20px] ">
