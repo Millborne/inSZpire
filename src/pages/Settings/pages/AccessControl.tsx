@@ -31,7 +31,7 @@ const AccessControl = () => {
               />
             </section>
             <div className="flex flex-col gap-[8px] p-[8px] rounded-lg bg-szGrey150 h-full">
-              <div className="flex flex-col gap-[8px] rounded-md bg-white h-full">
+              <div className="flex flex-col gap-[8px] h-full">
                 {activeTabIndex === 0 ? <PagesAndFeatures /> : <ProfileField />}
               </div>
             </div>
