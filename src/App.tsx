@@ -39,6 +39,7 @@ import EmailVerification from "./pages/SecuritySettings/pages/EmailVerification"
 import HoofTrail from "./pages/SecuritySettings/pages/HoofTrail";
 import MillComponents from "./components/examples/millcomponents";
 import KassyComponents from "./components/examples/KassyComponents";
+import AccessControl from "./pages/Settings/pages/AccessControl";
 
 function App() {
   // const {
@@ -156,6 +157,7 @@ function App() {
               path="job-title/job-title-archived"
               element={<JobTitle mode="archived" />}
             />
+            <Route path="access-control" element={<AccessControl />} />
           </Route>
           <Route path="security-settings/*" element={<SecuritySettings />}>
             <Route

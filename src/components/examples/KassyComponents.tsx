@@ -11,7 +11,6 @@ import CollapsableDropdownContent, {
 } from "../CollapsableDropdownContent";
 import TeamCheckboxDropdownComponent from "../TeamCheckboxDrodpownComponent";
 import { Team, Employee } from "../../types/team";
-import PapaZ from "../assets/papa-z-csr.png";
 
 const KassyComponents = () => {
   //? ============================================================================
@@ -892,7 +891,6 @@ const KassyComponents = () => {
                 showSearch: true,
                 showFilter: true,
                 showEmptyState: true,
-                emptyStateImage: PapaZ,
                 emptyStateTitle: "Search for employees and teams",
                 emptyStateDescription:
                   "I'll search for your employees and team. You could also search the word",
